@@ -10,6 +10,8 @@
 
 //REMEMBER TO EDIT Linker -> System -> SubSystem -> WINDOW to hide console!
 
+//This program currently just move a green block on a black background
+
 const float FPS = 60;
 const int BOUNCER_SIZE = 32;
 const int scrn_W = 640;

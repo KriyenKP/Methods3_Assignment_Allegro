@@ -53,12 +53,12 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>./Box2D;./;c:\allegro\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>./Box2D;./;./allegro/include;</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>./Box2D;./lib;c:\allegro\lib</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>./Box2D;./lib;./allegro\lib</AdditionalLibraryDirectories>
       <AdditionalDependencies>allegro-5.0.10-monolith-md-debug.lib;Box2D.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
