@@ -1,6 +1,8 @@
 #include <allegro5\allegro.h>
 #include <allegro5\allegro_primitives.h>				//Our primitive header file
+
 //static movement via keyboard
+
 int main(void)
 {
 	int width = 640;

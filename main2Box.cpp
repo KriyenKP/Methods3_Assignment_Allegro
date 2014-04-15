@@ -16,6 +16,8 @@
 * 3. This notice may not be removed or altered from any source distribution.
 */
 
+//This program is a box2D mesh with allegro...we're not necessarily gonna use it but I put it in anyway
+
 #include <Box2D/Box2D.h>
 #include <allegro5\allegro.h>
 #include <allegro5\allegro_image.h>

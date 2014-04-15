@@ -1,6 +1,8 @@
 #include <allegro5\allegro.h>
 #include <allegro5\allegro_primitives.h>				//Our primitive header file
+
 //Continuous movement via keyboard
+
 enum KEYS{ UP, DOWN, LEFT, RIGHT };
 
 int main(void)

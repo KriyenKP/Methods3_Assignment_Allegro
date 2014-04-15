@@ -5,9 +5,11 @@ const float FPS = 60;
 const int SCREEN_W = 640;
 const int SCREEN_H = 480;
 const int BOUNCER_SIZE = 32;
- 
+
+//the ffg program creates a window in which a block bounces at each edge
+
 int main(int argc, char **argv){
-   ALLEGRO_DISPLAY *display = NULL;
+   ALLEGRO_DISPLAY *display = NULL;							
    ALLEGRO_EVENT_QUEUE *event_queue = NULL;
    ALLEGRO_TIMER *timer = NULL;
    ALLEGRO_BITMAP *bouncer = NULL;

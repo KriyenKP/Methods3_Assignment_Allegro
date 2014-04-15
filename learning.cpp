@@ -10,7 +10,7 @@
 
 //REMEMBER TO EDIT Linker -> System -> SubSystem -> WINDOW to hide console!
 
-//This program currently just move a green block on a black background
+//This program currently just move a green block on a black background. I'm using this to learn and test aspects
 
 const float FPS = 60;
 const int BOUNCER_SIZE = 32;

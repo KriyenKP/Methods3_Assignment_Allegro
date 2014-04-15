@@ -1,6 +1,9 @@
 #include <stdio.h>
 #include <allegro5/allegro.h>
 
+
+//Run me to test allegro functionality!
+
 int main(int argc, char **argv)
 {
 	ALLEGRO_DISPLAY *display = NULL;
