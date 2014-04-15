@@ -39,8 +39,5 @@
     <ClCompile Include="bouncereg.cpp">
       <Filter>Source Files\Tests</Filter>
     </ClCompile>
-    <ClCompile Include="spriteTest.cpp">
-      <Filter>Source Files\Tests</Filter>
-    </ClCompile>
   </ItemGroup>
 </Project>
