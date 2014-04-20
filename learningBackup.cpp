@@ -8,46 +8,36 @@
 #include <exception>
 #include <stdio.h>
 #include <cstdio>
+
 //REMEMBER TO EDIT Linker -> System -> SubSystem -> WINDOW to hide console!
 
 //This program currently just move a green block on a black background. I'm using this to learn and test aspects
 
 const float FPS = 60;
 const int BOUNCER_SIZE = 32;
-const int scrn_W = 1024;
-const int scrn_H = 700;
-int bulletCount = 5;
-const int NUM_BULLETS = 5;
-int pos_x = scrn_W / 2;
-int pos_y = scrn_H / 2;
+const int scrn_W = 640;
+const int scrn_H = 480;
 
-static ALLEGRO_COLOR red,blue,black,white,green;
+static ALLEGRO_COLOR red, blue, black, white, green;
 enum KEYS{ UP, DOWN, LEFT, RIGHT };
-
 
 int main(void)
 {
-	//int pos_x = scrn_W / 2;
-	//int pos_y = scrn_H / 2;
+	int pos_x = scrn_W / 2;
+	int pos_y = scrn_H / 2;
 	float bouncer_x = scrn_W / 2.0 - BOUNCER_SIZE / 2.0;
 	float bouncer_y = scrn_H / 2.0 - BOUNCER_SIZE / 2.0;
 	float bouncer_dx = -4.0, bouncer_dy = 4.0;
-	bool done = false, fired = false;
+	bool done = false;
 	bool keys[4] = { false, false, false, false };
 
 	//Character variables
 	int curFrame = 0;
 	int frameCount = 0;
-	int frameDelay = 20;
+	int frameDelay = 5;
 	int frameW = 128;
 	int frameH = 128;
-	const int maxFrame = 4;
-
-
-	//Bullets
-
-	//end bullets
-
+	const int maxFrame = 8;
 	//End character variables
 
 	//Initialisers
@@ -55,7 +45,7 @@ int main(void)
 	ALLEGRO_EVENT_QUEUE *event_queue = NULL;
 	ALLEGRO_TIMER *timer = NULL;
 	ALLEGRO_BITMAP *bouncer = NULL;
-	ALLEGRO_BITMAP *walkLeft, *walkRight,*standLeft, *standRight,*select;
+	ALLEGRO_BITMAP *image[maxFrame];
 
 
 	if (!al_init())											//initialize and check Allegro
@@ -87,7 +77,7 @@ int main(void)
 
 	timer = al_create_timer(1.0 / FPS);							//Create Timer
 	if (!timer)													//Check timer creation
-	{				
+	{
 		al_show_native_message_box(display, "Error!", "Warning!", "Failed to initialise timer! \n Closing Application!", NULL, ALLEGRO_MESSAGEBOX_WARN);
 		//fprintf(stderr, "failed to create timer!\n");
 		al_destroy_bitmap(bouncer);
@@ -98,7 +88,7 @@ int main(void)
 
 	event_queue = al_create_event_queue();						//Create event queue
 	if (!event_queue)											//Check event queue creation
-	{											
+	{
 		al_show_native_message_box(display, "Error!", "Warning!", "Failed to initialise event queue! \n Closing Application!", NULL, ALLEGRO_MESSAGEBOX_WARN);
 		//fprintf(stderr, "failed to create event_queue!\n");
 		al_destroy_bitmap(bouncer);
@@ -116,18 +106,19 @@ int main(void)
 	//Init animated character
 	al_init_image_addon();
 	//Init bitmap
+	image[0] = al_load_bitmap("./images/dragon/fliegt e0000.bmp");
+	image[1] = al_load_bitmap("./images/dragon/fliegt e0001.bmp");
+	image[2] = al_load_bitmap("./images/dragon/fliegt e0002.bmp");
+	image[3] = al_load_bitmap("./images/dragon/fliegt e0003.bmp");
+	image[4] = al_load_bitmap("./images/dragon/fliegt e0004.bmp");
+	image[5] = al_load_bitmap("./images/dragon/fliegt e0005.bmp");
+	image[6] = al_load_bitmap("./images/dragon/fliegt e0006.bmp");
+	image[7] = al_load_bitmap("./images/dragon/fliegt e0007.bmp");
 
-	walkRight = al_load_bitmap("./images/kriWalkR.png");
-	walkLeft = al_load_bitmap("./images/kriWalkL.png");
-	standLeft = al_load_bitmap("./images/kriL.png");
-	standRight = al_load_bitmap("./images/kriR.png");
-	select = standRight;
-	int direction = 1;
-
-   // al_convert_mask_to_alpha(walkLeft, al_map_rgb(106, 76, 48));
-	//al_convert_mask_to_alpha(select, al_map_rgb(106, 76, 48));
-	//al_convert_mask_to_alpha(walkRight, al_map_rgb(106, 76, 48));
-
+	for (int i = 0; i < maxFrame; i++)
+	{
+		al_convert_mask_to_alpha(image[i], al_map_rgb(106, 76, 48));
+	}
 
 	//end animated character
 
@@ -138,7 +129,7 @@ int main(void)
 	//end event queue
 
 	//Colours
-	black = al_map_rgb(0,0,0);
+	black = al_map_rgb(0, 0, 0);
 	white = al_map_rgb(255, 255, 255);
 	red = al_map_rgb(255, 0, 0);
 	green = al_map_rgb(0, 255, 0);
@@ -153,8 +144,8 @@ int main(void)
 	al_set_target_bitmap(al_get_backbuffer(display));
 	//al_draw_filled_rectangle(pos_x, pos_y, pos_x + 30, pos_y + 30, green);
 	al_flip_display();
-	
-	
+
+
 	while (!done)
 	{
 		ALLEGRO_EVENT ev;
@@ -162,94 +153,61 @@ int main(void)
 
 		if (ev.type == ALLEGRO_EVENT_KEY_DOWN)
 		{
-			static bool fired = false;
 			switch (ev.keyboard.keycode)
 			{
 			case ALLEGRO_KEY_UP:
 				keys[UP] = true;
-				if (direction == 1) select = walkRight;
-				else select = walkLeft;
 				break;
 			case ALLEGRO_KEY_W:
 				keys[UP] = true;
-				if (direction == 1) select = walkRight;
-				else select = walkLeft;
 				break;
 			case ALLEGRO_KEY_DOWN:
 				keys[DOWN] = true;
-				if (direction == 1) select = walkRight;
-				else select = walkLeft;
 				break;
 			case ALLEGRO_KEY_S:
 				keys[DOWN] = true;
-				if (direction == 1) select = walkRight;
-				else select = walkLeft;
 				break;
 			case ALLEGRO_KEY_RIGHT:
 				keys[RIGHT] = true;
-				select = walkRight;
-				direction = 1;
 				break;
 			case ALLEGRO_KEY_D:
 				keys[RIGHT] = true;
-				select = walkRight;
-				direction = 1;
 				break;
 			case ALLEGRO_KEY_LEFT:
 				keys[LEFT] = true;
-				select = walkLeft;
-				direction = 0;
 				break;
 			case ALLEGRO_KEY_A:
 				keys[LEFT] = true;
-				select = walkLeft;
-				direction = 0;
-				break;
-			case ALLEGRO_KEY_SPACE:
-
 				break;
 			}
 		}
-
 		else if (ev.type == ALLEGRO_EVENT_KEY_UP)
 		{
 			switch (ev.keyboard.keycode)
 			{
 			case ALLEGRO_KEY_UP:
 				keys[UP] = false;
-				if (direction == 1) select = standRight;
-				else select = standLeft;
 				break;
 			case ALLEGRO_KEY_W:
 				keys[UP] = false;
-				if (direction == 1) select = standRight;
-				else select = standLeft;
 				break;
 			case ALLEGRO_KEY_DOWN:
 				keys[DOWN] = false;
-				if (direction == 1) select = standRight;
-				else select = standLeft;
 				break;
 			case ALLEGRO_KEY_S:
 				keys[DOWN] = false;
-				if (direction == 1) select = standRight;
-				else select = standLeft;
 				break;
 			case ALLEGRO_KEY_RIGHT:
 				keys[RIGHT] = false;
-				select = standRight;
 				break;
 			case ALLEGRO_KEY_D:
 				keys[RIGHT] = false;
-				select = standRight;
 				break;
 			case ALLEGRO_KEY_LEFT:
 				keys[LEFT] = false;
-				select = standLeft;
 				break;
 			case ALLEGRO_KEY_A:
 				keys[LEFT] = false;
-				select = standLeft;
 				break;
 			case ALLEGRO_KEY_ESCAPE:
 				done = true;
@@ -267,7 +225,6 @@ int main(void)
 				frameCount = 0;
 			}
 		}
-
 		else if (ev.type == ALLEGRO_EVENT_DISPLAY_CLOSE)
 		{
 			done = true;
@@ -280,22 +237,18 @@ int main(void)
 
 
 
-
-
 		//al_draw_filled_rectangle(pos_x, pos_y, pos_x + 30, pos_y + 30, green);
-		al_draw_scaled_bitmap(select, curFrame*frameW, 0, 128, 128, pos_x, pos_y, 300, 300, 0);    //makes shit big
-		//al_draw_bitmap_region(select, curFrame * frameW, 0, frameW, frameH,pos_x,pos_y,0);
-		//wal_draw_bitmap(select, pos_x, pos_y, 0);
+		al_draw_bitmap(image[curFrame], pos_x, pos_y, 0);
 		al_flip_display();
 		al_clear_to_color(black);
 	}
 
 	//Destruction
 
-	al_destroy_bitmap(walkLeft);
-	al_destroy_bitmap(walkRight);
-	//al_destroy_bitmap(select);
-	//al_destroy_bitmap(stand);
+	for (int i = 0; i < maxFrame; i++)
+	{
+		al_destroy_bitmap(image[i]);
+	}
 	al_destroy_bitmap(bouncer);
 	al_destroy_event_queue(event_queue);
 	al_destroy_display(display);
@@ -303,8 +256,3 @@ int main(void)
 	//end Distruction
 	return 0;
 }
-
-
-
-
-
