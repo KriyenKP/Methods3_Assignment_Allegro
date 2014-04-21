@@ -16,6 +16,9 @@
     <Filter Include="Source Files\Tests">
       <UniqueIdentifier>{e80f5da5-ac72-4064-bb93-bc0a6b036c84}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Shooter">
+      <UniqueIdentifier>{28fd3c3a-7ccd-426f-80a6-22d121db4610}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="test_Allegro.cpp">
@@ -60,10 +63,40 @@
     <ClCompile Include="bullets.cpp">
       <Filter>Source Files\Tests</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\..\Work\Campus\Year 3\Computer Methods 3\Assignment\Allegro\allegro tuts\FixByProximity\SideShooterCPP1\SideShooter1.cpp">
+      <Filter>Source Files\Shooter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\Work\Campus\Year 3\Computer Methods 3\Assignment\Allegro\allegro tuts\FixByProximity\SideShooterCPP2\SideShooter2-Movement.cpp">
+      <Filter>Source Files\Shooter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\Work\Campus\Year 3\Computer Methods 3\Assignment\Allegro\allegro tuts\FixByProximity\SideShooterCPP3\SideShooter3-Bullets.cpp">
+      <Filter>Source Files\Shooter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\Work\Campus\Year 3\Computer Methods 3\Assignment\Allegro\allegro tuts\FixByProximity\SideShooterCPP4\SideShooter4-Comets.cpp">
+      <Filter>Source Files\Shooter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\Work\Campus\Year 3\Computer Methods 3\Assignment\Allegro\allegro tuts\FixByProximity\SideShooterCPP6\SideShooter6-GameLogic.cpp">
+      <Filter>Source Files\Shooter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\Work\Campus\Year 3\Computer Methods 3\Assignment\Allegro\allegro tuts\FixByProximity\SideShooterCPP5\SideShooter5-Collision.cpp">
+      <Filter>Source Files\Shooter</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="objects.h">
       <Filter>Source Files\Tests</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\Work\Campus\Year 3\Computer Methods 3\Assignment\Allegro\allegro tuts\FixByProximity\SideShooterCPP2\objects1.h">
+      <Filter>Source Files\Shooter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\Work\Campus\Year 3\Computer Methods 3\Assignment\Allegro\allegro tuts\FixByProximity\SideShooterCPP3\objects2_Bullets.h">
+      <Filter>Source Files\Shooter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\Work\Campus\Year 3\Computer Methods 3\Assignment\Allegro\allegro tuts\FixByProximity\SideShooterCPP4\objects3_Comets.h">
+      <Filter>Source Files\Shooter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\Work\Campus\Year 3\Computer Methods 3\Assignment\Allegro\allegro tuts\FixByProximity\SideShooterCPP6\objects3_Comets.h">
+      <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
