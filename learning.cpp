@@ -1,52 +1,67 @@
 //#include <Box2D/Box2D.h>
 #include <math.h>
-#include <objects3_Comets.h>
+#include <objects.h>
 #include <allegro5/allegro.h>
 #include <allegro5/allegro_image.h>
 #include <allegro5/allegro_primitives.h>
 #include <allegro5/allegro_native_dialog.h>
 #include <allegro5/allegro_font.h>
 #include <allegro5/allegro_ttf.h>
-#include <exception>
+//#include <exception>
 #include <stdio.h>
 #include <cstdio>
 
 
 //REMEMBER TO EDIT Linker -> System -> SubSystem -> WINDOW to hide console!
 
-//This program currently just move a green block on a black background. I'm using this to learn and test aspects
+//This program currently just move a Kriyen on a black background. I'm using this to learn and test aspects
 
 const float FPS = 60;
 const int BOUNCER_SIZE = 32;
 const int scrn_W = 1024;
 const int scrn_H = 700;
 int bulletCount = 5;
-//int pos_x = scrn_W / 2;
-//int pos_y = scrn_H / 2;
 float shoot_x = scrn_W / 2.0;
 float shoot_y = scrn_H / 2.0;
 float crs_x = scrn_W / 2.0;
 float crs_y = scrn_H / 2.0;
 
 static ALLEGRO_COLOR red,blue,black,white,green;
-enum KEYS{ UP, DOWN, LEFT, RIGHT, SPACE };
+int shrinkx = 200;
+int shrinky = 200;
+enum KEYS { UP, DOWN, LEFT, RIGHT, SPACE, ENTER };
+enum Direction {
+	NORTH = 0,
+	EAST = 1,
+	SOUTH = 2,
+	WEST = 3
+};
+bool keys[6] = { false, false, false, false, false, false };
 
 //prototypes
-void InitShip(SpaceShip &ship);
-void DrawShip(SpaceShip &ship, ALLEGRO_BITMAP *select, int cur, int fW, int fH);
+void InitCharacter(Character &player);
+void DrawCharacter(Character &player, ALLEGRO_BITMAP *select, int cur, int fW, int fH);
 
-void MoveShipLeft(SpaceShip &ship);
-void MoveShipUp(SpaceShip &ship);
-void MoveShipDown(SpaceShip &ship);
-void MoveShipRight(SpaceShip &ship);
-
+void MoveCharacterLeft(Character &player);
+void MoveCharacterUp(Character &player);
+void MoveCharacterDown(Character &player);
+void MoveCharacterRight(Character &player);
 
 const int NUM_BULLETS = 5;
-void InitBullet(Bullet bullet[], int size);
+void InitBullet(Character &player, Bullet bullet[], int size);
 void DrawBullet(Bullet bullet[], int size, ALLEGRO_BITMAP *bit);
-void FireBullet(Bullet bullet[], int size, SpaceShip &ship);
+void FireBullet(Bullet bullet[], int size, Character &player);
+void UpdateBullet(Character &player, Bullet bullet[], int size, int dir);
 void UpdateBullet(Bullet bullet[], int size, int dir);
+void CollideBullet(Bullet bullet[], int bSize, Enemy comets[], int cSize);
 
+const int NUM_COMETS = 10;
+void InitEnemy(Enemy comets[], int size);
+void DrawEnemy(Enemy comets[], int size);
+void DrawEnemy(Enemy comets[], int size, ALLEGRO_BITMAP *bit, int cur, int fW, int fH);
+void StartEnemy(Enemy comets[], int size);
+void UpdateEnemy(Enemy comets[], int size);
+void CollideEnemy(Enemy comets[], int cSize, Character &player);
 
 
 
@@ -61,17 +76,16 @@ int main(void)
 	float bouncer_y = scrn_H / 2.0 - BOUNCER_SIZE / 2.0;
 	float bouncer_dx = -4.0, bouncer_dy = 4.0;
 	bool done = false, fired = false, redraw = true;
-	bool keys[5] = { false, false, false, false , false };
-	bool time = true;
+	//bool keys[5] = { false, false, false, false , false };
+	bool timeM = true;
 
-	//Character variables
+	//ASSET variables
 	
-	SpaceShip ship;
-	Bullet bullets[5];
-	InitShip(ship);
-	InitBullet(bullets, NUM_BULLETS);
-
-
+	Character player;InitCharacter(player);
+	Bullet bullets[5];InitBullet(player,bullets, NUM_BULLETS);
+	Enemy comets[NUM_COMETS];InitEnemy(comets, NUM_COMETS);
+	srand(time(NULL));
+	
 
 	int curFrame = 0;
 	int frameCount = 0;
@@ -80,18 +94,21 @@ int main(void)
 	int frameH = 128;
 	const int maxFrame = 4;
 
+
+
 	//End character variables
 
 	//Initialisers
-	ALLEGRO_DISPLAY *display = NULL;
-	ALLEGRO_EVENT_QUEUE *event_queue = NULL;
-	ALLEGRO_TIMER *timer = NULL;
-	ALLEGRO_FONT *font1 = NULL;
-	ALLEGRO_BITMAP *pause = NULL;
-	ALLEGRO_BITMAP *bouncer = NULL;
-	ALLEGRO_BITMAP *light = NULL;
-	ALLEGRO_STATE *state = NULL;
-	ALLEGRO_BITMAP *walkLeft, *walkRight,*standLeft, *standRight,*select;
+	ALLEGRO_DISPLAY			*display = NULL;
+	ALLEGRO_EVENT_QUEUE		*event_queue = NULL;
+	ALLEGRO_TIMER			*timer = NULL;
+	ALLEGRO_FONT			*font1 = NULL;
+	ALLEGRO_BITMAP			*pause = NULL;
+	ALLEGRO_BITMAP			*bouncer = NULL;
+	ALLEGRO_BITMAP			*light = NULL;
+	ALLEGRO_BITMAP			*bgImage = NULL;
+	ALLEGRO_STATE			*state = NULL;
+	ALLEGRO_BITMAP			*walkLeft, *walkRight,*standLeft, *standRight,*select, *poole;
 
 
 	if (!al_init())											//initialize and check Allegro
@@ -158,18 +175,18 @@ int main(void)
 	//Init animated character
 	al_init_image_addon();
 	//Init bitmap
-	light = al_load_bitmap("./images/light.png");
+	light = al_load_bitmap("./images/c.png");
 	walkRight = al_load_bitmap("./images/kriWalkR.png");
 	walkLeft = al_load_bitmap("./images/kriWalkL.png");
 	standLeft = al_load_bitmap("./images/kriL.png");
 	standRight = al_load_bitmap("./images/kriR.png");
 	select = standRight;
+	bgImage = al_load_bitmap("./images/tbdavis.png");
+	poole = al_load_bitmap("./images/poole.png");
+	
 	int direction = 1;
 
-   // al_convert_mask_to_alpha(walkLeft, al_map_rgb(106, 76, 48));
-	//al_convert_mask_to_alpha(select, al_map_rgb(106, 76, 48));
-	//al_convert_mask_to_alpha(walkRight, al_map_rgb(106, 76, 48));
-
+   // al_convert_mask_to_alpha(walkLeft, al_map_rgb(106, 76, 48));  //clear designated colour to create clear image
 
 	//end animated character
 
@@ -250,7 +267,7 @@ int main(void)
 				break;
 			case ALLEGRO_KEY_SPACE:
 				keys[SPACE] = true;
-				FireBullet(bullets, NUM_BULLETS, ship);
+				FireBullet(bullets, NUM_BULLETS, player);
 				break;
 			}
 		}
@@ -296,10 +313,10 @@ int main(void)
 				select = standLeft;
 				break;
 			case ALLEGRO_KEY_P:
-				if (time == true)
+				if (timeM == true)
 				{
 					al_stop_timer(timer);
-					time = false;
+					timeM = false;
 					al_draw_filled_rectangle(100, 100, scrn_W-100, scrn_H-100, white);
 					al_draw_text(font1, black, scrn_W/2, 100, ALLEGRO_ALIGN_CENTRE, "PAUSE MENU");
 					al_draw_text(font1, black, scrn_W / 2, scrn_H/2, ALLEGRO_ALIGN_CENTRE, "Press P to continue");
@@ -309,10 +326,8 @@ int main(void)
 				}
 				else
 				{
-
 					al_start_timer(timer);
-					time = true;
-					
+					timeM = true;	
 				}
 				
 				
@@ -351,7 +366,7 @@ int main(void)
 			crs_x = ev.mouse.x;
 			crs_y = ev.mouse.y;
 			fired = true;
-			FireBullet(bullets, NUM_BULLETS, ship);
+			FireBullet(bullets, NUM_BULLETS, player);
 			
 			//al_draw_bitmap(bullet, crs_x, crs_y, 0);
 			
@@ -377,16 +392,21 @@ int main(void)
 				}
 				frameCount = 0;
 			}
+			StartEnemy(comets, NUM_COMETS);
+			UpdateEnemy(comets, NUM_COMETS);
+			CollideBullet(bullets, NUM_BULLETS, comets, NUM_COMETS);
+			CollideEnemy(comets, NUM_COMETS, player);
+
 			redraw = true;
 			if (keys[UP])
-				MoveShipUp(ship);
+				MoveCharacterUp(player);
 			if (keys[DOWN])
-				MoveShipDown(ship);
+				MoveCharacterDown(player);
 			if (keys[LEFT])
-				MoveShipLeft(ship);
+				MoveCharacterLeft(player);
 			if (keys[RIGHT])
-				MoveShipRight(ship);
-			UpdateBullet(bullets, NUM_BULLETS, direction);
+				MoveCharacterRight(player);
+			UpdateBullet(player,bullets, NUM_BULLETS, direction);
 
 
 		}
@@ -399,9 +419,11 @@ int main(void)
 		if (redraw && al_is_event_queue_empty(event_queue)) 
 		{
 			redraw = false;
-			//playerQuit(font);
-			DrawShip(ship,select,curFrame,frameW, frameH);
+
+			DrawCharacter(player,select,curFrame,frameW, frameH);
 			DrawBullet(bullets, NUM_BULLETS, light);
+			DrawEnemy(comets, NUM_COMETS, poole, curFrame, frameW, frameH);
+
 			//al_draw_filled_rectangle(pos_x, pos_y, pos_x + 30, pos_y + 30, green);
 			//al_draw_scaled_bitmap(select, curFrame*frameW, 0, 128, 128, pos_x, pos_y, 350, 350, 0);    //makes shit big
 			//al_draw_bitmap_region(select, curFrame * frameW, 0, frameW, frameH,pos_x,pos_y,0);
@@ -414,19 +436,21 @@ int main(void)
 
 			al_flip_display();
 			al_clear_to_color(black);
-
-			al_draw_bitmap(bouncer, bouncer_x, bouncer_y, 0);
+			al_draw_scaled_bitmap(bgImage, 0, 0, al_get_bitmap_width(bgImage), al_get_bitmap_height(bgImage),0,0,scrn_W,scrn_H, 0);
+			//al_draw_bitmap(bouncer, bouncer_x, bouncer_y, 0);
 
 		}
 
 	}
 
 	//Destruction
-
+	al_destroy_font(font1);
 	al_destroy_bitmap(walkLeft);
 	al_destroy_bitmap(walkRight);
 	//al_destroy_bitmap(select);
-	//al_destroy_bitmap(stand);
+	al_destroy_bitmap(standLeft);
+	al_destroy_bitmap(standRight);
+	al_destroy_bitmap(light);
 	al_destroy_bitmap(bouncer);
 	al_destroy_event_queue(event_queue);
 	al_destroy_display(display);
@@ -437,65 +461,78 @@ int main(void)
 
 
 
-void InitShip(SpaceShip &ship)
+void InitCharacter(Character &player)
 {
-	ship.x = scrn_W / 2;
-	ship.y = scrn_H / 2;
-	ship.ID = PLAYER;
-	ship.lives = 3;
-	ship.speed = 7;
-	ship.boundx = 6;
-	ship.boundy = 7;
-	ship.score = 0;
+	player.x = scrn_W / 2;
+	player.y = scrn_H / 2;
+	player.ID = PLAYER;
+	player.lives = 3;
+	player.speed = 7;
+	player.boundx = 6;
+	player.boundy = 7;
+	player.score = 0;
 }
 
-void DrawShip(SpaceShip &ship, ALLEGRO_BITMAP *select, int cur, int fW, int fH)
+void DrawCharacter(Character &player, ALLEGRO_BITMAP *select, int cur, int fW, int fH)
 {
-	al_draw_bitmap_region(select, cur * fW, 0, fW, fH, ship.x, ship.y, 0);
-	/*al_draw_filled_rectangle(ship.x, ship.y - 9, ship.x + 10, ship.y - 7, al_map_rgb(255, 0, 0));
-	al_draw_filled_rectangle(ship.x, ship.y + 9, ship.x + 10, ship.y + 7, al_map_rgb(255, 0, 0));
+	al_draw_scaled_bitmap(select, cur * fW, 0, fW, fH, player.x, player.y, shrinkx, shrinky, 0);
+	//al_draw_bitmap_region(select, cur * fW, 0, fW, fH, player.x, player.y, 0);
+	/*al_draw_filled_rectangle(player.x, player.y - 9, player.x + 10, player.y - 7, al_map_rgb(255, 0, 0));
+	al_draw_filled_rectangle(player.x, player.y + 9, player.x + 10, player.y + 7, al_map_rgb(255, 0, 0));
 
-	al_draw_filled_triangle(ship.x - 12, ship.y - 17, ship.x + 12, ship.y, ship.x - 12, ship.y + 17, al_map_rgb(0, 255, 0));
-	al_draw_filled_rectangle(ship.x - 12, ship.y - 2, ship.x + 15, ship.y + 2, al_map_rgb(0, 0, 255));
+	al_draw_filled_triangle(player.x - 12, player.y - 17, player.x + 12, player.y, player.x - 12, player.y + 17, al_map_rgb(0, 255, 0));
+	al_draw_filled_rectangle(player.x - 12, player.y - 2, player.x + 15, player.y + 2, al_map_rgb(0, 0, 255));
 	*/
-
-
 }
 
-void MoveShipLeft(SpaceShip &ship)
+void MoveCharacterUp(Character &player)
 {
-	ship.x -= ship.speed;
-	if (ship.x < 0)
-		ship.x = 0;
+	player.y -= player.speed;
+	if (player.y < 0) player.y = 0;
+	player.dir = 0;
+	if (shrinkx >= 80 && shrinky >= 80)
+	{
+		shrinky -= 5;
+		shrinkx -= 5;
+	}
+}
+void MoveCharacterRight(Character &player)
+{
+	player.x += player.speed;
+	if (player.x > scrn_W - 80)
+		player.x = scrn_W - 80;
+	player.dir = 1;
+}
+void MoveCharacterDown(Character &player)
+{
+	player.y += player.speed;
+	if (player.y > scrn_H-80)
+		player.y = scrn_H-80;
+	player.dir = 2;
+	if (shrinkx <= 350 && shrinky <= 350)
+	{
+		shrinky += 5;
+		shrinkx += 5;
+	}
+}
+void MoveCharacterLeft(Character &player)
+{
+	player.x -= player.speed;
+	if (player.x < 0)
+		player.x = 0;
+	player.dir = 3;
 
 }
-void MoveShipUp(SpaceShip &ship)
-{
-	ship.y -= ship.speed;
-	if (ship.y < 0)
-		ship.y = 0;
-}
-void MoveShipDown(SpaceShip &ship)
-{
-	ship.y += ship.speed;
-	if (ship.y > scrn_H-80)
-		ship.y = scrn_H-80;
 
-}
-void MoveShipRight(SpaceShip &ship)
-{
-	ship.x += ship.speed;
-	if (ship.x > scrn_W-80)
-		ship.x = scrn_W-80;
-}
 
-void InitBullet(Bullet bullet[], int size)
+void InitBullet(Character &player, Bullet bullet[], int size)
 {
 	for (int i = 0; i < size; i++)
 	{
 		bullet[i].ID = BULLET;
 		bullet[i].speed = 10;
 		bullet[i].live = false;
+		bullet[i].dir = player.dir;
 	}
 }
 void DrawBullet(Bullet bullet[], int size, ALLEGRO_BITMAP *bit)
@@ -511,47 +548,218 @@ void DrawBullet(Bullet bullet[], int size, ALLEGRO_BITMAP *bit)
 			//al_draw_scaled_bitmap(bit, bullet[i].x, bullet[i].y, 117, 117, (float)bullet[i].x, (float)bullet[i].y, 100.0, 100.0, 0);
 	}
 }
-void FireBullet(Bullet bullet[], int size, SpaceShip &ship)
+
+int FindDeadBulletIndex(Bullet bullet[], int size) 
+{
+	for (int i = 0; i < size; ++i)
+	if (!bullet[i].live)
+		return i;
+
+	// didn't find an index; maybe delete old bullet or similar?
+	return -1;
+}
+void FireBullet(Bullet bullet[], int size, Character &player)
+{
+
+	int index = FindDeadBulletIndex(bullet, size);
+
+	if (index < 0)
+		return; // no "open" bullet positions available
+
+	bullet[index].live = true;
+	bullet[index].dir = player.dir;
+
+	// set bullet position to character's position ...
+	bullet[index].x = player.x;
+	bullet[index].y = player.y+30;
+
+	// ... or adjust position based on direction, if you want:
+	if (player.dir == NORTH) 
+	{
+		
+		bullet[index].x = player.x;
+		bullet[index].y = player.y + 17;
+	}
+	else if (player.dir == EAST)
+	{
+		
+		bullet[index].x = player.x + 17;
+		bullet[index].y = player.y;
+	}
+	else if (player.dir == SOUTH)
+	{
+		
+		bullet[index].x = player.x;
+		bullet[index].y = player.y - 17;
+	}
+	else if (player.dir == WEST)
+	{
+		
+		bullet[index].x = player.x -17;
+		bullet[index].y = player.y;
+	}
+
+	//fprintf(stderr, "\nBullet [%d] direction :  %d", index, bullet[index].dir);
+
+}
+void UpdateBullet(Character &player, Bullet bullet[], int size, int dir)
+{
+	
+	for (int i = -1; i < size; i++)
+
+		switch (bullet[i].dir)
+	{
+		case 0: //up
+			//for (int i = 0; i < size; i++)
+			{
+				if (bullet[i].live)
+				{
+					bullet[i].y -= bullet[i].speed;
+					if (bullet[i].y < 0)
+						bullet[i].live = false;
+				}
+			}
+			break;
+		case 1: //right
+			//for (int i = 0; i < size; i++)
+			{
+				if (bullet[i].live)
+				{
+					bullet[i].x += bullet[i].speed;
+					if (bullet[i].x > scrn_W)
+						bullet[i].live = false;
+				}
+			}
+			break;
+		case 2: //down
+			//for (int i = 0; i < size; i++)
+			{
+				if (bullet[i].live)
+				{
+					bullet[i].y += bullet[i].speed;
+					if (bullet[i].y > scrn_H)
+						bullet[i].live = false;
+				}
+			}
+			break;
+		case 3: //left
+			//for (int i = 0; i < size; i++)
+			{
+				if (bullet[i].live)
+				{
+					bullet[i].x -= bullet[i].speed;
+					if (bullet[i].x < 0)
+						bullet[i].live = false;
+				}
+			}
+			break;
+	}
+	
+}
+void CollideBullet(Bullet bullet[], int bSize, Enemy comets[], int cSize)
+{
+	for (int i = 0; i < bSize; i++)
+	{
+		if (bullet[i].live)
+		{
+			for (int j = 0; j < cSize; j++)
+			{
+				if (comets[j].live)
+				{
+					if (bullet[i].x >(comets[j].x - comets[j].boundx) && bullet[i].x < (comets[j].x + comets[j].boundx) &&
+						bullet[i].y >(comets[j].y - comets[j].boundy) && bullet[i].y < (comets[j].y + comets[j].boundy))
+					{
+						bullet[i].live = false;
+						comets[j].live = false;
+					}
+				}
+			}
+		}
+	}
+}
+
+void InitEnemy(Enemy comets[], int size)
 {
 	for (int i = 0; i < size; i++)
 	{
-		if (!bullet[i].live)
-		{
-			bullet[i].x = ship.x + 17;
-			bullet[i].y = ship.y + 50;
-			bullet[i].live = true;
-			break;
-		}
+		comets[i].ID = ENEMY;
+		comets[i].live = false;
+		comets[i].speed = 5;
+		comets[i].boundx = 50;
+		comets[i].boundy = 100;
 	}
 }
-
-
-void UpdateBullet(Bullet bullet[], int size, int dir)
+void DrawEnemy(Enemy comets[], int size, ALLEGRO_BITMAP *bit, int cur, int fW, int fH)
 {
-	if (dir == 1)
+	for (int i = 0; i < size; i++)
 	{
-		for (int i = 0; i < size; i++)
+		if (comets[i].live)
 		{
-			if (bullet[i].live)
-			{
-			    bullet[i].x += bullet[i].speed;
-				bullet[i].y += bullet[i].speed;
-				if (bullet[i].x > scrn_W) bullet[i].live = false;
-			}
+			//al_draw_bitmap(bit, comets[i].x, comets[i].y, 0);
+			al_draw_bitmap_region(bit, cur * fW, 0, fW, fH, comets[i].x, comets[i].y, 0);
+			//al_draw_filled_circle(comets[i].x, comets[i].y, 20, al_map_rgb(255, 0, 0));
 		}
 	}
-	else
+}
+void StartEnemy(Enemy comets[], int size)
+{
+	for (int i = 0; i < size; i++)
 	{
-		for (int i = 0; i < size; i++)
+		if (!comets[i].live)
 		{
-			if (bullet[i].live)
+			if (rand() % 500 == 0)
 			{
-				bullet[i].x -= bullet[i].speed;
-				if (bullet[i].x < 0) bullet[i].live = false;
+				comets[i].live = true;
+				comets[i].x = scrn_W;
+				retry:
+				int y = 30 + rand() % (scrn_H - 20);
+				if (y < 475)
+				{
+					comets[i].y = y;
+				}
+				else
+				{
+					goto retry;
+				}
+
+				break;
 			}
 		}
 	}
 }
+void UpdateEnemy(Enemy comets[], int size)
+{
+	for (int i = 0; i < size; i++)
+	{
+		if (comets[i].live)
+		{
+			comets[i].x -= comets[i].speed;
 
-		
+			if (comets[i].x < 0)
+				comets[i].live = false;
+		}
+	}
+}
+void CollideEnemy(Enemy comets[], int cSize, Character &player)
+{
+	for (int i = 0; i < cSize; i++)
+	{
+		if (comets[i].live)
+		{
+			if (comets[i].x - comets[i].boundx < player.x + player.boundx &&
+				comets[i].x + comets[i].boundx > player.x - player.boundx &&
+				comets[i].y - comets[i].boundy < player.y + player.boundy &&
+				comets[i].y + comets[i].boundy > player.y - player.boundy)
+			{
+				player.lives--;
+				comets[i].live = false;
+			}
+			else if (comets[i].x < 0)
+			{
+				comets[i].live = false;
+				player.lives--;
+			}
+		}
+	}
+}
 	

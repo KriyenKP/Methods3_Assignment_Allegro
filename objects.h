@@ -2,13 +2,14 @@
 enum IDS{PLAYER, BULLET, ENEMY};
 
 //Our Player
-struct SpaceShip
+struct Character
 {
 	int ID;
 	int x;
 	int y;
 	int lives;
 	int speed;
+	int dir;
 	int boundx;
 	int boundy;
 	int score;
@@ -19,11 +20,12 @@ struct Bullet
 	int ID;
 	int x;
 	int y;
+	int dir;
 	bool live;
 	int speed;
 };
 
-struct Comet
+struct Enemy
 {
 	int ID;
 	int x;
