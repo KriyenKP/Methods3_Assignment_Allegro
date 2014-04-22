@@ -16,15 +16,15 @@
 
 //This program currently just move a Kriyen on a black background. I'm using this to learn and test aspects
 
-const float FPS = 60;
-const int BOUNCER_SIZE = 32;
-const int scrn_W = 1024;
-const int scrn_H = 700;
-int bulletCount = 5;
-float shoot_x = scrn_W / 2.0;
-float shoot_y = scrn_H / 2.0;
-float crs_x = scrn_W / 2.0;
-float crs_y = scrn_H / 2.0;
+const float FPS			= 60;
+const int BOUNCER_SIZE	= 32;
+const int scrn_W		= 1024;
+const int scrn_H		= 700;
+int bulletCount			= 5;
+float shoot_x			= scrn_W / 2.0;
+float shoot_y			= scrn_H / 2.0;
+float crs_x				= scrn_W / 2.0;
+float crs_y				= scrn_H / 2.0;
 
 static ALLEGRO_COLOR red,blue,black,white,green;
 int shrinkx = 200;
@@ -64,51 +64,55 @@ void UpdateEnemy(Enemy comets[], int size);
 void CollideEnemy(Enemy comets[], int cSize, Character &player);
 
 
-
-
 int main(void)
 {
-	 
-
 	//int pos_x = scrn_W / 2;
 	//int pos_y = scrn_H / 2;
-	float bouncer_x = scrn_W / 2.0 - BOUNCER_SIZE / 2.0;
-	float bouncer_y = scrn_H / 2.0 - BOUNCER_SIZE / 2.0;
-	float bouncer_dx = -4.0, bouncer_dy = 4.0;
-	bool done = false, fired = false, redraw = true;
-	//bool keys[5] = { false, false, false, false , false };
-	bool timeM = true;
+	float bouncer_x		= scrn_W / 2.0 - BOUNCER_SIZE / 2.0;
+	float bouncer_y		= scrn_H / 2.0 - BOUNCER_SIZE / 2.0;
+	float bouncer_dx	= -4.0, 
+		  bouncer_dy	= 4.0;
 
-	//ASSET variables
+	bool done	= false, 
+		 fired	= false, 
+		 redraw = true,
+	     timeM	= true;
+
+	//Asset variables
 	
 	Character player;InitCharacter(player);
 	Bullet bullets[5];InitBullet(player,bullets, NUM_BULLETS);
 	Enemy comets[NUM_COMETS];InitEnemy(comets, NUM_COMETS);
 	srand(time(NULL));
-	
 
-	int curFrame = 0;
-	int frameCount = 0;
-	int frameDelay = 20;
-	int frameW = 128;
-	int frameH = 128;
-	const int maxFrame = 4;
+	//end Asset variables
 
+	//animated image var
+	int curFrame		= 0;					//Current frame of animated image
+	int frameCount		= 0;					//frame counter for animated image
+	int frameDelay		= 20;					//rate at which animate image changes
+	int frameW			= 128;					//frame width for animated image
+	int frameH			= 128;					//frame height for animated image
+	const int maxFrame	= 4;					//number of frames in animated image
 
-
-	//End character variables
+	//End animated image var
 
 	//Initialisers
-	ALLEGRO_DISPLAY			*display = NULL;
-	ALLEGRO_EVENT_QUEUE		*event_queue = NULL;
-	ALLEGRO_TIMER			*timer = NULL;
-	ALLEGRO_FONT			*font1 = NULL;
-	ALLEGRO_BITMAP			*pause = NULL;
-	ALLEGRO_BITMAP			*bouncer = NULL;
-	ALLEGRO_BITMAP			*light = NULL;
-	ALLEGRO_BITMAP			*bgImage = NULL;
-	ALLEGRO_STATE			*state = NULL;
-	ALLEGRO_BITMAP			*walkLeft, *walkRight,*standLeft, *standRight,*select, *poole;
+	ALLEGRO_DISPLAY			*display		= NULL;
+	ALLEGRO_EVENT_QUEUE		*event_queue	= NULL;
+	ALLEGRO_TIMER			*timer			= NULL;
+	ALLEGRO_FONT			*font1			= NULL;
+	ALLEGRO_BITMAP			*pause			= NULL;
+	ALLEGRO_BITMAP			*bouncer		= NULL;
+	ALLEGRO_BITMAP			*light			= NULL;
+	ALLEGRO_BITMAP			*bgImage		= NULL;
+	ALLEGRO_STATE			*state			= NULL;
+	ALLEGRO_BITMAP			*walkLeft		= NULL, 
+							*walkRight		= NULL,
+							*standLeft		= NULL, 
+							*standRight		= NULL,
+							*select			= NULL, 
+							*poole			= NULL;
 
 
 	if (!al_init())											//initialize and check Allegro
@@ -161,20 +165,20 @@ int main(void)
 	}
 
 
-	al_init_primitives_addon();
-	al_init_font_addon();
-	al_init_ttf_addon();
-	al_install_keyboard();
-	al_install_mouse(); 
-	
+	//Init all Addons
+	al_init_primitives_addon();								//load primitive (drawing shapes, etc)
+	al_init_font_addon();									//load font addon
+	al_init_ttf_addon();									//load truetype font addon	
+	al_init_image_addon();									//load image processing addon
+	al_install_keyboard();									//install keyboard
+	al_install_mouse();										//install mouse
+	//end addon innit
 	
 	//cursor = al_load_bitmap("./images/target.png");
 	//custom_cursor = al_create_mouse_cursor(cursor, 0, 0);
-	font1 = al_load_ttf_font("arial.ttf", 20, 0);
+	font1 = al_load_ttf_font("arial.ttf", 20, 0);				//Load custom font
 
-	//Init animated character
-	al_init_image_addon();
-	//Init bitmap
+	//Init images
 	light = al_load_bitmap("./images/c.png");
 	walkRight = al_load_bitmap("./images/kriWalkR.png");
 	walkLeft = al_load_bitmap("./images/kriWalkL.png");
@@ -207,27 +211,26 @@ int main(void)
 
 	//End initialisers
 
-	al_start_timer(timer);
-	al_set_target_bitmap(bouncer);
+	al_start_timer(timer);											//Start event timer (program clock)
+	al_set_target_bitmap(bouncer);							
 	al_clear_to_color(black);
 	al_set_target_bitmap(al_get_backbuffer(display));
-	//al_draw_filled_rectangle(pos_x, pos_y, pos_x + 30, pos_y + 30, green);
 	al_flip_display();
 	
 	
 	while (!done)
 	{
-		ALLEGRO_EVENT ev;
-		al_wait_for_event(event_queue, &ev);
+		ALLEGRO_EVENT ev;										//Allegro event init
+		al_wait_for_event(event_queue, &ev);					//wait for and accept events 
 
-		if (ev.type == ALLEGRO_EVENT_KEY_DOWN)
+		if (ev.type == ALLEGRO_EVENT_KEY_DOWN)					//If Key down event
 		{
-			static bool fired = false;
+			fired = false;
 			switch (ev.keyboard.keycode)
 			{
-			case ALLEGRO_KEY_UP:
+			case ALLEGRO_KEY_UP:				
 				keys[UP] = true;
-				if (direction == 1) select = walkRight;
+				if (direction == 1) select = walkRight;			//set character sprite to ____
 				else select = walkLeft;
 				break;
 			case ALLEGRO_KEY_W:
@@ -267,12 +270,12 @@ int main(void)
 				break;
 			case ALLEGRO_KEY_SPACE:
 				keys[SPACE] = true;
-				FireBullet(bullets, NUM_BULLETS, player);
+				FireBullet(bullets, NUM_BULLETS, player);			//Registers projectile character
 				break;
 			}
 		}
 
-		else if (ev.type == ALLEGRO_EVENT_KEY_UP)
+		else if (ev.type == ALLEGRO_EVENT_KEY_UP)					//If Key down event
 		{
 			switch (ev.keyboard.keycode)
 			{
@@ -368,8 +371,6 @@ int main(void)
 			fired = true;
 			FireBullet(bullets, NUM_BULLETS, player);
 			
-			//al_draw_bitmap(bullet, crs_x, crs_y, 0);
-			
 		}
 		else if (ev.type == ALLEGRO_EVENT_MOUSE_BUTTON_UP) 
 		{
@@ -447,7 +448,6 @@ int main(void)
 	al_destroy_font(font1);
 	al_destroy_bitmap(walkLeft);
 	al_destroy_bitmap(walkRight);
-	//al_destroy_bitmap(select);
 	al_destroy_bitmap(standLeft);
 	al_destroy_bitmap(standRight);
 	al_destroy_bitmap(light);
@@ -455,6 +455,7 @@ int main(void)
 	al_destroy_event_queue(event_queue);
 	al_destroy_display(display);
 	al_destroy_timer(timer);
+	//al_destroy_bitmap(select);
 	//end Distruction
 	return 0;
 }
