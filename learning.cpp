@@ -25,6 +25,7 @@ float shoot_x			= scrn_W / 2.0;
 float shoot_y			= scrn_H / 2.0;
 float crs_x				= scrn_W / 2.0;
 float crs_y				= scrn_H / 2.0;
+int enem				= rand() % 3 + 1;
 
 static ALLEGRO_COLOR red,blue,black,white,green;
 int shrinkx = 200;
@@ -107,12 +108,14 @@ int main(void)
 	ALLEGRO_BITMAP			*light			= NULL;
 	ALLEGRO_BITMAP			*bgImage		= NULL;
 	ALLEGRO_STATE			*state			= NULL;
-	ALLEGRO_BITMAP			*walkLeft		= NULL, 
+	ALLEGRO_BITMAP			*walkLeft		= NULL,
 							*walkRight		= NULL,
-							*standLeft		= NULL, 
+							*standLeft		= NULL,
 							*standRight		= NULL,
-							*select			= NULL, 
-							*poole			= NULL;
+							*select			= NULL,
+							*poole			= NULL,
+							*taps			= NULL,
+							*saha			= NULL;
 
 
 	if (!al_init())											//initialize and check Allegro
@@ -179,14 +182,16 @@ int main(void)
 	font1 = al_load_ttf_font("arial.ttf", 20, 0);				//Load custom font
 
 	//Init images
-	light = al_load_bitmap("./images/c.png");
-	walkRight = al_load_bitmap("./images/kriWalkR.png");
-	walkLeft = al_load_bitmap("./images/kriWalkL.png");
-	standLeft = al_load_bitmap("./images/kriL.png");
-	standRight = al_load_bitmap("./images/kriR.png");
-	select = standRight;
-	bgImage = al_load_bitmap("./images/tbdavis.png");
-	poole = al_load_bitmap("./images/poole.png");
+	light		= al_load_bitmap("./images/c.png");
+	walkRight	= al_load_bitmap("./images/kriWalkR.png");
+	walkLeft	= al_load_bitmap("./images/kriWalkL.png");
+	standLeft	= al_load_bitmap("./images/kriL.png");
+	standRight	= al_load_bitmap("./images/kriR.png");
+	select		= standRight;
+	bgImage		= al_load_bitmap("./images/tbdavis.png");
+	poole		= al_load_bitmap("./images/poole.png");
+	saha		= al_load_bitmap("./images/saha.png");
+	taps		= al_load_bitmap("./images/taps.png");
 	
 	int direction = 1;
 
@@ -423,7 +428,28 @@ int main(void)
 
 			DrawCharacter(player,select,curFrame,frameW, frameH);
 			DrawBullet(bullets, NUM_BULLETS, light);
-			DrawEnemy(comets, NUM_COMETS, poole, curFrame, frameW, frameH);
+
+			bool test = false;
+			
+
+			switch (enem)
+			{
+			case 1:
+				DrawEnemy(comets, NUM_COMETS, poole, curFrame, frameW, frameH);
+				test = true;
+				break;
+			case 2:
+				DrawEnemy(comets, NUM_COMETS, taps, curFrame, frameW, frameH);
+				test = true;
+				break;
+			case 3:
+				DrawEnemy(comets, NUM_COMETS, saha, curFrame, frameW, frameH);
+				test = true;
+				break;
+			
+			}
+
+			
 
 			//al_draw_filled_rectangle(pos_x, pos_y, pos_x + 30, pos_y + 30, green);
 			//al_draw_scaled_bitmap(select, curFrame*frameW, 0, 128, 128, pos_x, pos_y, 350, 350, 0);    //makes shit big
@@ -701,9 +727,12 @@ void DrawEnemy(Enemy comets[], int size, ALLEGRO_BITMAP *bit, int cur, int fW, i
 			//al_draw_filled_circle(comets[i].x, comets[i].y, 20, al_map_rgb(255, 0, 0));
 		}
 	}
+	
+	
 }
 void StartEnemy(Enemy comets[], int size)
 {
+	
 	for (int i = 0; i < size; i++)
 	{
 		if (!comets[i].live)
@@ -712,6 +741,7 @@ void StartEnemy(Enemy comets[], int size)
 			{
 				comets[i].live = true;
 				comets[i].x = scrn_W;
+				
 				retry:
 				int y = 30 + rand() % (scrn_H - 20);
 				if (y < 475)
