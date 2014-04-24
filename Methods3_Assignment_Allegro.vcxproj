@@ -84,24 +84,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\..\..\Work\Campus\Year 3\Computer Methods 3\Assignment\Allegro\allegro tuts\FixByProximity\SideShooterCPP1\SideShooter1.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\..\Work\Campus\Year 3\Computer Methods 3\Assignment\Allegro\allegro tuts\FixByProximity\SideShooterCPP2\SideShooter2-Movement.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\..\Work\Campus\Year 3\Computer Methods 3\Assignment\Allegro\allegro tuts\FixByProximity\SideShooterCPP3\SideShooter3-Bullets.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\..\Work\Campus\Year 3\Computer Methods 3\Assignment\Allegro\allegro tuts\FixByProximity\SideShooterCPP4\SideShooter4-Comets.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\..\Work\Campus\Year 3\Computer Methods 3\Assignment\Allegro\allegro tuts\FixByProximity\SideShooterCPP5\SideShooter5-Collision.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\..\Work\Campus\Year 3\Computer Methods 3\Assignment\Allegro\allegro tuts\FixByProximity\SideShooterCPP6\SideShooter6-GameLogic.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-    </ClCompile>
     <ClCompile Include="bouncereg.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </ClCompile>
@@ -120,6 +102,7 @@
     <ClCompile Include="learningBackup.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="learningLatestBackup.cpp" />
     <ClCompile Include="main.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </ClCompile>
@@ -127,6 +110,9 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="newSprite.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="SideShooter_V3_2.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="sprite2.cpp">
@@ -146,12 +132,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\..\..\Work\Campus\Year 3\Computer Methods 3\Assignment\Allegro\allegro tuts\FixByProximity\SideShooterCPP2\objects1.h" />
-    <ClInclude Include="..\..\..\..\..\Work\Campus\Year 3\Computer Methods 3\Assignment\Allegro\allegro tuts\FixByProximity\SideShooterCPP3\objects2_Bullets.h">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\..\Work\Campus\Year 3\Computer Methods 3\Assignment\Allegro\allegro tuts\FixByProximity\SideShooterCPP4\objects3_Comets.h" />
-    <ClInclude Include="..\..\..\..\..\Work\Campus\Year 3\Computer Methods 3\Assignment\Allegro\allegro tuts\FixByProximity\SideShooterCPP6\objects3_Comets.h" />
     <ClInclude Include="objects.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
     </ClInclude>
