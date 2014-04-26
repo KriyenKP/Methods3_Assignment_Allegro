@@ -24,8 +24,6 @@ enum KEYS{ UP, DOWN, LEFT, RIGHT };
 
 int main(void)
 {
-	int pos_x = scrn_W / 2;
-	int pos_y = scrn_H / 2;
 	float bouncer_x = scrn_W / 2.0 - BOUNCER_SIZE / 2.0;
 	float bouncer_y = scrn_H / 2.0 - BOUNCER_SIZE / 2.0;
 	float bouncer_dx = -4.0, bouncer_dy = 4.0;
@@ -90,7 +88,7 @@ int main(void)
 
 	//Event queue - register listeners
 	al_register_event_source(event_queue, al_get_keyboard_event_source());
-	al_register_event_source(event_queue, al_get_display_event_source(display));
+	al_register_event_source(event_queue, al_get_display_event_source(display)); //min, max etc buttons on window
 	//end event queue
 
 	//Colours
@@ -104,7 +102,7 @@ int main(void)
 	//End initialisers
 	
 	al_set_target_bitmap(bouncer);
-	al_clear_to_color(green);
+	al_clear_to_color(red);
 	al_set_target_bitmap(al_get_backbuffer(display));
 	al_draw_filled_rectangle(pos_x, pos_y, pos_x + 30, pos_y + 30, green);
 	al_flip_display();
