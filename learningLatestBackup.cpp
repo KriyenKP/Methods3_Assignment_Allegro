@@ -16,25 +16,25 @@
 
 //This program currently just move a Kriyen on a black background. I'm using this to learn and test aspects
 
-const float FPS				= 60;
-const int BOUNCER_SIZE		= 32;
-const int scrn_W			= 1024;
-const int scrn_H			= 700;
-const int NUM_BULLETS		= 5;
-const int NUM_COMETS		= 10;
-const int NUM_EXPLOSIONS	= 5;
-int bulletCount				= 5;
-float shoot_x				= scrn_W / 2.0;
-float shoot_y				= scrn_H / 2.0;
-float crs_x					= scrn_W / 2.0;
-float crs_y					= scrn_H / 2.0;
-int enem					= rand() % 3 + 1;
+const float FPS = 60;
+const int BOUNCER_SIZE = 32;
+const int scrn_W = 1024;
+const int scrn_H = 700;
+const int NUM_BULLETS = 5;
+const int NUM_COMETS = 10;
+const int NUM_EXPLOSIONS = 5;
+int bulletCount = 5;
+float shoot_x = scrn_W / 2.0;
+float shoot_y = scrn_H / 2.0;
+float crs_x = scrn_W / 2.0;
+float crs_y = scrn_H / 2.0;
+int enem = rand() % 3 + 1;
 
-static ALLEGRO_COLOR red,blue,black,white,green;
+static ALLEGRO_COLOR red, blue, black, white, green;
 int shrinkx = 200;
 int shrinky = 200;
 enum KEYS { UP, DOWN, LEFT, RIGHT, SPACE, ENTER };
-enum STATE{ TITLE, PLAYING, LOST, MENU, SETTINGS};
+enum STATE{ TITLE, PLAYING, LOST, MENU, SETTINGS };
 enum Direction {
 	NORTH = 0,
 	EAST = 1,
@@ -86,82 +86,82 @@ int main(void)
 {
 	//int pos_x = scrn_W / 2;
 	//int pos_y = scrn_H / 2;
-	float bouncer_x		= scrn_W / 2.0 - BOUNCER_SIZE / 2.0;
-	float bouncer_y		= scrn_H / 2.0 - BOUNCER_SIZE / 2.0;
-	float bouncer_dx	= -4.0, 
-		  bouncer_dy	= 4.0;
-	
+	float bouncer_x = scrn_W / 2.0 - BOUNCER_SIZE / 2.0;
+	float bouncer_y = scrn_H / 2.0 - BOUNCER_SIZE / 2.0;
+	float bouncer_dx = -4.0,
+		bouncer_dy = 4.0;
+
 	int state = -1;
 
-	bool done	= false, 
-		 fired	= false, 
-		 redraw = true,
-	     timeM	= true;
+	bool done = false,
+		fired = false,
+		redraw = true,
+		timeM = true;
 
 
 	//animated image var
-	int curFrame		= 0;					//Current frame of animated image
-	int frameCount		= 0;					//frame counter for animated image
-	int frameDelay		= 20;					//rate at which animate image changes
-	int frameW			= 128;					//frame width for animated image
-	int frameH			= 128;					//frame height for animated image
-	const int maxFrame	= 4;					//number of frames in animated image
+	int curFrame = 0;					//Current frame of animated image
+	int frameCount = 0;					//frame counter for animated image
+	int frameDelay = 20;					//rate at which animate image changes
+	int frameW = 128;					//frame width for animated image
+	int frameH = 128;					//frame height for animated image
+	const int maxFrame = 4;					//number of frames in animated image
 	//End animated image var
 
 	//Initialisers
-	ALLEGRO_DISPLAY			*display		= NULL;
-	ALLEGRO_EVENT_QUEUE		*event_queue	= NULL;
-	ALLEGRO_TIMER			*timer			= NULL;
+	ALLEGRO_DISPLAY			*display = NULL;
+	ALLEGRO_EVENT_QUEUE		*event_queue = NULL;
+	ALLEGRO_TIMER			*timer = NULL;
 	ALLEGRO_FONT			*fonts[5] = { NULL, NULL, NULL, NULL, NULL };
-							//*font20			= NULL,
-							//*font18			= NULL,
-							
-	ALLEGRO_BITMAP			*bouncer		= NULL;
-	ALLEGRO_BITMAP			*light			= NULL;
-	ALLEGRO_BITMAP			*bgImage		= NULL;
-	ALLEGRO_STATE			*state1			= NULL;
-	ALLEGRO_BITMAP			*walkLeft		= NULL,
-							*walkRight		= NULL,
-							*standLeft		= NULL,
-							*standRight		= NULL,
-							*select			= NULL,
+	//*font20			= NULL,
+	//*font18			= NULL,
 
-							*lifes			= NULL,
+	ALLEGRO_BITMAP			*bouncer = NULL;
+	ALLEGRO_BITMAP			*light = NULL;
+	ALLEGRO_BITMAP			*bgImage = NULL;
+	ALLEGRO_STATE			*state1 = NULL;
+	ALLEGRO_BITMAP			*walkLeft = NULL,
+		*walkRight = NULL,
+		*standLeft = NULL,
+		*standRight = NULL,
+		*select = NULL,
 
-							*lecturers[6]	= {NULL, NULL, NULL, NULL, NULL, NULL},
-							//*poole		= NULL,
-							//*taps			= NULL,
-							//*saha			= NULL,
+		*lifes = NULL,
 
-							*minilect[6]	= { NULL, NULL, NULL, NULL, NULL, NULL },
+		*lecturers[6] = { NULL, NULL, NULL, NULL, NULL, NULL },
+		//*poole		= NULL,
+		//*taps			= NULL,
+		//*saha			= NULL,
 
-							//*poole1			= NULL,
-							//*taps1			= NULL,
-							//*saha1			= NULL,
+		*minilect[6] = { NULL, NULL, NULL, NULL, NULL, NULL },
 
-							*enemsel		= NULL,
-							*exp			= NULL,
+		//*poole1			= NULL,
+		//*taps1			= NULL,
+		//*saha1			= NULL,
 
-							*maps[5]		= {NULL,NULL,NULL,NULL,NULL},
-						//	*howard			= NULL,
-						//  *tbdavis		= NULL,
+		*enemsel = NULL,
+		*exp = NULL,
 
-							*mapsmini[5]	= {NULL,NULL,NULL,NULL,NULL},
-						//	*howards		= NULL,
-						//	*tbdaviss		= NULL,
+		*maps[5] = { NULL, NULL, NULL, NULL, NULL },
+		//	*howard			= NULL,
+		//  *tbdavis		= NULL,
 
-							*mapsel			= NULL,
+		*mapsmini[5] = { NULL, NULL, NULL, NULL, NULL },
+		//	*howards		= NULL,
+		//	*tbdaviss		= NULL,
 
-							*scrns[5] = { NULL, NULL, NULL, NULL, NULL },
-							//*title			= NULL,
-							//*pause			= NULL,
+		*mapsel = NULL,
 
-							*btns[5] = { NULL, NULL, NULL, NULL, NULL };
-							//*start			= NULL,
-							//*stop				= NULL,
-							//*setting			= NULL,
+		*scrns[5] = { NULL, NULL, NULL, NULL, NULL },
+		//*title			= NULL,
+		//*pause			= NULL,
 
-							
+		*btns[5] = { NULL, NULL, NULL, NULL, NULL };
+	//*start			= NULL,
+	//*stop				= NULL,
+	//*setting			= NULL,
+
+
 
 	if (!al_init())											//initialize and check Allegro
 	{
@@ -193,7 +193,7 @@ int main(void)
 
 	timer = al_create_timer(1.0 / FPS);							//Create Timer
 	if (!timer)													//Check timer creation
-	{				
+	{
 		al_show_native_message_box(display, "Error!", "Warning!", "Failed to initialise timer! \n Closing Application!", NULL, ALLEGRO_MESSAGEBOX_WARN);
 		//fprintf(stderr, "failed to create timer!\n");
 		al_destroy_bitmap(bouncer);
@@ -204,7 +204,7 @@ int main(void)
 
 	event_queue = al_create_event_queue();						//Create event queue
 	if (!event_queue)											//Check event queue creation
-	{											
+	{
 		al_show_native_message_box(display, "Error!", "Warning!", "Failed to initialise event queue! \n Closing Application!", NULL, ALLEGRO_MESSAGEBOX_WARN);
 		//fprintf(stderr, "failed to create event_queue!\n");
 		al_destroy_bitmap(bouncer);
@@ -222,7 +222,7 @@ int main(void)
 	al_install_keyboard();									//install keyboard
 	al_install_mouse();										//install mouse
 	//end addon innit
-	
+
 	//cursor = al_load_bitmap("./images/target.png");
 	//custom_cursor = al_create_mouse_cursor(cursor, 0, 0);
 	fonts[2] = al_load_ttf_font("arial.ttf", 36, 0);
@@ -230,59 +230,59 @@ int main(void)
 	fonts[0] = al_load_ttf_font("arial.ttf", 18, 0);
 
 	//Init images
-	light		= al_load_bitmap("./images/c.png");
-	walkRight	= al_load_bitmap("./images/kriWalkR.png");
-	walkLeft	= al_load_bitmap("./images/kriWalkL.png");
-	standLeft	= al_load_bitmap("./images/kriL.png");
-	standRight	= al_load_bitmap("./images/kriR.png");
-	select		= standRight;
+	light = al_load_bitmap("./images/c.png");
+	walkRight = al_load_bitmap("./images/kriWalkR.png");
+	walkLeft = al_load_bitmap("./images/kriWalkL.png");
+	standLeft = al_load_bitmap("./images/kriL.png");
+	standRight = al_load_bitmap("./images/kriR.png");
+	select = standRight;
 
-	lifes		= al_load_bitmap("./images/life.png");
+	lifes = al_load_bitmap("./images/life.png");
 
-	exp			= al_load_bitmap("./images/boom1.png");
+	exp = al_load_bitmap("./images/boom1.png");
 
-	lecturers[0]	= al_load_bitmap("./images/poole.png");			//John Poole
-	lecturers[1]	= al_load_bitmap("./images/saha.png");			//Akshay Saha
-	lecturers[2]	= al_load_bitmap("./images/taps.png");			//Jules Tapamo
-	lecturers[3]	= al_load_bitmap("./images/afullo.png");		//Afullo
-	lecturers[4]	= al_load_bitmap("./images/tom.png");		//Walingo
-	lecturers[5]	= al_load_bitmap("./images/viran.png");
+	lecturers[0] = al_load_bitmap("./images/poole.png");			//John Poole
+	lecturers[1] = al_load_bitmap("./images/saha.png");			//Akshay Saha
+	lecturers[2] = al_load_bitmap("./images/taps.png");			//Jules Tapamo
+	lecturers[3] = al_load_bitmap("./images/afullo.png");		//Afullo
+	lecturers[4] = al_load_bitmap("./images/tom.png");		//Walingo
+	lecturers[5] = al_load_bitmap("./images/viran.png");
 
 	enemsel = lecturers[0];
-	
-	minilect[0]			= al_load_bitmap("./images/poole1.png");
-	minilect[1]			= al_load_bitmap("./images/saha1.png");
-	minilect[2]			= al_load_bitmap("./images/taps1.png");
-	minilect[3]			= al_load_bitmap("./images/afullo1.png");
-	minilect[4]			= al_load_bitmap("./images/tom1.png");
-	minilect[5]			= al_load_bitmap("./images/viran1.png");
-	
 
-	maps[0]		= al_load_bitmap("./images/howard.png");		//Howard Building
-	maps[1]		= al_load_bitmap("./images/tbdavis.png");		//TB Davis
-	maps[2]		= al_load_bitmap("./images/park.png");			//The park
+	minilect[0] = al_load_bitmap("./images/poole1.png");
+	minilect[1] = al_load_bitmap("./images/saha1.png");
+	minilect[2] = al_load_bitmap("./images/taps1.png");
+	minilect[3] = al_load_bitmap("./images/afullo1.png");
+	minilect[4] = al_load_bitmap("./images/tom1.png");
+	minilect[5] = al_load_bitmap("./images/viran1.png");
 
-	bgImage		= maps[0];
 
-	mapsmini[0]	= al_load_bitmap("./images/howards.png");		//Howard Building
-	mapsmini[1]	= al_load_bitmap("./images/tbdaviss.png");		//TB Davis 
+	maps[0] = al_load_bitmap("./images/howard.png");		//Howard Building
+	maps[1] = al_load_bitmap("./images/tbdavis.png");		//TB Davis
+	maps[2] = al_load_bitmap("./images/park.png");			//The park
+
+	bgImage = maps[0];
+
+	mapsmini[0] = al_load_bitmap("./images/howards.png");		//Howard Building
+	mapsmini[1] = al_load_bitmap("./images/tbdaviss.png");		//TB Davis 
 	mapsmini[2] = al_load_bitmap("./images/parks.png");			//The park
 
-	scrns[0]		= al_load_bitmap("./images/BG1.png");
+	scrns[0] = al_load_bitmap("./images/BG1.png");
 
-	btns[0]		= al_load_bitmap("./images/startbtn.png");		//start
-	btns[1]		= al_load_bitmap("./images/sttngbtn.png");		//settings
-	btns[2]		= al_load_bitmap("./images/stpbtn.png");		//stop
-	btns[3]		= al_load_bitmap("./images/back.png");			//back
+	btns[0] = al_load_bitmap("./images/startbtn.png");		//start
+	btns[1] = al_load_bitmap("./images/sttngbtn.png");		//settings
+	btns[2] = al_load_bitmap("./images/stpbtn.png");		//stop
+	btns[3] = al_load_bitmap("./images/back.png");			//back
 
 
-	scrns[1]		= al_load_bitmap("./images/pause.png");
-	scrns[2]		= al_load_bitmap("./images/gameover.png");
-	
-	
+	scrns[1] = al_load_bitmap("./images/pause.png");
+	scrns[2] = al_load_bitmap("./images/gameover.png");
+
+
 	int direction = 1;
 
-   // al_convert_mask_to_alpha(walkLeft, al_map_rgb(106, 76, 48));  //clear designated colour to create clear image
+	// al_convert_mask_to_alpha(walkLeft, al_map_rgb(106, 76, 48));  //clear designated colour to create clear image
 
 	//end animated character
 
@@ -294,7 +294,7 @@ int main(void)
 	//end event queue
 
 	//Colours
-	black = al_map_rgb(0,0,0);
+	black = al_map_rgb(0, 0, 0);
 	white = al_map_rgb(255, 255, 255);
 	red = al_map_rgb(255, 0, 0);
 	green = al_map_rgb(0, 255, 0);
@@ -314,12 +314,12 @@ int main(void)
 
 	al_set_window_title(display, "UKZN - LECTURE DEFENCE - HOWARD EDITION");
 	al_start_timer(timer);											//Start event timer (program clock)
-	al_set_target_bitmap(bouncer);							
+	al_set_target_bitmap(bouncer);
 	al_clear_to_color(black);
 	al_set_target_bitmap(al_get_backbuffer(display));
 	al_flip_display();
-	
-	
+
+
 	while (!done)
 	{
 		ALLEGRO_EVENT ev;										//Allegro event init
@@ -330,7 +330,7 @@ int main(void)
 			fired = false;
 			switch (ev.keyboard.keycode)
 			{
-			case ALLEGRO_KEY_UP:				
+			case ALLEGRO_KEY_UP:
 				keys[UP] = true;
 				if (direction == 1) select = walkRight;			//set character sprite to ____
 				else select = walkLeft;
@@ -447,7 +447,7 @@ int main(void)
 				ChangeState(state, MENU);
 				break;
 			case ALLEGRO_KEY_ESCAPE:
-				if (state==TITLE || state == MENU)done = true;
+				if (state == TITLE || state == MENU)done = true;
 				else ChangeState(state, MENU);
 				break;
 			case ALLEGRO_KEY_SPACE:
@@ -455,9 +455,9 @@ int main(void)
 				break;
 			}
 		}
-		
-	
-		else if (ev.type == ALLEGRO_EVENT_MOUSE_AXES || ev.type == ALLEGRO_EVENT_MOUSE_ENTER_DISPLAY) 
+
+
+		else if (ev.type == ALLEGRO_EVENT_MOUSE_AXES || ev.type == ALLEGRO_EVENT_MOUSE_ENTER_DISPLAY)
 		{
 			crs_x = ev.mouse.x;
 			crs_y = ev.mouse.y;
@@ -483,7 +483,7 @@ int main(void)
 			fired = true;
 			if (state == MENU)
 			{
-				if (crs_x >= 400 && crs_x <=677 && crs_y >= 180 && crs_y <= 256)  ChangeState(state, PLAYING);
+				if (crs_x >= 400 && crs_x <= 677 && crs_y >= 180 && crs_y <= 256)  ChangeState(state, PLAYING);
 				if (crs_x >= 400 && crs_x <= 677 && crs_y >= 310 && crs_y <= 388) ChangeState(state, SETTINGS);
 				if (crs_x >= 400 && crs_x <= 677 && crs_y >= 438 && crs_y <= 517) done = true;
 			}
@@ -499,11 +499,11 @@ int main(void)
 			}
 			FireBullet(bullets, NUM_BULLETS, player);
 		}
-		else if (ev.type == ALLEGRO_EVENT_MOUSE_BUTTON_UP) 
-		{		
-			
+		else if (ev.type == ALLEGRO_EVENT_MOUSE_BUTTON_UP)
+		{
+
 		}
-		
+
 		if (ev.type == ALLEGRO_EVENT_DISPLAY_CLOSE)
 		{
 			done = true;
@@ -524,7 +524,7 @@ int main(void)
 			}
 		}
 		if (ev.type == ALLEGRO_EVENT_DISPLAY_SWITCH_IN)
-		{	
+		{
 			al_start_timer(timer);
 			timeM = true;
 		}
@@ -581,12 +581,12 @@ int main(void)
 			done = true;
 		}
 
-		if (redraw && al_is_event_queue_empty(event_queue)) 
+		if (redraw && al_is_event_queue_empty(event_queue))
 		{
 			redraw = false;
 
 			/*DrawCharacter(player,select,curFrame,frameW, frameH);
-			DrawBullet(bullets, NUM_BULLETS, light);			
+			DrawBullet(bullets, NUM_BULLETS, light);
 			DrawEnemy(comets, NUM_COMETS, saha, curFrame, frameW, frameH);
 			DrawExplosions(explosions, NUM_EXPLOSIONS);*/
 
@@ -605,19 +605,19 @@ int main(void)
 			{
 				//al_draw_filled_rectangle(0, 0, scrn_W, scrn_H, blue);
 				al_draw_bitmap(scrns[0], 0, 0, 0);
-				al_draw_textf(fonts[0],white, scrn_W/2+20, scrn_H-60, ALLEGRO_ALIGN_CENTRE, "PRESS SPACEBAR TO START");
+				al_draw_textf(fonts[0], white, scrn_W / 2 + 20, scrn_H - 60, ALLEGRO_ALIGN_CENTRE, "PRESS SPACEBAR TO START");
 			}
 			else if (state == MENU)
 			{
 				al_clear_to_color(black);
-				al_draw_bitmap(btns[0], scrn_W/2 - 130, scrn_H/2 - 180 ,0);
-				al_draw_bitmap(btns[1], scrn_W / 2 - 130, scrn_H / 2 -50 , 0);
+				al_draw_bitmap(btns[0], scrn_W / 2 - 130, scrn_H / 2 - 180, 0);
+				al_draw_bitmap(btns[1], scrn_W / 2 - 130, scrn_H / 2 - 50, 0);
 				al_draw_bitmap(btns[2], scrn_W / 2 - 130, scrn_H / 2 + 80, 0);
 			}
 			else if (state == SETTINGS)
 			{
 				al_clear_to_color(black);
-				al_draw_textf(fonts[1], white,scrn_W/2-100, 100, 0, "CHOOSE YOUR LECTURER : ");
+				al_draw_textf(fonts[1], white, scrn_W / 2 - 100, 100, 0, "CHOOSE YOUR LECTURER : ");
 
 				al_draw_bitmap(minilect[0], 100, scrn_H / 2 - 180, 0);
 				al_draw_bitmap(minilect[1], 240, scrn_H / 2 - 180, 0);
@@ -630,12 +630,12 @@ int main(void)
 				al_draw_textf(fonts[1], white, scrn_W / 2 - 80, 400, 0, "CHOOSE YOUR VENUE : ");
 
 				al_draw_bitmap(mapsmini[0], scrn_W / 2 - 200, scrn_H / 2 + 100, 0);
-				al_draw_bitmap(mapsmini[1], scrn_W / 2 - 20, scrn_H / 2 +100, 0);
-				al_draw_bitmap(mapsmini[2], scrn_W / 2 + 160, scrn_H / 2 +100, 0);
+				al_draw_bitmap(mapsmini[1], scrn_W / 2 - 20, scrn_H / 2 + 100, 0);
+				al_draw_bitmap(mapsmini[2], scrn_W / 2 + 160, scrn_H / 2 + 100, 0);
 
 
 				//al_draw_bitmap(btns[3], scrn_W - 300, scrn_H - 50, 0);
-				al_draw_textf(fonts[0], white, scrn_W - 300, scrn_H-50, 0, "PRESS BACKSPACE TO RETURN");
+				al_draw_textf(fonts[0], white, scrn_W - 300, scrn_H - 50, 0, "PRESS BACKSPACE TO RETURN");
 			}
 			else if (state == PLAYING)
 			{
@@ -645,8 +645,8 @@ int main(void)
 				DrawEnemy(comets, NUM_COMETS, enemsel, curFrame, frameW, frameH);
 				DrawExplosions(explosions, NUM_EXPLOSIONS);
 
-				al_draw_textf(fonts[0], white, scrn_W/2-100, 5, 0, "Score : %i ", player.score*10);
-				
+				al_draw_textf(fonts[0], white, scrn_W / 2 - 100, 5, 0, "Score : %i ", player.score * 10);
+
 				if (player.lives == 3)
 				{
 					al_draw_scaled_bitmap(lifes, 5, 5, al_get_bitmap_width(lifes), al_get_bitmap_height(lifes), 5, 5, 80, 50, 0);
@@ -662,7 +662,7 @@ int main(void)
 				{
 					al_draw_scaled_bitmap(lifes, 5, 5, al_get_bitmap_width(lifes), al_get_bitmap_height(lifes), 5, 5, 80, 50, 0);
 				}
-				
+
 
 			}
 			else if (state == LOST)
@@ -670,13 +670,13 @@ int main(void)
 				//al_draw_filled_rectangle(0, 0, scrn_W, scrn_H, green);
 				//al_draw_bitmap(lost, 0, 0, 0);
 				al_draw_bitmap(scrns[2], scrn_W / 2 - 250, 100, 0);
-				al_draw_textf(fonts[0], black, scrn_W/2+70, 340, 0, "%i", player.score);
+				al_draw_textf(fonts[0], black, scrn_W / 2 + 70, 340, 0, "%i", player.score);
 			}
 
 
 			al_flip_display();
 			al_clear_to_color(black);
-			al_draw_scaled_bitmap(bgImage, 0, 0, al_get_bitmap_width(bgImage), al_get_bitmap_height(bgImage),0,0,scrn_W,scrn_H, 0);
+			al_draw_scaled_bitmap(bgImage, 0, 0, al_get_bitmap_width(bgImage), al_get_bitmap_height(bgImage), 0, 0, scrn_W, scrn_H, 0);
 			//al_draw_bitmap(bouncer, bouncer_x, bouncer_y, 0);
 
 		}
@@ -701,7 +701,7 @@ int main(void)
 		al_destroy_bitmap(btns[i]);
 		al_destroy_bitmap(scrns[i]);
 	}
-	
+
 	al_destroy_event_queue(event_queue);
 	al_destroy_display(display);
 	al_destroy_timer(timer);
@@ -756,8 +756,8 @@ void MoveCharacterRight(Character &player)
 void MoveCharacterDown(Character &player)
 {
 	player.y += player.speed;
-	if (player.y > scrn_H-80)
-		player.y = scrn_H-80;
+	if (player.y > scrn_H - 80)
+		player.y = scrn_H - 80;
 	player.dir = 2;
 	if (shrinkx <= 350 && shrinky <= 350)
 	{
@@ -793,12 +793,12 @@ void DrawBullet(Bullet bullet[], int size, ALLEGRO_BITMAP *bit)
 
 			//al_draw_filled_circle(bullet[i].x, bullet[i].y, 2, al_map_rgb(255, 255, 255));
 			//al_draw_scaled_bitmap(select, curFrame*frameW, 0, 128, 128, pos_x, pos_y, 350, 350, 0);    //makes shit big
-			al_draw_bitmap(bit, bullet[i].x, bullet[i].y,0 );
+			al_draw_bitmap(bit, bullet[i].x, bullet[i].y, 0);
 
-			//al_draw_scaled_bitmap(bit, bullet[i].x, bullet[i].y, 117, 117, (float)bullet[i].x, (float)bullet[i].y, 100.0, 100.0, 0);
+		//al_draw_scaled_bitmap(bit, bullet[i].x, bullet[i].y, 117, 117, (float)bullet[i].x, (float)bullet[i].y, 100.0, 100.0, 0);
 	}
 }
-int FindDeadBulletIndex(Bullet bullet[], int size) 
+int FindDeadBulletIndex(Bullet bullet[], int size)
 {
 	for (int i = 0; i < size; ++i)
 	if (!bullet[i].live)
@@ -820,31 +820,31 @@ void FireBullet(Bullet bullet[], int size, Character &player)
 
 	// set bullet position to character's position ...
 	bullet[index].x = player.x;
-	bullet[index].y = player.y+30;
+	bullet[index].y = player.y + 30;
 
 	// ... or adjust position based on direction, if you want:
-	if (player.dir == NORTH) 
+	if (player.dir == NORTH)
 	{
-		
+
 		bullet[index].x = player.x;
 		bullet[index].y = player.y + 17;
 	}
 	else if (player.dir == EAST)
 	{
-		
+
 		bullet[index].x = player.x + 17;
 		bullet[index].y = player.y;
 	}
 	else if (player.dir == SOUTH)
 	{
-		
+
 		bullet[index].x = player.x;
 		bullet[index].y = player.y - 17;
 	}
 	else if (player.dir == WEST)
 	{
-		
-		bullet[index].x = player.x -17;
+
+		bullet[index].x = player.x - 17;
 		bullet[index].y = player.y;
 	}
 
@@ -853,59 +853,59 @@ void FireBullet(Bullet bullet[], int size, Character &player)
 }
 void UpdateBullet(Bullet bullet[], int size, int dir)
 {
-	
+
 	for (int i = -1; i < size; i++)
 
 		switch (bullet[i].dir)
 	{
 		case 0: //up
 			//for (int i = 0; i < size; i++)
-			{
-				if (bullet[i].live)
-				{
-					bullet[i].y -= bullet[i].speed;
-					if (bullet[i].y < 0)
-						bullet[i].live = false;
-				}
-			}
+		{
+					if (bullet[i].live)
+					{
+						bullet[i].y -= bullet[i].speed;
+						if (bullet[i].y < 0)
+							bullet[i].live = false;
+					}
+		}
 			break;
 		case 1: //right
 			//for (int i = 0; i < size; i++)
-			{
-				if (bullet[i].live)
-				{
-					bullet[i].x += bullet[i].speed;
-					if (bullet[i].x > scrn_W)
-						bullet[i].live = false;
-				}
-			}
+		{
+					if (bullet[i].live)
+					{
+						bullet[i].x += bullet[i].speed;
+						if (bullet[i].x > scrn_W)
+							bullet[i].live = false;
+					}
+		}
 			break;
 		case 2: //down
 			//for (int i = 0; i < size; i++)
-			{
-				if (bullet[i].live)
-				{
-					bullet[i].y += bullet[i].speed;
-					if (bullet[i].y > scrn_H)
-						bullet[i].live = false;
-				}
-			}
+		{
+					if (bullet[i].live)
+					{
+						bullet[i].y += bullet[i].speed;
+						if (bullet[i].y > scrn_H)
+							bullet[i].live = false;
+					}
+		}
 			break;
 		case 3: //left
 			//for (int i = 0; i < size; i++)
-			{
-				if (bullet[i].live)
-				{
-					bullet[i].x -= bullet[i].speed;
-					if (bullet[i].x < 0)
-						bullet[i].live = false;
-				}
-			}
+		{
+					if (bullet[i].live)
+					{
+						bullet[i].x -= bullet[i].speed;
+						if (bullet[i].x < 0)
+							bullet[i].live = false;
+					}
+		}
 			break;
 	}
-	
+
 }
-void CollideBullet(Bullet bullet[], int bSize, Enemy comets[], int cSize, Character &player , Explosion explosions[], int eSize)
+void CollideBullet(Bullet bullet[], int bSize, Enemy comets[], int cSize, Character &player, Explosion explosions[], int eSize)
 {
 	for (int i = 0; i < bSize; i++)
 	{
@@ -915,16 +915,16 @@ void CollideBullet(Bullet bullet[], int bSize, Enemy comets[], int cSize, Charac
 			{
 				if (comets[j].live)
 				{
-					if (bullet[i].x >(comets[j].x - comets[j].boundx) 
-						&& bullet[i].x < (comets[j].x + comets[j].boundx) 
-						&& bullet[i].y > (comets[j].y - comets[j].boundy) 
+					if (bullet[i].x >(comets[j].x - comets[j].boundx)
+						&& bullet[i].x < (comets[j].x + comets[j].boundx)
+						&& bullet[i].y >(comets[j].y - comets[j].boundy)
 						&& bullet[i].y < (comets[j].y + comets[j].boundy))
 					{
 						bullet[i].live = false;
 						comets[j].live = false;
 						player.score++;
-						
-						StartExplosions(explosions, eSize, bullet[i].x + 70, bullet[i].y+30);
+
+						StartExplosions(explosions, eSize, bullet[i].x + 70, bullet[i].y + 30);
 					}
 				}
 			}
@@ -957,12 +957,12 @@ void DrawEnemy(Enemy comets[], int size, ALLEGRO_BITMAP *bit, int cur, int fW, i
 			//al_draw_filled_circle(comets[i].x, comets[i].y, 20, al_map_rgb(255, 0, 0));
 		}
 	}
-	
-	
+
+
 }
 void StartEnemy(Enemy comets[], int size)
 {
-	
+
 	for (int i = 0; i < size; i++)
 	{
 		if (!comets[i].live)
@@ -971,11 +971,11 @@ void StartEnemy(Enemy comets[], int size)
 			{
 				comets[i].live = true;
 				comets[i].x = scrn_W;
-				
-				retry:
+
+			retry:
 				int y = 30 + rand() % (scrn_H - 20);
 				if (y < 475)
-				{ 
+				{
 					comets[i].y = y;
 				}
 				else
@@ -1023,7 +1023,7 @@ void CollideEnemy(Enemy comets[], int cSize, Character &player)
 		}
 	}
 }
-	
+
 void InitExplosions(Explosion explosions[], int size, ALLEGRO_BITMAP *image)
 {
 	for (int i = 0; i < size; i++)
