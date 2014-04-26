@@ -1,55 +1,52 @@
 //#include <Box2D/Box2D.h>
 #include <math.h>
+#include <string>
 #include <allegro5/allegro.h>
 #include <allegro5/allegro_image.h>
 #include <allegro5/allegro_primitives.h>
 #include <allegro5/allegro_native_dialog.h>
 #include <allegro5/allegro_font.h>
 #include <allegro5/allegro_ttf.h>
+#include <allegro5/allegro_audio.h>
 #include <objects.h>
 //#include <exception>
-#include <stdio.h>
+//#include <stdio.h>
 #include <cstdio>
 
+using namespace std;
 
 //REMEMBER TO EDIT Linker -> System -> SubSystem -> WINDOW to hide console!
 
 //This program currently just move a Kriyen on a black background. I'm using this to learn and test aspects
 
-const float FPS				= 60;
-const int BOUNCER_SIZE		= 32;
-const int scrn_W			= 1024;
-const int scrn_H			= 700;
-const int NUM_BULLETS		= 5;
-const int NUM_COMETS		= 10;
-const int NUM_EXPLOSIONS	= 5;
-int bulletCount				= 5;
-float shoot_x				= scrn_W / 2.0;
-float shoot_y				= scrn_H / 2.0;
-float crs_x					= scrn_W / 2.0;
-float crs_y					= scrn_H / 2.0;
-int enem					= rand() % 3 + 1;
+const float FPS				= 60;					//Frames per second
+const int scrn_W			= 1024;					// Screen Width 
+const int scrn_H			= 686;					//Screen Height
+const int NUM_BULLETS		= 5;					//Number of bullets  (not actual amount - more like a limit that can be on shot on the screen at any one time)
+const int NUM_COMETS		= 10;					//Number of enemies  (same as above)
+const int NUM_EXPLOSIONS	= 5;					//Number of explosions (same as above)					
+//float shoot_x				= scrn_W / 2.0;			
+//float shoot_y				= scrn_H / 2.0;
+float crs_x					= scrn_W / 2.0;			//default x location for mouse position detection
+float crs_y					= scrn_H / 2.0;			//default y location for mouse position detection
 
-static ALLEGRO_COLOR red,blue,black,white,green;
-int shrinkx = 200;
-int shrinky = 200;
-enum KEYS { UP, DOWN, LEFT, RIGHT, SPACE, ENTER };
-enum STATE{ TITLE, PLAYING, LOST, MENU, SETTINGS};
-enum Direction {
-	NORTH = 0,
-	EAST = 1,
-	SOUTH = 2,
-	WEST = 3
-};
+static ALLEGRO_COLOR red,blue,black,white,green;		//Used to create quick access to colours (versus al_map_rgb(0,0,0)
+int shrinkx = 200;										//x value used to adjust player size for depth 
+int shrinky = 200;										//x value used to adjust player size for depth 
+enum KEYS { UP, DOWN, LEFT, RIGHT, SPACE, ENTER };		//Key press shortcut 
+enum STATE{ TITLE, PLAYING, LOST, MENU, SETTINGS};		//Game state identification
+enum Direction { NORTH = 0, EAST = 1, SOUTH = 2, WEST = 3};		//Direction of player identification
 
-Character player;
+//asset Init
+Character player;	
 Bullet bullets[NUM_BULLETS];
 Enemy comets[NUM_COMETS];
 Explosion explosions[NUM_EXPLOSIONS];
+//End asset init
 
-bool keys[6] = { false, false, false, false, false, false };
+bool keys[6] = { false, false, false, false, false, false }; // enum KEYS init
 
-//prototypes
+//Asset Functions
 void InitCharacter(Character &player);
 void DrawCharacter(Character &player, ALLEGRO_BITMAP *select, int cur, int fW, int fH);
 
@@ -58,14 +55,12 @@ void MoveCharacterUp(Character &player);
 void MoveCharacterDown(Character &player);
 void MoveCharacterRight(Character &player);
 
-
 void InitBullet(Character &player, Bullet bullet[], int size);
 void DrawBullet(Bullet bullet[], int size, ALLEGRO_BITMAP *bit);
 void FireBullet(Bullet bullet[], int size, Character &player);
 void UpdateBullet(Bullet bullet[], int size, int dir);
 void CollideBullet(Bullet bullet[], int bSize, Enemy comets[], int cSize, Character &ship, Explosion explosions[], int eSize);
 void CollideBullet(Bullet bullet[], int bSize, Enemy comets[], int cSize);
-
 
 void InitEnemy(Enemy comets[], int size);
 void DrawEnemy(Enemy comets[], int size);
@@ -74,29 +69,27 @@ void StartEnemy(Enemy comets[], int size);
 void UpdateEnemy(Enemy comets[], int size);
 void CollideEnemy(Enemy comets[], int cSize, Character &player);
 
-
 void InitExplosions(Explosion explosions[], int size, ALLEGRO_BITMAP *image);
 void DrawExplosions(Explosion explosions[], int size);
 void StartExplosions(Explosion explosions[], int size, int x, int y);
 void UpdateExplosions(Explosion explosions[], int size);
 
-void ChangeState(int &state, int newState);
+//End asset functions
+
+void ChangeState(int &state, int newState);   //Change State function
 
 int main(void)
-{
-	//int pos_x = scrn_W / 2;
-	//int pos_y = scrn_H / 2;
-	float bouncer_x		= scrn_W / 2.0 - BOUNCER_SIZE / 2.0;
-	float bouncer_y		= scrn_H / 2.0 - BOUNCER_SIZE / 2.0;
-	float bouncer_dx	= -4.0, 
-		  bouncer_dy	= 4.0;
-	
-	int state = -1;
+{	
+	int state = -1;						//default state
 
-	bool done	= false, 
-		 fired	= false, 
-		 redraw = true,
-	     timeM	= true;
+	bool done	= false,				//Game over
+		 fired	= false,				//Power is fired
+		 redraw = true,					//Redraw frame
+	     timeM	= true;					//Pause Timer  -- NEEDS TO BE FIXED
+
+	int curLect = 0,		//current lecture identifier
+		curMap = 0,			//current map identifier
+		curAtk = 0;			//current attack identifier
 
 
 	//animated image var
@@ -109,54 +102,57 @@ int main(void)
 	//End animated image var
 
 	//Initialisers
-	ALLEGRO_DISPLAY			*display		= NULL;
-	ALLEGRO_EVENT_QUEUE		*event_queue	= NULL;
-	ALLEGRO_TIMER			*timer			= NULL;
-	ALLEGRO_FONT			*fonts[5] = { NULL, NULL, NULL, NULL, NULL };
+	ALLEGRO_DISPLAY			*display		= NULL;					//Screen display
+	ALLEGRO_EVENT_QUEUE		*event_queue	= NULL;					//Event Queue
+	ALLEGRO_TIMER			*timer			= NULL;					//System timer
+	ALLEGRO_FONT			*fonts[5]		= { NULL, NULL, NULL, NULL, NULL };	//fonts array
+							//*font36			= NULL,
 							//*font20			= NULL,
 							//*font18			= NULL,
-							
-	ALLEGRO_BITMAP			*bouncer		= NULL;
-	ALLEGRO_BITMAP			*light			= NULL;
-	ALLEGRO_BITMAP			*bgImage		= NULL;
-	ALLEGRO_STATE			*state1			= NULL;
-	ALLEGRO_BITMAP			*walkLeft		= NULL,
-							*walkRight		= NULL,
-							*standLeft		= NULL,
-							*standRight		= NULL,
-							*select			= NULL,
+	ALLEGRO_STATE			*state1 = NULL;					//State
+	ALLEGRO_BITMAP			*bgImage		= NULL,					//Title Page splash
+							*walkLeft		= NULL,					//Character walking left  	
+							*walkRight		= NULL,					//Character walking right
+							*standLeft		= NULL,					//Character Standing left
+							*standRight		= NULL,					//character standing right
+							*select			= NULL,					//Current Selected position of character
+							*icon			= NULL,					//Current icon -- NOT SET YET
 
-							*lifes			= NULL,
+							*numLives[3] = { NULL, NULL, NULL},		//Attack array
+							//*lives			= NULL,					//Number of lives remaining
 
-							*lecturers[6]	= {NULL, NULL, NULL, NULL, NULL, NULL},
+							*atk[5]			= { NULL, NULL, NULL, NULL, NULL },		//Attack array
+							*atksel			= NULL,
+
+							*lecturers[6]	= {NULL, NULL, NULL, NULL, NULL, NULL},  //Lecturer array
 							//*poole		= NULL,
 							//*taps			= NULL,
 							//*saha			= NULL,
 
-							*minilect[6]	= { NULL, NULL, NULL, NULL, NULL, NULL },
+							*minilect[6]	= { NULL, NULL, NULL, NULL, NULL, NULL },	//Lecturer Thumbnail
 
 							//*poole1			= NULL,
 							//*taps1			= NULL,
 							//*saha1			= NULL,
 
-							*enemsel		= NULL,
-							*exp			= NULL,
+							*enemsel		= NULL,							//Currently selected lecturer
+							*exp			= NULL,							//Explosion image
 
-							*maps[5]		= {NULL,NULL,NULL,NULL,NULL},
+							*maps[5]		= {NULL,NULL,NULL,NULL,NULL},	//Maps array
 						//	*howard			= NULL,
 						//  *tbdavis		= NULL,
 
-							*mapsmini[5]	= {NULL,NULL,NULL,NULL,NULL},
+							*mapsmini[5]	= {NULL,NULL,NULL,NULL,NULL},	//Map Thumbnails
 						//	*howards		= NULL,
 						//	*tbdaviss		= NULL,
 
-							*mapsel			= NULL,
+							*mapsel			= NULL,				//Currently selected maps
 
-							*scrns[5] = { NULL, NULL, NULL, NULL, NULL },
+							*scrns[5] = { NULL, NULL, NULL, NULL, NULL },		//Box images array (pause, gameover, etc)
 							//*title			= NULL,
 							//*pause			= NULL,
 
-							*btns[5] = { NULL, NULL, NULL, NULL, NULL };
+							*btns[5] = { NULL, NULL, NULL, NULL, NULL };		//Buttons Array
 							//*start			= NULL,
 							//*stop				= NULL,
 							//*setting			= NULL,
@@ -172,6 +168,7 @@ int main(void)
 		return -1;
 	}
 
+
 	display = al_create_display(scrn_W, scrn_H);			//create our display object
 	if (!display)											//Check display
 	{
@@ -183,20 +180,11 @@ int main(void)
 	}
 
 
-	bouncer = al_create_bitmap(BOUNCER_SIZE, BOUNCER_SIZE);		//create box 
-	if (!bouncer) {												//Check creation of box 
-		fprintf(stderr, "failed to create bouncer bitmap!\n");
-		al_destroy_display(display);
-		al_destroy_timer(timer);
-		return -1;
-	}
-
 	timer = al_create_timer(1.0 / FPS);							//Create Timer
 	if (!timer)													//Check timer creation
 	{				
 		al_show_native_message_box(display, "Error!", "Warning!", "Failed to initialise timer! \n Closing Application!", NULL, ALLEGRO_MESSAGEBOX_WARN);
 		//fprintf(stderr, "failed to create timer!\n");
-		al_destroy_bitmap(bouncer);
 		al_destroy_display(display);
 		al_destroy_timer(timer);
 		return -1;
@@ -207,7 +195,6 @@ int main(void)
 	{											
 		al_show_native_message_box(display, "Error!", "Warning!", "Failed to initialise event queue! \n Closing Application!", NULL, ALLEGRO_MESSAGEBOX_WARN);
 		//fprintf(stderr, "failed to create event_queue!\n");
-		al_destroy_bitmap(bouncer);
 		al_destroy_display(display);
 		al_destroy_timer(timer);
 		return -1;
@@ -217,6 +204,7 @@ int main(void)
 	//Init all Addons
 	al_init_primitives_addon();								//load primitive (drawing shapes, etc)
 	al_init_font_addon();									//load font addon
+	al_install_audio();										// load sound addon
 	al_init_ttf_addon();									//load truetype font addon	
 	al_init_image_addon();									//load image processing addon
 	al_install_keyboard();									//install keyboard
@@ -225,62 +213,75 @@ int main(void)
 	
 	//cursor = al_load_bitmap("./images/target.png");
 	//custom_cursor = al_create_mouse_cursor(cursor, 0, 0);
-	fonts[2] = al_load_ttf_font("arial.ttf", 36, 0);
+	fonts[2] = al_load_ttf_font("arial.ttf", 36, 0);				//
 	fonts[1] = al_load_ttf_font("arial.ttf", 20, 0);				//Load custom font
-	fonts[0] = al_load_ttf_font("arial.ttf", 18, 0);
+	fonts[0] = al_load_ttf_font("arial.ttf", 18, 0);				//
 
 	//Init images
-	light		= al_load_bitmap("./images/c.png");
+
+	//Character Images
 	walkRight	= al_load_bitmap("./images/kriWalkR.png");
 	walkLeft	= al_load_bitmap("./images/kriWalkL.png");
 	standLeft	= al_load_bitmap("./images/kriL.png");
 	standRight	= al_load_bitmap("./images/kriR.png");
 	select		= standRight;
+	
+	//Attack images
+	atk[0]	= al_load_bitmap("./images/calc.png");
+	atk[1]	= al_load_bitmap("./images/pencil.png");
+	atk[2]	= al_load_bitmap("./images/c.png");
+	atksel = atk[0];
 
-	lifes		= al_load_bitmap("./images/life.png");
+	numLives[0]		= al_load_bitmap("./images/1.png");			//Number of Lives
+	numLives[1]		= al_load_bitmap("./images/2.png");
+	numLives[2]		= al_load_bitmap("./images/3.png");
 
-	exp			= al_load_bitmap("./images/boom1.png");
+	exp			= al_load_bitmap("./images/boom1.png");			//Explosions
 
+	//Lecturer Images
 	lecturers[0]	= al_load_bitmap("./images/poole.png");			//John Poole
 	lecturers[1]	= al_load_bitmap("./images/saha.png");			//Akshay Saha
 	lecturers[2]	= al_load_bitmap("./images/taps.png");			//Jules Tapamo
 	lecturers[3]	= al_load_bitmap("./images/afullo.png");		//Afullo
-	lecturers[4]	= al_load_bitmap("./images/tom.png");		//Walingo
-	lecturers[5]	= al_load_bitmap("./images/viran.png");
+	lecturers[4]	= al_load_bitmap("./images/tom.png");			//Walingo
+	lecturers[5]	= al_load_bitmap("./images/viran.png");			//Viranjay
 
-	enemsel = lecturers[0];
+	enemsel = lecturers[0];											//Default selected enemy/lecturer
 	
-	minilect[0]			= al_load_bitmap("./images/poole1.png");
+	//Lecturer Thumbnails
+	minilect[0]			= al_load_bitmap("./images/poole1.png");	
 	minilect[1]			= al_load_bitmap("./images/saha1.png");
 	minilect[2]			= al_load_bitmap("./images/taps1.png");
 	minilect[3]			= al_load_bitmap("./images/afullo1.png");
 	minilect[4]			= al_load_bitmap("./images/tom1.png");
 	minilect[5]			= al_load_bitmap("./images/viran1.png");
 	
-
+	//Map Images
 	maps[0]		= al_load_bitmap("./images/howard.png");		//Howard Building
 	maps[1]		= al_load_bitmap("./images/tbdavis.png");		//TB Davis
 	maps[2]		= al_load_bitmap("./images/park.png");			//The park
 
-	bgImage		= maps[0];
+	bgImage		= maps[0];								//Default selected map
 
+	//Map thumbnail
 	mapsmini[0]	= al_load_bitmap("./images/howards.png");		//Howard Building
 	mapsmini[1]	= al_load_bitmap("./images/tbdaviss.png");		//TB Davis 
 	mapsmini[2] = al_load_bitmap("./images/parks.png");			//The park
 
-	scrns[0]		= al_load_bitmap("./images/BG1.png");
+	scrns[0]		= al_load_bitmap("./images/BG1.png");		//Title Background
 
+	//Button Images
 	btns[0]		= al_load_bitmap("./images/startbtn.png");		//start
 	btns[1]		= al_load_bitmap("./images/sttngbtn.png");		//settings
 	btns[2]		= al_load_bitmap("./images/stpbtn.png");		//stop
 	btns[3]		= al_load_bitmap("./images/back.png");			//back
 
-
+	//Menu Images
 	scrns[1]		= al_load_bitmap("./images/pause.png");
 	scrns[2]		= al_load_bitmap("./images/gameover.png");
 	
 	
-	int direction = 1;
+	int direction = 1;						//Default direction identifier init
 
    // al_convert_mask_to_alpha(walkLeft, al_map_rgb(106, 76, 48));  //clear designated colour to create clear image
 
@@ -311,12 +312,11 @@ int main(void)
 	//end Asset variables
 
 	//End initialisers
-
-	al_set_window_title(display, "UKZN - LECTURE DEFENCE - HOWARD EDITION");
+	//al_set_display_icon(display, icon);  
+	al_set_window_title(display, "UKZN - LECTURE DEFENCE - HOWARD EDITION");   //set window title 
 	al_start_timer(timer);											//Start event timer (program clock)
-	al_set_target_bitmap(bouncer);							
-	al_clear_to_color(black);
-	al_set_target_bitmap(al_get_backbuffer(display));
+	al_clear_to_color(black);										//Clear and set Background black
+	al_set_target_bitmap(al_get_backbuffer(display));				//
 	al_flip_display();
 	
 	
@@ -327,15 +327,15 @@ int main(void)
 
 		if (ev.type == ALLEGRO_EVENT_KEY_DOWN)					//If Key down event
 		{
-			fired = false;
-			switch (ev.keyboard.keycode)
+			fired = false;										//Bullet Fired False 
+			switch (ev.keyboard.keycode)						//Switch keyboard code returned
 			{
 			case ALLEGRO_KEY_UP:				
 				keys[UP] = true;
 				if (direction == 1) select = walkRight;			//set character sprite to ____
 				else select = walkLeft;
 				break;
-			case ALLEGRO_KEY_W:
+			case ALLEGRO_KEY_W:									
 				keys[UP] = true;
 				if (direction == 1) select = walkRight;
 				else select = walkLeft;
@@ -426,29 +426,36 @@ int main(void)
 				select = standLeft;
 				break;
 			case ALLEGRO_KEY_P:
-				if (state == PLAYING)
+				if (state == PLAYING)					//Check state		-- THIS FUNCTION NEEDS REPAIRS	
 				{
 					if (timeM == true)
 					{
-						al_stop_timer(timer);
+						al_stop_timer(timer);									//Stop timer for pause menu
 						timeM = false;
-						al_draw_bitmap(scrns[1], scrn_W / 2 - 250, 100, 0);
-						//al_draw_text(font18, black, scrn_W / 2, 100, ALLEGRO_ALIGN_CENTRE, "PAUSE MENU");
-						al_flip_display();
+						al_draw_bitmap(scrns[1], scrn_W / 2 - 250, 100, 0);		//Show Pause menu
+						al_flip_display();										//Bring backbuffer forward (bring all set contents to the current frame)
+
 					}
 					else
 					{
-						al_start_timer(timer);
+						al_start_timer(timer);									//Continue timer
 						timeM = true;
 					}
 				}
 				break;
 			case ALLEGRO_KEY_BACKSPACE:
+				if (timeM == false)
+				{
+					timeM = true;
+					al_start_timer(timer);
+				}
 				ChangeState(state, MENU);
 				break;
 			case ALLEGRO_KEY_ESCAPE:
-				if (state==TITLE || state == MENU)done = true;
-				else ChangeState(state, MENU);
+				if (state==TITLE || state == MENU)
+					done = true;
+				else 
+					ChangeState(state, MENU);
 				break;
 			case ALLEGRO_KEY_SPACE:
 				keys[SPACE] = false;
@@ -457,10 +464,10 @@ int main(void)
 		}
 		
 	
-		else if (ev.type == ALLEGRO_EVENT_MOUSE_AXES || ev.type == ALLEGRO_EVENT_MOUSE_ENTER_DISPLAY) 
+		else if (ev.type == ALLEGRO_EVENT_MOUSE_AXES || ev.type == ALLEGRO_EVENT_MOUSE_ENTER_DISPLAY)  
 		{
-			crs_x = ev.mouse.x;
-			crs_y = ev.mouse.y;
+			crs_x = ev.mouse.x;									//get x co-ord of mouse
+			crs_y = ev.mouse.y;									//get y co-ord of mouse
 			//(stderr, "\nposition = x %f  y %f", crs_x,crs_y);
 
 
@@ -477,33 +484,88 @@ int main(void)
 
 		else if (ev.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN)
 		{
-			fprintf(stderr, "\nHERE !position = x %f  y %f", crs_x, crs_y);
+			fprintf(stderr, "\nHERE !position = x %f  y %f", crs_x, crs_y);  //Prints mouse postion to console - used to identify position for clicks
 			crs_x = ev.mouse.x;
 			crs_y = ev.mouse.y;
 			fired = true;
 			if (state == MENU)
 			{
-				if (crs_x >= 400 && crs_x <=677 && crs_y >= 180 && crs_y <= 256)  ChangeState(state, PLAYING);
-				if (crs_x >= 400 && crs_x <= 677 && crs_y >= 310 && crs_y <= 388) ChangeState(state, SETTINGS);
-				if (crs_x >= 400 && crs_x <= 677 && crs_y >= 438 && crs_y <= 517) done = true;
+				if (crs_x >= 400 && crs_x <=677 && crs_y >= 180 && crs_y <= 256)  ChangeState(state, PLAYING); //Start
+				if (crs_x >= 400 && crs_x <= 677 && crs_y >= 310 && crs_y <= 388) ChangeState(state, SETTINGS);	//Settings
+				if (crs_x >= 400 && crs_x <= 677 && crs_y >= 438 && crs_y <= 517) done = true; //Quit
 			}
 			if (state == SETTINGS)
 			{
-				if (crs_x >= 330 && crs_x <= 430 && crs_y >= 180 && crs_y <= 310) enemsel = lecturers[0];
-				if (crs_x >= 500 && crs_x <= 615 && crs_y >= 180 && crs_y <= 310) enemsel = lecturers[1];
-				if (crs_x >= 670 && crs_x <= 800 && crs_y >= 180 && crs_y <= 310) enemsel = lecturers[2];
+				if (crs_x >= 100 && crs_x <= 224 && crs_y >= 50 && crs_y <= 180)
+				{
+					enemsel = lecturers[0]; //Poole
+					curLect = 0;
+				}
+				if (crs_x >= 240 && crs_x <= 354 && crs_y >= 50 && crs_y <= 180)
+				{
+					enemsel = lecturers[1]; //Saha
+				    curLect = 1;
+				}
+				if (crs_x >= 380 && crs_x <= 504 && crs_y >= 50 && crs_y <= 180)
+				{
+					enemsel = lecturers[2]; //Tapamo
+					curLect = 2;
+				}
+				if (crs_x >= 520 && crs_x <= 644 && crs_y >= 50 && crs_y <= 180) 
+				{
+					enemsel = lecturers[3]; //Afullo
+					curLect = 3;
+				}
+				if (crs_x >= 660 && crs_x <= 784 && crs_y >= 50 && crs_y <= 180)
+				{
+					enemsel = lecturers[4];//Walingo
+					curLect = 4; 
+				}
+				if (crs_x >= 800 && crs_x <= 924 && crs_y >= 50 && crs_y <= 180)
+				{
+					enemsel = lecturers[5]; //Viranjay
+					curLect = 5;
+				}
+				if (crs_x >= 330 && crs_x <= 430 && crs_y >= 250 && crs_y <= 380)
+				{
+					bgImage = maps[0]; //Howard
+					curMap = 0;
+				}			
+				if (crs_x >= 500 && crs_x <= 615 && crs_y >= 250 && crs_y <= 380)
+				{
+					bgImage = maps[1]; //TB Davis
+					curMap = 1;
+				}
+				if (crs_x >= 670 && crs_x <= 800 && crs_y >= 250 && crs_y <= 380)
+				{
+					bgImage = maps[2]; //Park
+					curMap = 2;
+				}
 
-				if (crs_x >= 330 && crs_x <= 430 && crs_y >= 450 && crs_y <= 580) bgImage = maps[0];
-				if (crs_x >= 500 && crs_x <= 615 && crs_y >= 450 && crs_y <= 580) bgImage = maps[1];
-				if (crs_x >= 670 && crs_x <= 800 && crs_y >= 450 && crs_y <= 580) bgImage = maps[2];
+				if (crs_x >= 330 && crs_x <= 430 && crs_y >= 470 && crs_y <= 560)
+				{
+					atksel = atk[0]; //Calculator
+					curAtk = 0;
+				}
+
+				if (crs_x >= 500 && crs_x <= 615 && crs_y >= 470 && crs_y <= 560)
+				{
+					atksel = atk[1]; //Pencil
+					curAtk = 1;
+
+				}
+				if (crs_x >= 670 && crs_x <= 800 && crs_y >= 470 && crs_y <= 560)
+				{
+					atksel = atk[2]; //C++
+					curAtk = 2;
+				}
 			}
-			FireBullet(bullets, NUM_BULLETS, player);
+			FireBullet(bullets, NUM_BULLETS, player);   //Fire Bullets
 		}
 		else if (ev.type == ALLEGRO_EVENT_MOUSE_BUTTON_UP) 
 		{		
 			
 		}
-		
 		if (ev.type == ALLEGRO_EVENT_DISPLAY_CLOSE)
 		{
 			done = true;
@@ -515,23 +577,31 @@ int main(void)
 				if (timeM == true)
 				{
 					al_stop_timer(timer);
-					timeM = false;
-					al_draw_bitmap(scrns[1], scrn_W / 2 - 250, 100, 0);
-					//al_draw_text(font18, black, scrn_W / 2, 100, ALLEGRO_ALIGN_CENTRE, "PAUSE MENU");
+					al_draw_bitmap(scrns[1], scrn_W / 2 - 250, 100, 0);			//Show pause menu
 					al_flip_display();
 				}
-
 			}
 		}
 		if (ev.type == ALLEGRO_EVENT_DISPLAY_SWITCH_IN)
 		{	
-			al_start_timer(timer);
-			timeM = true;
+			if (state == PLAYING)
+			{
+				al_stop_timer(timer);
+				timeM = false;
+				al_draw_bitmap(scrns[1], scrn_W / 2 - 250, 100, 0);
+				al_flip_display();
+			}
 		}
+		
 
+		if (ev.type == ALLEGRO_EVENT_DISPLAY_RESIZE)
+		{
+			al_set_new_display_flags(ALLEGRO_FULLSCREEN_WINDOW);
+		}
 		else if (ev.type == ALLEGRO_EVENT_TIMER)
 		{
-			if (++frameCount >= frameDelay)
+			//Start Animation for all images
+			if (++frameCount >= frameDelay) 
 			{
 				if (++curFrame >= maxFrame)
 				{
@@ -539,7 +609,7 @@ int main(void)
 				}
 				frameCount = 0;
 			}
-
+			//End animation
 
 			if (state == TITLE)
 			{
@@ -566,14 +636,10 @@ int main(void)
 			}
 
 			redraw = true;
-			if (keys[UP])
-				MoveCharacterUp(player);
-			if (keys[DOWN])
-				MoveCharacterDown(player);
-			if (keys[LEFT])
-				MoveCharacterLeft(player);
-			if (keys[RIGHT])
-				MoveCharacterRight(player);
+			if (keys[UP])    MoveCharacterUp(player);
+			if (keys[DOWN])  MoveCharacterDown(player);
+			if (keys[LEFT])  MoveCharacterLeft(player);
+			if (keys[RIGHT]) MoveCharacterRight(player);
 		}
 
 		else if (ev.type == ALLEGRO_EVENT_DISPLAY_CLOSE)
@@ -603,81 +669,117 @@ int main(void)
 
 			if (state == TITLE)
 			{
-				//al_draw_filled_rectangle(0, 0, scrn_W, scrn_H, blue);
-				al_draw_bitmap(scrns[0], 0, 0, 0);
+				al_draw_bitmap(scrns[0], 0, 0, 0);  //Title Screen
 				al_draw_textf(fonts[0],white, scrn_W/2+20, scrn_H-60, ALLEGRO_ALIGN_CENTRE, "PRESS SPACEBAR TO START");
 			}
 			else if (state == MENU)
 			{
 				al_clear_to_color(black);
-				al_draw_bitmap(btns[0], scrn_W/2 - 130, scrn_H/2 - 180 ,0);
-				al_draw_bitmap(btns[1], scrn_W / 2 - 130, scrn_H / 2 -50 , 0);
-				al_draw_bitmap(btns[2], scrn_W / 2 - 130, scrn_H / 2 + 80, 0);
+				al_draw_bitmap(btns[0], scrn_W/2 - 130, scrn_H/2 - 180 ,0);			//Start
+				al_draw_bitmap(btns[1], scrn_W / 2 - 130, scrn_H / 2 -50 , 0);		//Settings
+				al_draw_bitmap(btns[2], scrn_W / 2 - 130, scrn_H / 2 + 80, 0);		//Quit
 			}
 			else if (state == SETTINGS)
 			{
 				al_clear_to_color(black);
-				al_draw_textf(fonts[1], white,scrn_W/2-100, 100, 0, "CHOOSE YOUR LECTURER : ");
+				al_draw_textf(fonts[1], white,scrn_W/2-100, 20, 0, "CHOOSE YOUR LECTURER : ");
 
-				al_draw_bitmap(minilect[0], 100, scrn_H / 2 - 180, 0);
-				al_draw_bitmap(minilect[1], 240, scrn_H / 2 - 180, 0);
-				al_draw_bitmap(minilect[2], 380, scrn_H / 2 - 180, 0);
-				al_draw_bitmap(minilect[3], 520, scrn_H / 2 - 180, 0);
-				al_draw_bitmap(minilect[4], 660, scrn_H / 2 - 180, 0);
-				al_draw_bitmap(minilect[5], 800, scrn_H / 2 - 180, 0);
+				al_draw_bitmap(minilect[0], 100, 50, 0);	//Poole
+				al_draw_bitmap(minilect[1], 240, 50, 0);	//Saha
+				al_draw_bitmap(minilect[2], 380, 50, 0);	//Tapamo
+				al_draw_bitmap(minilect[3], 520, 50, 0);	//Afullo
+				al_draw_bitmap(minilect[4], 660, 50, 0);	//Walingo
+				al_draw_bitmap(minilect[5], 800, 50, 0);	//Viranjay
 
+				switch (curLect)
+				{
+				case 0:
+					al_draw_textf(fonts[1], white, scrn_W / 2 - 150, 180, 0, "CURRENT LECTURER : Dr John Poole");
+					break;
+				case 1:
+					al_draw_textf(fonts[1], white, scrn_W / 2 - 150, 180, 0, "CURRENT LECTURER : Dr Akshay Kumar");
+					break;
+				case 2:
+					al_draw_textf(fonts[1], white, scrn_W / 2 - 150, 180, 0, "CURRENT LECTURER : Professor Jules Tapamo");
+					break;
+				case 3:
+					al_draw_textf(fonts[1], white, scrn_W / 2 - 150, 180, 0, "CURRENT LECTURER : Professor Thomas Afullo");
+					break;
+				case 4:
+					al_draw_textf(fonts[1], white, scrn_W / 2 - 150, 180, 0, "CURRENT LECTURER : Dr Tom Walingo");
+					break;
+				case 5:
+					al_draw_textf(fonts[1], white, scrn_W / 2 - 150, 180, 0, "CURRENT LECTURER : Dr Viranjay Srivastava");
+					break;
+				}
+				
 
-				al_draw_textf(fonts[1], white, scrn_W / 2 - 80, 400, 0, "CHOOSE YOUR VENUE : ");
+				al_draw_textf(fonts[1], white, scrn_W / 2 - 80, 225, 0, "CHOOSE YOUR VENUE : ");
 
-				al_draw_bitmap(mapsmini[0], scrn_W / 2 - 200, scrn_H / 2 + 100, 0);
-				al_draw_bitmap(mapsmini[1], scrn_W / 2 - 20, scrn_H / 2 +100, 0);
-				al_draw_bitmap(mapsmini[2], scrn_W / 2 + 160, scrn_H / 2 +100, 0);
+				al_draw_bitmap(mapsmini[0], scrn_W / 2 - 200, 250, 0);	//Howard
+				al_draw_bitmap(mapsmini[1], scrn_W / 2 - 20,  250, 0);	//TBDavis
+				al_draw_bitmap(mapsmini[2], scrn_W / 2 + 160, 250, 0);	//Park
 
+				switch (curMap)
+				{
+				case 0:
+					al_draw_textf(fonts[1], white, scrn_W / 2 - 150,380, 0, "CURRENT VENUE : Howard Building");
+					break;
+				case 1:
+					al_draw_textf(fonts[1], white, scrn_W / 2 - 150, 380, 0, "CURRENT VENUE : T.B Davis");
+					break;
+				case 2:
+					al_draw_textf(fonts[1], white, scrn_W / 2 - 150,380, 0, "CURRENT VENUE : The Park");
+					break;
+				}
 
-				//al_draw_bitmap(btns[3], scrn_W - 300, scrn_H - 50, 0);
+				al_draw_textf(fonts[1], white, scrn_W / 2 - 80, 425, 0, "CHOOSE YOUR POWER : ");
+
+				al_draw_bitmap(atk[0], scrn_W / 2 - 200, 475, 0);	//Calculator
+				al_draw_bitmap(atk[1], scrn_W / 2 - 20, 475, 0);	//Pencil
+				al_draw_bitmap(atk[2], scrn_W / 2 + 160, 475, 0);	//C++
+
+				switch (curAtk)
+				{
+				case 0:
+					al_draw_textf(fonts[1], white, scrn_W / 2 - 150, 575, 0, "CURRENT POWER : Calculator");
+					break;
+				case 1:
+					al_draw_textf(fonts[1], white, scrn_W / 2 - 150, 575, 0, "CURRENT POWER : Pencil");
+					break;
+				case 2:
+					al_draw_textf(fonts[1], white, scrn_W / 2 - 150, 575, 0, "CURRENT POWER : C++ Programming");
+					break;
+				}
+
 				al_draw_textf(fonts[0], white, scrn_W - 300, scrn_H-50, 0, "PRESS BACKSPACE TO RETURN");
 			}
 			else if (state == PLAYING)
 			{
 
 				DrawCharacter(player, select, curFrame, frameW, frameH);
-				DrawBullet(bullets, NUM_BULLETS, light);
+				DrawBullet(bullets, NUM_BULLETS, atksel);
 				DrawEnemy(comets, NUM_COMETS, enemsel, curFrame, frameW, frameH);
 				DrawExplosions(explosions, NUM_EXPLOSIONS);
 
-				al_draw_textf(fonts[0], white, scrn_W/2-100, 5, 0, "Score : %i ", player.score*10);
-				
-				if (player.lives == 3)
-				{
-					al_draw_scaled_bitmap(lifes, 5, 5, al_get_bitmap_width(lifes), al_get_bitmap_height(lifes), 5, 5, 80, 50, 0);
-					al_draw_scaled_bitmap(lifes, 5, 5, al_get_bitmap_width(lifes), al_get_bitmap_height(lifes), 90, 5, 80, 50, 0);
-					al_draw_scaled_bitmap(lifes, 5, 5, al_get_bitmap_width(lifes), al_get_bitmap_height(lifes), 175, 5, 80, 50, 0);
-				}
-				if (player.lives == 2)
-				{
-					al_draw_scaled_bitmap(lifes, 5, 5, al_get_bitmap_width(lifes), al_get_bitmap_height(lifes), 5, 5, 80, 50, 0);
-					al_draw_scaled_bitmap(lifes, 5, 5, al_get_bitmap_width(lifes), al_get_bitmap_height(lifes), 90, 5, 80, 50, 0);
-				}
-				if (player.lives == 2)
-				{
-					al_draw_scaled_bitmap(lifes, 5, 5, al_get_bitmap_width(lifes), al_get_bitmap_height(lifes), 5, 5, 80, 50, 0);
-				}
+				al_draw_textf(fonts[0], black, scrn_W/2-100, 5, 0, "Score : %i ", player.score*10);
+				int x = al_get_bitmap_width(numLives[player.lives-1]);
+				int y = al_get_bitmap_width(numLives[player.lives-1]);
+
+				al_draw_scaled_bitmap(numLives[player.lives-1], 5, 5,x, y, 5, 5, 150, 150, 0);
 				
 
 			}
 			else if (state == LOST)
 			{
-				//al_draw_filled_rectangle(0, 0, scrn_W, scrn_H, green);
-				//al_draw_bitmap(lost, 0, 0, 0);
-				al_draw_bitmap(scrns[2], scrn_W / 2 - 250, 100, 0);
-				al_draw_textf(fonts[0], black, scrn_W/2+70, 340, 0, "%i", player.score);
+				al_draw_bitmap(scrns[2], scrn_W / 2 - 250, 100, 0);                      // Game over Screen
+				al_draw_textf(fonts[2], black, scrn_W/2+70, 340, 0, "%i", player.score*10);
 			}
 
 
 			al_flip_display();
 			al_clear_to_color(black);
 			al_draw_scaled_bitmap(bgImage, 0, 0, al_get_bitmap_width(bgImage), al_get_bitmap_height(bgImage),0,0,scrn_W,scrn_H, 0);
-			//al_draw_bitmap(bouncer, bouncer_x, bouncer_y, 0);
 
 		}
 
@@ -688,18 +790,21 @@ int main(void)
 	al_destroy_bitmap(walkRight);
 	al_destroy_bitmap(standLeft);
 	al_destroy_bitmap(standRight);
-	al_destroy_bitmap(light);
-	al_destroy_bitmap(bouncer);
+	al_destroy_bitmap(atksel);
 
 	for (int i = 0; i < 5; i++)
 	{
 		al_destroy_font(fonts[i]);
-		al_destroy_bitmap(lecturers[i]);
-		al_destroy_bitmap(minilect[i]);
 		al_destroy_bitmap(maps[i]);
 		al_destroy_bitmap(mapsmini[i]);
 		al_destroy_bitmap(btns[i]);
 		al_destroy_bitmap(scrns[i]);
+		//al_destroy_bitmap(atk[i]);
+	}
+	for (int i = 0; i < 6; i++)
+	{
+		al_destroy_bitmap(lecturers[i]);
+		al_destroy_bitmap(minilect[i]);
 	}
 	
 	al_destroy_event_queue(event_queue);
@@ -773,7 +878,6 @@ void MoveCharacterLeft(Character &player)
 	player.dir = 3;
 
 }
-
 
 void InitBullet(Character &player, Bullet bullet[], int size)
 {
