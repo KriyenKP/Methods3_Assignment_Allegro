@@ -138,11 +138,11 @@ int main(void)
 							*enemsel		= NULL,							//Currently selected lecturer
 							*exp			= NULL,							//Explosion image
 
-							*maps[5]		= {NULL,NULL,NULL,NULL,NULL},	//Maps array
+							*maps[6]		= {NULL,NULL,NULL,NULL,NULL},	//Maps array
 						//	*howard			= NULL,
 						//  *tbdavis		= NULL,
 
-							*mapsmini[5]	= {NULL,NULL,NULL,NULL,NULL},	//Map Thumbnails
+							*mapsmini[6]	= {NULL,NULL,NULL,NULL,NULL},	//Map Thumbnails
 						//	*howards		= NULL,
 						//	*tbdaviss		= NULL,
 
@@ -260,6 +260,9 @@ int main(void)
 	maps[0]		= al_load_bitmap("./images/howard.png");		//Howard Building
 	maps[1]		= al_load_bitmap("./images/tbdavis.png");		//TB Davis
 	maps[2]		= al_load_bitmap("./images/park.png");			//The park
+	maps[3]		= al_load_bitmap("./images/science.png");	//Science
+	maps[4]		= al_load_bitmap("./images/cafe.png");		//cafe
+	maps[5]		= al_load_bitmap("./images/amphi.png");	//amphitheatre
 
 	bgImage		= maps[0];								//Default selected map
 
@@ -267,7 +270,10 @@ int main(void)
 	mapsmini[0]	= al_load_bitmap("./images/howards.png");		//Howard Building
 	mapsmini[1]	= al_load_bitmap("./images/tbdaviss.png");		//TB Davis 
 	mapsmini[2] = al_load_bitmap("./images/parks.png");			//The park
-
+	mapsmini[3] = al_load_bitmap("./images/sciences.png");	//science
+	mapsmini[4] = al_load_bitmap("./images/cafes.png");			//cafe
+	mapsmini[5] = al_load_bitmap("./images/amphis.png");
+	
 	scrns[0]		= al_load_bitmap("./images/BG1.png");		//Title Background
 
 	//Button Images
@@ -526,21 +532,41 @@ int main(void)
 					enemsel = lecturers[5]; //Viranjay
 					curLect = 5;
 				}
-				if (crs_x >= 330 && crs_x <= 430 && crs_y >= 250 && crs_y <= 380)
+
+
+				if (crs_x >= 100 && crs_x <= 224 && crs_y >= 250 && crs_y <= 380)
 				{
-					bgImage = maps[0]; //Howard
+					bgImage = maps[0]; // howard
 					curMap = 0;
-				}			
-				if (crs_x >= 500 && crs_x <= 615 && crs_y >= 250 && crs_y <= 380)
+				}
+				if (crs_x >= 240 && crs_x <= 354 && crs_y >= 250 && crs_y <= 380)
 				{
-					bgImage = maps[1]; //TB Davis
+					bgImage = maps[1]; // tbdavis
 					curMap = 1;
 				}
-				if (crs_x >= 670 && crs_x <= 800 && crs_y >= 250 && crs_y <= 380)
+				if (crs_x >= 380 && crs_x <= 504 && crs_y >= 250 && crs_y <= 380)
 				{
-					bgImage = maps[2]; //Park
+					bgImage = maps[2];		//Park
 					curMap = 2;
 				}
+				if (crs_x >= 520 && crs_x <= 644 && crs_y >= 250 && crs_y <= 380) 
+				{
+					bgImage = maps[3];		//science
+					curMap = 3;
+				}
+				if (crs_x >= 660 && crs_x <= 784 && crs_y >= 250 && crs_y <= 380)
+				{
+					bgImage = maps[4];		//cafe
+					curMap = 4;
+				}
+				if (crs_x >= 800 && crs_x <= 924 && crs_y >= 250 && crs_y <= 380)
+				{
+					bgImage = maps[5];		//amphi
+					curMap = 5;
+				}
+
+
+
 
 				if (crs_x >= 330 && crs_x <= 430 && crs_y >= 470 && crs_y <= 560)
 				{
@@ -716,9 +742,12 @@ int main(void)
 
 				al_draw_textf(fonts[1], white, scrn_W / 2 - 80, 225, 0, "CHOOSE YOUR VENUE : ");
 
-				al_draw_bitmap(mapsmini[0], scrn_W / 2 - 200, 250, 0);	//Howard
-				al_draw_bitmap(mapsmini[1], scrn_W / 2 - 20,  250, 0);	//TBDavis
-				al_draw_bitmap(mapsmini[2], scrn_W / 2 + 160, 250, 0);	//Park
+				al_draw_bitmap(mapsmini[0], 100, 250, 0);	//Howard
+				al_draw_bitmap(mapsmini[1], 240, 250, 0);	//TBDavis
+				al_draw_bitmap(mapsmini[2], 380, 250, 0);	//Park
+				al_draw_bitmap(mapsmini[3], 520, 250, 0);	//Science
+				al_draw_bitmap(mapsmini[4], 660, 250, 0);	//Cafe
+				al_draw_bitmap(mapsmini[5], 800, 250, 0);	//Amphi
 
 				switch (curMap)
 				{
@@ -729,7 +758,16 @@ int main(void)
 					al_draw_textf(fonts[1], white, scrn_W / 2 - 150, 380, 0, "CURRENT VENUE : T.B Davis");
 					break;
 				case 2:
-					al_draw_textf(fonts[1], white, scrn_W / 2 - 150,380, 0, "CURRENT VENUE : The Park");
+					al_draw_textf(fonts[1], white, scrn_W / 2 - 150, 380, 0, "CURRENT VENUE : The Park");
+					break;
+				case 3:
+					al_draw_textf(fonts[1], white, scrn_W / 2 - 150,380, 0, "CURRENT VENUE : Science Block");
+					break;
+				case 4:
+					al_draw_textf(fonts[1], white, scrn_W / 2 - 150, 380, 0, "CURRENT VENUE : The Cafe");
+					break;
+				case 5:
+					al_draw_textf(fonts[1], white, scrn_W / 2 - 150, 380, 0, "CURRENT VENUE : The Amphitheatre");
 					break;
 				}
 
@@ -824,7 +862,7 @@ void InitCharacter(Character &player)
 	player.ID = PLAYER;
 	player.lives = 3;
 	player.speed = 7;
-	player.boundx = 6;
+	player.boundx = 5;
 	player.boundy = 7;
 	player.score = 0;
 }
@@ -861,8 +899,8 @@ void MoveCharacterRight(Character &player)
 void MoveCharacterDown(Character &player)
 {
 	player.y += player.speed;
-	if (player.y > scrn_H-80)
-		player.y = scrn_H-80;
+	if (player.y > scrn_H-200)
+		player.y = scrn_H-200;
 	player.dir = 2;
 	if (shrinkx <= 350 && shrinky <= 350)
 	{
