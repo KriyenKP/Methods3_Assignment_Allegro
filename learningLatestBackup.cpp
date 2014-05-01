@@ -1,16 +1,19 @@
 //#include <Box2D/Box2D.h>
 #include <math.h>
+#include <string>
 #include <allegro5/allegro.h>
 #include <allegro5/allegro_image.h>
 #include <allegro5/allegro_primitives.h>
 #include <allegro5/allegro_native_dialog.h>
 #include <allegro5/allegro_font.h>
 #include <allegro5/allegro_ttf.h>
+#include <allegro5/allegro_audio.h>
 #include <objects.h>
 //#include <exception>
-#include <stdio.h>
+//#include <stdio.h>
 #include <cstdio>
 
+using namespace std;
 
 //REMEMBER TO EDIT Linker -> System -> SubSystem -> WINDOW to hide console!
 
@@ -98,6 +101,9 @@ int main(void)
 		redraw = true,
 		timeM = true;
 
+	int curLect = 0;
+	int curMap = 0;
+
 
 	//animated image var
 	int curFrame = 0;					//Current frame of animated image
@@ -125,8 +131,8 @@ int main(void)
 		*standLeft = NULL,
 		*standRight = NULL,
 		*select = NULL,
-
-		*lifes = NULL,
+		*icon = NULL,
+		*lives = NULL,
 
 		*lecturers[6] = { NULL, NULL, NULL, NULL, NULL, NULL },
 		//*poole		= NULL,
@@ -217,6 +223,7 @@ int main(void)
 	//Init all Addons
 	al_init_primitives_addon();								//load primitive (drawing shapes, etc)
 	al_init_font_addon();									//load font addon
+	al_install_audio();										// load sound addon
 	al_init_ttf_addon();									//load truetype font addon	
 	al_init_image_addon();									//load image processing addon
 	al_install_keyboard();									//install keyboard
@@ -237,7 +244,7 @@ int main(void)
 	standRight = al_load_bitmap("./images/kriR.png");
 	select = standRight;
 
-	lifes = al_load_bitmap("./images/life.png");
+	lives = al_load_bitmap("./images/life.png");
 
 	exp = al_load_bitmap("./images/boom1.png");
 
@@ -245,8 +252,8 @@ int main(void)
 	lecturers[1] = al_load_bitmap("./images/saha.png");			//Akshay Saha
 	lecturers[2] = al_load_bitmap("./images/taps.png");			//Jules Tapamo
 	lecturers[3] = al_load_bitmap("./images/afullo.png");		//Afullo
-	lecturers[4] = al_load_bitmap("./images/tom.png");		//Walingo
-	lecturers[5] = al_load_bitmap("./images/viran.png");
+	lecturers[4] = al_load_bitmap("./images/tom.png");			//Walingo
+	lecturers[5] = al_load_bitmap("./images/viran.png");			//Viranjay
 
 	enemsel = lecturers[0];
 
@@ -311,7 +318,8 @@ int main(void)
 	//end Asset variables
 
 	//End initialisers
-
+	al_set_new_display_flags(ALLEGRO_RESIZABLE);
+	//al_set_display_icon(display, icon);
 	al_set_window_title(display, "UKZN - LECTURE DEFENCE - HOWARD EDITION");
 	al_start_timer(timer);											//Start event timer (program clock)
 	al_set_target_bitmap(bouncer);
@@ -433,8 +441,8 @@ int main(void)
 						al_stop_timer(timer);
 						timeM = false;
 						al_draw_bitmap(scrns[1], scrn_W / 2 - 250, 100, 0);
-						//al_draw_text(font18, black, scrn_W / 2, 100, ALLEGRO_ALIGN_CENTRE, "PAUSE MENU");
 						al_flip_display();
+
 					}
 					else
 					{
@@ -444,6 +452,11 @@ int main(void)
 				}
 				break;
 			case ALLEGRO_KEY_BACKSPACE:
+				if (timeM == false)
+				{
+					timeM = true;
+					al_start_timer(timer);
+				}
 				ChangeState(state, MENU);
 				break;
 			case ALLEGRO_KEY_ESCAPE:
@@ -489,13 +502,55 @@ int main(void)
 			}
 			if (state == SETTINGS)
 			{
-				if (crs_x >= 330 && crs_x <= 430 && crs_y >= 180 && crs_y <= 310) enemsel = lecturers[0];
-				if (crs_x >= 500 && crs_x <= 615 && crs_y >= 180 && crs_y <= 310) enemsel = lecturers[1];
-				if (crs_x >= 670 && crs_x <= 800 && crs_y >= 180 && crs_y <= 310) enemsel = lecturers[2];
+				if (crs_x >= 100 && crs_x <= 224 && crs_y >= 180 && crs_y <= 310)
+				{
+					enemsel = lecturers[0];
+					curLect = 0;
+				}
+				if (crs_x >= 240 && crs_x <= 354 && crs_y >= 180 && crs_y <= 310)
+				{
+					enemsel = lecturers[1];
+					curLect = 1;
+				}
+				if (crs_x >= 380 && crs_x <= 504 && crs_y >= 180 && crs_y <= 310)
+				{
+					enemsel = lecturers[2];
+					curLect = 2;
+				}
+				if (crs_x >= 520 && crs_x <= 644 && crs_y >= 180 && crs_y <= 310)
+				{
+					enemsel = lecturers[3];
+					curLect = 3;
+				}
+				if (crs_x >= 660 && crs_x <= 784 && crs_y >= 180 && crs_y <= 310)
+				{
+					enemsel = lecturers[4];
+					curLect = 4;
+				}
+				if (crs_x >= 800 && crs_x <= 924 && crs_y >= 180 && crs_y <= 310)
+				{
+					enemsel = lecturers[5];
+					curLect = 5;
+				}
 
-				if (crs_x >= 330 && crs_x <= 430 && crs_y >= 450 && crs_y <= 580) bgImage = maps[0];
-				if (crs_x >= 500 && crs_x <= 615 && crs_y >= 450 && crs_y <= 580) bgImage = maps[1];
-				if (crs_x >= 670 && crs_x <= 800 && crs_y >= 450 && crs_y <= 580) bgImage = maps[2];
+
+				if (crs_x >= 330 && crs_x <= 430 && crs_y >= 450 && crs_y <= 580)
+				{
+					bgImage = maps[0];
+					curMap = 0;
+				}
+
+				if (crs_x >= 500 && crs_x <= 615 && crs_y >= 450 && crs_y <= 580)
+				{
+					bgImage = maps[1];
+					curMap = 1;
+
+				}
+				if (crs_x >= 670 && crs_x <= 800 && crs_y >= 450 && crs_y <= 580)
+				{
+					bgImage = maps[2];
+					curMap = 2;
+				}
 			}
 			FireBullet(bullets, NUM_BULLETS, player);
 		}
@@ -515,20 +570,27 @@ int main(void)
 				if (timeM == true)
 				{
 					al_stop_timer(timer);
-					timeM = false;
 					al_draw_bitmap(scrns[1], scrn_W / 2 - 250, 100, 0);
-					//al_draw_text(font18, black, scrn_W / 2, 100, ALLEGRO_ALIGN_CENTRE, "PAUSE MENU");
 					al_flip_display();
 				}
-
 			}
 		}
 		if (ev.type == ALLEGRO_EVENT_DISPLAY_SWITCH_IN)
 		{
-			al_start_timer(timer);
-			timeM = true;
+			if (state == PLAYING)
+			{
+				al_stop_timer(timer);
+				timeM = false;
+				al_draw_bitmap(scrns[1], scrn_W / 2 - 250, 100, 0);
+				al_flip_display();
+			}
 		}
 
+
+		if (ev.type == ALLEGRO_EVENT_DISPLAY_RESIZE)
+		{
+			al_set_new_display_flags(ALLEGRO_FULLSCREEN_WINDOW);
+		}
 		else if (ev.type == ALLEGRO_EVENT_TIMER)
 		{
 			if (++frameCount >= frameDelay)
@@ -566,14 +628,10 @@ int main(void)
 			}
 
 			redraw = true;
-			if (keys[UP])
-				MoveCharacterUp(player);
-			if (keys[DOWN])
-				MoveCharacterDown(player);
-			if (keys[LEFT])
-				MoveCharacterLeft(player);
-			if (keys[RIGHT])
-				MoveCharacterRight(player);
+			if (keys[UP])    MoveCharacterUp(player);
+			if (keys[DOWN])  MoveCharacterDown(player);
+			if (keys[LEFT])  MoveCharacterLeft(player);
+			if (keys[RIGHT]) MoveCharacterRight(player);
 		}
 
 		else if (ev.type == ALLEGRO_EVENT_DISPLAY_CLOSE)
@@ -603,7 +661,6 @@ int main(void)
 
 			if (state == TITLE)
 			{
-				//al_draw_filled_rectangle(0, 0, scrn_W, scrn_H, blue);
 				al_draw_bitmap(scrns[0], 0, 0, 0);
 				al_draw_textf(fonts[0], white, scrn_W / 2 + 20, scrn_H - 60, ALLEGRO_ALIGN_CENTRE, "PRESS SPACEBAR TO START");
 			}
@@ -626,12 +683,48 @@ int main(void)
 				al_draw_bitmap(minilect[4], 660, scrn_H / 2 - 180, 0);
 				al_draw_bitmap(minilect[5], 800, scrn_H / 2 - 180, 0);
 
+				switch (curLect)
+				{
+				case 0:
+					al_draw_textf(fonts[1], white, scrn_W / 2 - 150, 300, 0, "CURRENT LECTURER : Dr John Poole");
+					break;
+				case 1:
+					al_draw_textf(fonts[1], white, scrn_W / 2 - 150, 300, 0, "CURRENT LECTURER : Dr Akshay Kumar");
+					break;
+				case 2:
+					al_draw_textf(fonts[1], white, scrn_W / 2 - 150, 300, 0, "CURRENT LECTURER : Professor Jules Tapamo");
+					break;
+				case 3:
+					al_draw_textf(fonts[1], white, scrn_W / 2 - 150, 300, 0, "CURRENT LECTURER : Professor Thomas Afullo");
+					break;
+				case 4:
+					al_draw_textf(fonts[1], white, scrn_W / 2 - 150, 300, 0, "CURRENT LECTURER : Dr Tom Walingo");
+					break;
+				case 5:
+					al_draw_textf(fonts[1], white, scrn_W / 2 - 150, 300, 0, "CURRENT LECTURER : Dr Viranjay Srivastava");
+					break;
+				}
+
 
 				al_draw_textf(fonts[1], white, scrn_W / 2 - 80, 400, 0, "CHOOSE YOUR VENUE : ");
 
 				al_draw_bitmap(mapsmini[0], scrn_W / 2 - 200, scrn_H / 2 + 100, 0);
 				al_draw_bitmap(mapsmini[1], scrn_W / 2 - 20, scrn_H / 2 + 100, 0);
 				al_draw_bitmap(mapsmini[2], scrn_W / 2 + 160, scrn_H / 2 + 100, 0);
+
+				switch (curMap)
+				{
+				case 0:
+					al_draw_textf(fonts[1], white, scrn_W / 2 - 150, scrn_H / 2 + 250, 0, "CURRENT VENUE : Howard Building");
+					break;
+				case 1:
+					al_draw_textf(fonts[1], white, scrn_W / 2 - 150, scrn_H / 2 + 250, 0, "CURRENT VENUE : T.B Davis");
+					break;
+				case 2:
+					al_draw_textf(fonts[1], white, scrn_W / 2 - 150, scrn_H / 2 + 250, 0, "CURRENT VENUE : The Park");
+					break;
+				}
+
 
 
 				//al_draw_bitmap(btns[3], scrn_W - 300, scrn_H - 50, 0);
@@ -649,18 +742,18 @@ int main(void)
 
 				if (player.lives == 3)
 				{
-					al_draw_scaled_bitmap(lifes, 5, 5, al_get_bitmap_width(lifes), al_get_bitmap_height(lifes), 5, 5, 80, 50, 0);
-					al_draw_scaled_bitmap(lifes, 5, 5, al_get_bitmap_width(lifes), al_get_bitmap_height(lifes), 90, 5, 80, 50, 0);
-					al_draw_scaled_bitmap(lifes, 5, 5, al_get_bitmap_width(lifes), al_get_bitmap_height(lifes), 175, 5, 80, 50, 0);
+					al_draw_scaled_bitmap(lives, 5, 5, al_get_bitmap_width(lives), al_get_bitmap_height(lives), 5, 5, 80, 50, 0);
+					al_draw_scaled_bitmap(lives, 5, 5, al_get_bitmap_width(lives), al_get_bitmap_height(lives), 90, 5, 80, 50, 0);
+					al_draw_scaled_bitmap(lives, 5, 5, al_get_bitmap_width(lives), al_get_bitmap_height(lives), 175, 5, 80, 50, 0);
 				}
 				if (player.lives == 2)
 				{
-					al_draw_scaled_bitmap(lifes, 5, 5, al_get_bitmap_width(lifes), al_get_bitmap_height(lifes), 5, 5, 80, 50, 0);
-					al_draw_scaled_bitmap(lifes, 5, 5, al_get_bitmap_width(lifes), al_get_bitmap_height(lifes), 90, 5, 80, 50, 0);
+					al_draw_scaled_bitmap(lives, 5, 5, al_get_bitmap_width(lives), al_get_bitmap_height(lives), 5, 5, 80, 50, 0);
+					al_draw_scaled_bitmap(lives, 5, 5, al_get_bitmap_width(lives), al_get_bitmap_height(lives), 90, 5, 80, 50, 0);
 				}
 				if (player.lives == 2)
 				{
-					al_draw_scaled_bitmap(lifes, 5, 5, al_get_bitmap_width(lifes), al_get_bitmap_height(lifes), 5, 5, 80, 50, 0);
+					al_draw_scaled_bitmap(lives, 5, 5, al_get_bitmap_width(lives), al_get_bitmap_height(lives), 5, 5, 80, 50, 0);
 				}
 
 
