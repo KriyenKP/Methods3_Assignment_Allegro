@@ -16,18 +16,9 @@
     <Filter Include="Source Files\Tests">
       <UniqueIdentifier>{e80f5da5-ac72-4064-bb93-bc0a6b036c84}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\k">
-      <UniqueIdentifier>{971bd2a5-23bb-4652-af2f-aef20bade1da}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="learning.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="SideShooter_V3_2.cpp">
-      <Filter>Source Files\k</Filter>
-    </ClCompile>
-    <ClCompile Include="learningLatestBackup.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="bouncereg.cpp">
@@ -71,7 +62,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="objects.h">
+    <ClInclude Include="lib\objects.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
