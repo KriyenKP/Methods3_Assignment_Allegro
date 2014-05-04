@@ -76,18 +76,3 @@ struct Explosion {
 
 	ALLEGRO_BITMAP *image;
 };
-
-struct Background
-{
-	float x;
-	float y;
-	float velX;
-	float velY;
-	int dirX;
-	int dirY;
-
-	int width;
-	int height;
-
-	ALLEGRO_BITMAP *image;
-};
