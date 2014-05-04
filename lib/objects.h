@@ -48,14 +48,14 @@ struct Enemy {
 	int boundx;
 	int boundy;
 
-	/*int maxFrame;
+	int maxFrame;
 	int curFrame;
 	int frameCount;
 	int frameDelay;
 	int frameWidth;
 	int frameHeight;
 	int animationColumns;
-	int animationDirection;*/
+	int animationDirection;
 
 	ALLEGRO_BITMAP *image;
 };

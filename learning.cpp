@@ -9,8 +9,6 @@
 #include <allegro5/allegro_ttf.h>
 #include <allegro5/allegro_audio.h>
 #include <objects.h>
-//#include <exception>
-//#include <stdio.h>
 #include <cstdio>
 
 using namespace std;
@@ -139,12 +137,12 @@ int main(void)
 							*exp			= NULL,							//Explosion image
 
 							*maps[6]		= {NULL,NULL,NULL,NULL,NULL},	//Maps array
-						//	*howard			= NULL,
-						//  *tbdavis		= NULL,
+							//*howard			= NULL,
+							//*tbdavis		= NULL,
 
 							*mapsmini[6]	= {NULL,NULL,NULL,NULL,NULL},	//Map Thumbnails
-						//	*howards		= NULL,
-						//	*tbdaviss		= NULL,
+							//*howards		= NULL,
+							//*tbdaviss		= NULL,
 
 							*mapsel			= NULL,				//Currently selected maps
 
@@ -273,8 +271,6 @@ int main(void)
 	mapsmini[3] = al_load_bitmap("./images/sciences.png");	//science
 	mapsmini[4] = al_load_bitmap("./images/cafes.png");			//cafe
 	mapsmini[5] = al_load_bitmap("./images/amphis.png");
-	
-	scrns[0]		= al_load_bitmap("./images/BG1.png");		//Title Background
 
 	//Button Images
 	btns[0]		= al_load_bitmap("./images/startbtn.png");		//start
@@ -283,6 +279,7 @@ int main(void)
 	btns[3]		= al_load_bitmap("./images/back.png");			//back
 
 	//Menu Images
+	scrns[0]		= al_load_bitmap("./images/BG1.png");		//Title Background
 	scrns[1]		= al_load_bitmap("./images/pause.png");
 	scrns[2]		= al_load_bitmap("./images/gameover.png");
 	
@@ -490,7 +487,7 @@ int main(void)
 
 		else if (ev.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN)
 		{
-			fprintf(stderr, "\nHERE !position = x %f  y %f", crs_x, crs_y);  //Prints mouse postion to console - used to identify position for clicks
+			//fprintf(stderr, "\nHERE !position = x %f  y %f", crs_x, crs_y);  //Prints mouse postion to console - used to identify position for clicks
 			crs_x = ev.mouse.x;
 			crs_y = ev.mouse.y;
 			fired = true;
@@ -502,6 +499,7 @@ int main(void)
 			}
 			if (state == SETTINGS)
 			{
+				// Position of Lecturers
 				if (crs_x >= 100 && crs_x <= 224 && crs_y >= 50 && crs_y <= 180)
 				{
 					enemsel = lecturers[0]; //Poole
@@ -532,8 +530,9 @@ int main(void)
 					enemsel = lecturers[5]; //Viranjay
 					curLect = 5;
 				}
+				// End Position of Lecturers
 
-
+				// Position of Maps
 				if (crs_x >= 100 && crs_x <= 224 && crs_y >= 250 && crs_y <= 380)
 				{
 					bgImage = maps[0]; // howard
@@ -564,9 +563,9 @@ int main(void)
 					bgImage = maps[5];		//amphi
 					curMap = 5;
 				}
+				// End Position of Maps
 
-
-
+				// Position of Powers
 
 				if (crs_x >= 330 && crs_x <= 430 && crs_y >= 470 && crs_y <= 560)
 				{
@@ -585,12 +584,12 @@ int main(void)
 					atksel = atk[2]; //C++
 					curAtk = 2;
 				}
+				// End Position of Powers
 			}
 			FireBullet(bullets, NUM_BULLETS, player);   //Fire Bullets
 		}
 		else if (ev.type == ALLEGRO_EVENT_MOUSE_BUTTON_UP) 
 		{		
-			
 		}
 		if (ev.type == ALLEGRO_EVENT_DISPLAY_CLOSE)
 		{
@@ -619,7 +618,6 @@ int main(void)
 			}
 		}
 		
-
 		if (ev.type == ALLEGRO_EVENT_DISPLAY_RESIZE)
 		{
 			al_set_new_display_flags(ALLEGRO_FULLSCREEN_WINDOW);
@@ -695,7 +693,12 @@ int main(void)
 
 			if (state == TITLE)
 			{
-				al_draw_bitmap(scrns[0], 0, 0, 0);  //Title Screen
+				if (scrns[0] == NULL)
+					al_draw_filled_circle(0, 0, 20, green);
+				else
+					al_draw_bitmap(scrns[0], 0, 0, 0);  //Title Screen
+
+				//al_draw_bitmap(scrns[0], 0, 0, 0);  //Title Screen
 				al_draw_textf(fonts[0],white, scrn_W/2+20, scrn_H-60, ALLEGRO_ALIGN_CENTRE, "PRESS SPACEBAR TO START");
 			}
 			else if (state == MENU)
@@ -849,7 +852,7 @@ int main(void)
 	al_destroy_display(display);
 	al_destroy_timer(timer);
 	//al_destroy_bitmap(select);
-	//end Distruction
+	//end Destruction
 	return 0;
 }
 
@@ -870,12 +873,6 @@ void DrawCharacter(Character &player, ALLEGRO_BITMAP *select, int cur, int fW, i
 {
 	al_draw_scaled_bitmap(select, cur * fW, 0, fW, fH, player.x, player.y, shrinkx, shrinky, 0);
 	//al_draw_bitmap_region(select, cur * fW, 0, fW, fH, player.x, player.y, 0);
-	/*al_draw_filled_rectangle(player.x, player.y - 9, player.x + 10, player.y - 7, al_map_rgb(255, 0, 0));
-	al_draw_filled_rectangle(player.x, player.y + 9, player.x + 10, player.y + 7, al_map_rgb(255, 0, 0));
-
-	al_draw_filled_triangle(player.x - 12, player.y - 17, player.x + 12, player.y, player.x - 12, player.y + 17, al_map_rgb(0, 255, 0));
-	al_draw_filled_rectangle(player.x - 12, player.y - 2, player.x + 15, player.y + 2, al_map_rgb(0, 0, 255));
-	*/
 }
 
 void MoveCharacterUp(Character &player)
