@@ -1,3 +1,7 @@
+// Header? 
+
+
+// What do these do? 
 #include <math.h>
 #include <string>
 #include <allegro5/allegro.h>
