@@ -1,18 +1,13 @@
-// Header? 
-
-
-// What do these do? 
-#include <math.h>
-#include <string>
-#include <allegro5/allegro.h>
-#include <allegro5/allegro_image.h>
-#include <allegro5/allegro_primitives.h>
-#include <allegro5/allegro_native_dialog.h>
-#include <allegro5/allegro_font.h>
-#include <allegro5/allegro_ttf.h>
-#include <allegro5/allegro_audio.h>
-#include <lib/objects.h>
-#include <cstdio>
+ #include <math.h>								//Nothing yet - put in for mouse cursor check if we use it
+#include <allegro5/allegro.h>					//Allegro
+#include <allegro5/allegro_image.h>				//Allegro bitmaps
+#include <allegro5/allegro_native_dialog.h>		//Message Dialog
+#include <allegro5/allegro_font.h>				//Needed for fonts 
+#include <allegro5/allegro_ttf.h>				//Needed for fonts
+#include <lib/objects.h>						//Structures for Enemies/Characters/Projectiles
+//#include <allegro5/allegro_audio.h>			//Audio yet to be used	
+//#include <cstdio>								//Input/output - Not used atm
+//#include <allegro5/allegro_primitives.h>		//Used for drawing Shapes
 
 using namespace std;
 
@@ -203,9 +198,9 @@ int main(void)
 
 
 	//Init all Addons
-	al_init_primitives_addon();								//load primitive (drawing shapes, etc)
+	//al_init_primitives_addon();								//load primitive (drawing shapes, etc) - Needs #include <allegro5/allegro_primitives.h>
 	al_init_font_addon();									//load font addon
-	al_install_audio();										// load sound addon
+	//al_install_audio();										// load sound addon - Needs #include <allegro5/allegro_audio.h>
 	al_init_ttf_addon();									//load truetype font addon	
 	al_init_image_addon();									//load image processing addon
 	al_install_keyboard();									//install keyboard
@@ -696,9 +691,9 @@ int main(void)
 
 			if (state == TITLE)
 			{
-				if (scrns[0] == NULL)
-					al_draw_filled_circle(0, 0, 20, green);
-				else
+				//if (scrns[0] == NULL)
+				//	al_draw_filled_circle(0, 0, 20, green);
+				//else
 					al_draw_bitmap(scrns[0], 0, 0, 0);  //Title Screen
 
 				//al_draw_bitmap(scrns[0], 0, 0, 0);  //Title Screen
