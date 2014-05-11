@@ -9,7 +9,7 @@
 
 //#include <allegro5/allegro_audio.h>			//Audio yet to be used	
 #include <cstdio>								//Input/output - Used for displaying mouse pos atm
-//#include <allegro5/allegro_primitives.h>		//Used for drawing Shapes
+#include <allegro5/allegro_primitives.h>		//Used for drawing Shapes
 
 using namespace std;
 
@@ -189,7 +189,7 @@ int main(void)
 
 
 	//Init all Addons
-	//al_init_primitives_addon();								//load primitive (drawing shapes, etc) - Needs #include <allegro5/allegro_primitives.h>
+	al_init_primitives_addon();								//load primitive (drawing shapes, etc) - Needs #include <allegro5/allegro_primitives.h>
 	al_init_font_addon();									//load font addon
 	//al_install_audio();										// load sound addon - Needs #include <allegro5/allegro_audio.h>
 	al_init_ttf_addon();									//load truetype font addon	
@@ -796,7 +796,7 @@ int main(void)
 				DrawExplosions(explosions, NUM_EXPLOSIONS);
 
 				al_draw_textf(fonts[0], black, scrn_W/2-100, 5, 0, "Score : %i ", player.score*10);
-				if (player.score % 10 == 0 && player.score != 0)
+				if (player.score % 1 == 0 && player.score != 0)
 				{
 					bosslevel = true;
 				}
@@ -1077,8 +1077,8 @@ void CollideBullet(Bullet bullet[], int bSize, Boss end[], int cSize, Character 
 			{
 				if (end[j].live)
 				{
-					if (bullet[i].x >(end[j].x - end[j].boundx) 
-					 && bullet[i].x < (end[j].x + end[j].boundx) 
+					if (bullet[i].x >(end[j].x - end[j].boundx+100) 
+					 && bullet[i].x < (end[j].x + end[j].boundx+60) 
 					 && bullet[i].y >(end[j].y - end[j].boundy)
 				     && bullet[i].y < (end[j].y + end[j].boundy+250))
 					{
@@ -1101,7 +1101,7 @@ void InitEnemy(Enemy comets[], int size)
 {
 	for (int i = 0; i < size; i++)
 	{
-		int spd = rand() % 5 + 5;
+		int spd = (rand()%3+1)*3;
 		comets[i].ID = ENEMY;
 		comets[i].live = false;
 		comets[i].speed = spd;
@@ -1116,6 +1116,7 @@ void DrawEnemy(Enemy comets[], int size, ALLEGRO_BITMAP *bit, int cur, int fW, i
 	{
 		if (comets[i].live)
 		{
+
 			al_draw_bitmap_region(bit, cur * fW, 0, fW, fH, comets[i].x, comets[i].y, 0);
 			//al_draw_scaled_bitmap(bit, cur * fW, 0, fW, fH, comets[i].x, comets[i].y,400,400, 0);
 		}
@@ -1194,7 +1195,7 @@ void InitBoss(Boss end[], int size)
 		end[i].ID = BOSS;
 		end[i].live = false;
 		end[i].speed = spd;
-		end[i].boundx = 20;
+		end[i].boundx = 50;
 		end[i].boundy = 50;
 		end[i].lives = 30;
 		//comets[i].image = al_load_bitmap("./images/boom.png");
@@ -1206,8 +1207,9 @@ void DrawBoss(Boss end[], int size, ALLEGRO_BITMAP *bit, int cur, int fW, int fH
 	{
 		if (end[i].live)
 		{
-			//al_draw_bitmap_region(bit, cur * fW, 0, fW, fH, end[i].x, end[i].y, 0);
-			al_draw_scaled_bitmap(bit, cur * fW, 0, fW, fH, end[i].x, end[i].y,325,325, 0);
+			al_draw_scaled_bitmap(bit, cur * fW, 0, fW, fH, end[i].x, end[i].y, 325, 325, 0);
+			al_draw_filled_rectangle(end[i].x + 30, end[i].y - 5, end[i].x + (end[i].lives * 10) + 40, end[i].y + 15, black);
+			al_draw_filled_rectangle(end[i].x + 35, end[i].y, end[i].x + (end[i].lives * 10) + 35, end[i].y + 10, red);		
 		}
 	}
 
