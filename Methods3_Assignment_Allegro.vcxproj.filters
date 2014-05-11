@@ -23,5 +23,8 @@
     <ClInclude Include="lib\objects.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="init.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
