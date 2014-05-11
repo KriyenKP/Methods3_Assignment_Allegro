@@ -6,8 +6,8 @@
 #include <allegro5/allegro_ttf.h>				//Needed for fonts
 #include <lib/objects.h>						//Structures for Enemies/Characters/Projectiles
 #include <lib/init.h>
-
-//#include <allegro5/allegro_audio.h>			//Audio yet to be used	
+#include <allegro5/allegro_acodec.h>
+#include <allegro5/allegro_audio.h>			//Audio yet to be used	
 #include <cstdio>								//Input/output - Used for displaying mouse pos atm
 #include <allegro5/allegro_primitives.h>		//Used for drawing Shapes
 
@@ -15,7 +15,6 @@ using namespace std;
 
 //REMEMBER TO EDIT Linker -> System -> SubSystem -> WINDOW to hide console!
 
-//This program currently just move a Kriyen on a black background. I'm using this to learn and test aspects
 /*
 const float FPS				= 60;					//Frames per second
 const int scrn_W			= 1024;					// Screen Width 
@@ -107,7 +106,9 @@ int main(void)
 	//*font36			= NULL,
 							//*font20			= NULL,
 							//*font18			= NULL,
-	ALLEGRO_STATE			*state1 = NULL;					//State
+	ALLEGRO_STATE			*state1			= NULL;					//State
+	ALLEGRO_SAMPLE			*sample			= NULL,
+							*sample2		= NULL;
 	ALLEGRO_BITMAP			*bgImage		= NULL,					//Title Page splash
 							*walkLeft		= NULL,					//Character walking left  	
 							*walkRight		= NULL,					//Character walking right
@@ -155,7 +156,6 @@ int main(void)
 		return -1;
 	}
 
-
 	display = al_create_display(scrn_W, scrn_H);			//create our display object
 	if (!display)											//Check display
 	{
@@ -165,7 +165,6 @@ int main(void)
 		al_destroy_timer(timer);
 		return -1;
 	}
-
 
 	timer = al_create_timer(1.0 / FPS);							//Create Timer
 	if (!timer)													//Check timer creation
@@ -188,16 +187,23 @@ int main(void)
 	}
 
 
+
 	//Init all Addons
 	al_init_primitives_addon();								//load primitive (drawing shapes, etc) - Needs #include <allegro5/allegro_primitives.h>
 	al_init_font_addon();									//load font addon
-	//al_install_audio();										// load sound addon - Needs #include <allegro5/allegro_audio.h>
+	al_install_audio();										// load sound addon - Needs #include <allegro5/allegro_audio.h>
+	al_init_acodec_addon();
 	al_init_ttf_addon();									//load truetype font addon	
 	al_init_image_addon();									//load image processing addon
 	al_install_keyboard();									//install keyboard
 	al_install_mouse();										//install mouse
 	//end addon innit
 	
+	if (!al_reserve_samples(2)){
+		fprintf(stderr, "failed to reserve samples!\n");
+		return -1;
+	}
+
 	//cursor = al_load_bitmap("./images/target.png");
 	//custom_cursor = al_create_mouse_cursor(cursor, 0, 0);
 	fonts[2] = al_load_ttf_font("arial.ttf", 36, 0);				//
@@ -272,12 +278,13 @@ int main(void)
 	scrns[1]		= al_load_bitmap("./images/pause.png");
 	scrns[2]		= al_load_bitmap("./images/gameover.png");
 	
+	sample = al_load_sample("./sounds/Pew_Pew.wav");
+	sample2 = al_load_sample("./sounds/Evil_Laugh.wav");
 	
 	int direction = 1;						//Default direction identifier init
 
    // al_convert_mask_to_alpha(walkLeft, al_map_rgb(106, 76, 48));  //clear designated colour to create clear image
 
-	//end animated character
 
 	//Event queue - register listeners
 	al_register_event_source(event_queue, al_get_timer_event_source(timer));
@@ -371,7 +378,10 @@ int main(void)
 				else if (state == MENU)
 					ChangeState(state, PLAYING);
 				else if (state == PLAYING)
+				{
 					FireBullet(bullets, NUM_BULLETS, player);
+					al_play_sample(sample, 1.0, 0.0, 1.0, ALLEGRO_PLAYMODE_ONCE, NULL);
+				}
 				else if (state == LOST)
 					ChangeState(state, PLAYING);
 				break;
@@ -796,8 +806,9 @@ int main(void)
 				DrawExplosions(explosions, NUM_EXPLOSIONS);
 
 				al_draw_textf(fonts[0], black, scrn_W/2-100, 5, 0, "Score : %i ", player.score*10);
-				if (player.score % 1 == 0 && player.score != 0)
+				if (player.score % 10 == 0 && player.score != 0)
 				{
+					al_play_sample(sample2, 1.0, 0.0, 1.0, ALLEGRO_PLAYMODE_ONCE, NULL);
 					bosslevel = true;
 				}
 				int x = al_get_bitmap_width(numLives[player.lives-1]);
@@ -847,6 +858,7 @@ int main(void)
 	al_destroy_event_queue(event_queue);
 	al_destroy_display(display);
 	al_destroy_timer(timer);
+	al_destroy_sample(sample);
 	//al_destroy_bitmap(select);
 	//end Destruction
 	return 0;
@@ -1221,24 +1233,9 @@ void StartBoss(Boss end[], int size)
 	{
 		if (!end[i].live)
 		{
-			if (rand() % 500 == 0)
-			{
 				end[i].live = true;
 				end[i].x = scrn_W;
-
-			retry:
-				int y = 30 + rand() % (scrn_H - 20);
-				if (y < 475)
-				{
-					end[i].y = y;
-				}
-				else
-				{
-					goto retry;
-				}
-
-				break;
-			}
+				end[i].y = scrn_H / 2 -150;
 		}
 	}
 }
@@ -1254,13 +1251,10 @@ void UpdateBoss(Boss end[], int size)
 			}
 			else
 			{
-				if (end[i].y > scrn_H - 86)sign = 1;
+				if (end[i].y > scrn_H - 286)sign = 1;
 				if (end[i].y <= 0) sign = -1;
 				end[i].y -= sign*end[i].speed;
-				//fprintf(stderr, "\nHERE !Taps! y = %d", end[i].y);  //Prints mouse postion to console - used to identify position for clicks
 			}
-			//if (end[i].x < 0)
-			//end[i].live = false;
 		}
 	}
 }
