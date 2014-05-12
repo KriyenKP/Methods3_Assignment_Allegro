@@ -1,4 +1,4 @@
- #include <math.h>								//Nothing yet - put in for mouse cursor check if we use it
+#include <math.h>								//Nothing yet - put in for mouse cursor check if we use it
 #include <allegro5/allegro.h>					//Allegro
 #include <allegro5/allegro_image.h>				//Allegro bitmaps
 #include <allegro5/allegro_native_dialog.h>		//Message Dialog
@@ -7,7 +7,7 @@
 #include <lib/objects.h>						//Structures for Enemies/Characters/Projectiles
 #include <lib/init.h>
 #include <allegro5/allegro_acodec.h>
-#include <allegro5/allegro_audio.h>			//Audio yet to be used	
+#include <allegro5/allegro_audio.h>				//Audio yet to be used	
 #include <cstdio>								//Input/output - Used for displaying mouse pos atm
 #include <allegro5/allegro_primitives.h>		//Used for drawing Shapes
 using namespace std;
@@ -37,7 +37,7 @@ enum Direction { NORTH = 0, EAST = 1, SOUTH = 2, WEST = 3};		//Direction of play
 Character player;	
 Bullet bullets[NUM_BULLETS];
 Enemy comets[NUM_COMETS];
-Boss end[NUM_BOSS];
+Boss bossy[NUM_BOSS];
 Explosion explosions[NUM_EXPLOSIONS];
 //End asset init
 
@@ -58,7 +58,7 @@ void FireBullet(Bullet bullet[], int size, Character &player);
 void UpdateBullet(Bullet bullet[], int size, int dir);
 void CollideBullet(Bullet bullet[], int bSize, Enemy comets[], int cSize, Character &ship, Explosion explosions[], int eSize, ALLEGRO_SAMPLE *sample);
 void CollideBullet(Bullet bullet[], int bSize, Enemy comets[], int cSize);
-void CollideBullet(Bullet bullet[], int bSize, Boss end[], int cSize, Character &player, Explosion explosions[], int eSize, ALLEGRO_SAMPLE * sample);
+void CollideBullet(Bullet bullet[], int bSize, Boss bossy[], int cSize, Character &player, Explosion explosions[], int eSize, ALLEGRO_SAMPLE * sample);
 
 void InitEnemy(Enemy comets[], int size);
 void DrawEnemy(Enemy comets[], int size);
@@ -67,12 +67,12 @@ void StartEnemy(Enemy comets[], int size);
 void UpdateEnemy(Enemy comets[], int size);
 void CollideEnemy(Enemy comets[], int cSize, Character &player);
 
-void InitBoss(Boss end[], int size);
-void DrawBoss(Boss end[], int size);
-void DrawBoss(Boss end[], int size, ALLEGRO_BITMAP *bit, int cur, int fW, int fH);
-void StartBoss(Boss end[], int size);
-void UpdateBoss(Boss end[], int size);
-void CollideBoss(Boss end[], int cSize, Character &player);
+void InitBoss(Boss bossy[], int size);
+void DrawBoss(Boss bossy[], int size);
+void DrawBoss(Boss bossy[], int size, ALLEGRO_BITMAP *bit, int cur, int fW, int fH);
+void StartBoss(Boss bossy[], int size);
+void UpdateBoss(Boss bossy[], int size);
+void CollideBoss(Boss bossy[], int cSize, Character &player);
 
 void InitExplosions(Explosion explosions[], int size, ALLEGRO_BITMAP *image);
 void DrawExplosions(Explosion explosions[], int size);
@@ -102,12 +102,8 @@ int main(void)
 	ALLEGRO_EVENT_QUEUE		*event_queue	= NULL;					//Event Queue
 	ALLEGRO_TIMER			*timer			= NULL;					//System timer
 	ALLEGRO_FONT			*fonts[5]		= { NULL, NULL, NULL, NULL, NULL };	//fonts array
-	//*font36			= NULL,
-							//*font20			= NULL,
-							//*font18			= NULL,
 	ALLEGRO_STATE			*state1			= NULL;					//State
 	ALLEGRO_SAMPLE			*sample[5]		= {NULL, NULL, NULL,NULL,NULL};
-							//*sample2		= NULL;
 	ALLEGRO_BITMAP			*bgImage		= NULL,					//Title Page splash
 							*walkLeft		= NULL,					//Character walking left  	
 							*walkRight		= NULL,					//Character walking right
@@ -115,7 +111,7 @@ int main(void)
 							*standRight		= NULL,					//character standing right
 							*select			= NULL,					//Current Selected position of character
 							*icon			= NULL,					//Current icon -- NOT SET YET
-							*numLives[3] = { NULL, NULL, NULL},		//Attack array
+							*numLives[3]	= { NULL, NULL, NULL},		//Attack array
 							//*lives			= NULL,					//Number of lives remaining
 							*atk[5]			= { NULL, NULL, NULL, NULL, NULL },		//Attack array
 							*atksel			= NULL,
@@ -137,15 +133,14 @@ int main(void)
 							//*howards		= NULL,
 							//*tbdaviss		= NULL,
 							*mapsel			= NULL,				//Currently selected map
-							*scrns[5] = { NULL, NULL, NULL, NULL, NULL },		//Box images array (pause, gameover, etc)
+							*scrns[5]		= { NULL, NULL, NULL, NULL, NULL },		//Box images array (pause, gameover, etc)
 							//*title			= NULL,
 							//*pause			= NULL,
-							*btns[5] = { NULL, NULL, NULL, NULL, NULL };		//Buttons Array
+							*btns[5]		= { NULL, NULL, NULL, NULL, NULL };		//Buttons Array
 							//*start			= NULL,
 							//*stop				= NULL,
 							//*setting			= NULL,
 
-							
 
 	if (!al_init())											//initialize and check Allegro
 	{
@@ -199,7 +194,7 @@ int main(void)
 	al_install_mouse();										//install mouse
 	//end addon innit
 	
-	if (!al_reserve_samples(2)){
+	if (!al_reserve_samples(5)){
 		fprintf(stderr, "failed to reserve samples!\n");
 		return -1;
 	}
@@ -239,7 +234,7 @@ int main(void)
 	lecturers[4]	= al_load_bitmap("./images/tom.png");			//Walingo
 	lecturers[5]	= al_load_bitmap("./images/viran.png");			//Viranjay
 
-	enemsel = lecturers[0];											//Default selected enemy/lecturer
+	enemsel	 = lecturers[0];											//Default selected enemy/lecturer
 	boss_sel = lecturers[rand()*0+5];											//Default selected enemy/lecturer
 	
 	//Lecturer Thumbnails
@@ -281,9 +276,10 @@ int main(void)
 	scrns[2]		= al_load_bitmap("./images/gameover.png");
 	scrns[3]		= al_load_bitmap("./images/config.png");
 	
-	sample[1] = al_load_sample("./sounds/Evil_Laugh.wav");
-	sample[2] = al_load_sample("./sounds/victory_fanfare.wav");
-	sample[3] = al_load_sample("./sounds/boom.wav");
+	sample[0]		= al_load_sample("./sounds/Pew_Pew.wav");
+	sample[1]		= al_load_sample("./sounds/Evil_Laugh.wav");
+	sample[2]		= al_load_sample("./sounds/victory_fanfare.wav");
+	sample[3]		= al_load_sample("./sounds/boom.wav");
 
 	int direction = 1;						//Default direction identifier init
 
@@ -306,10 +302,6 @@ int main(void)
 	//End Colours
 
 	//Asset variables
-	/*InitCharacter(player);
-	InitBullet(player, bullets, NUM_BULLETS);
-	InitEnemy(comets, NUM_COMETS);
-	InitExplosions(explosions, NUM_EXPLOSIONS, exp);*/
 	ChangeState(state, TITLE);
 	srand(time(NULL));
 	//end Asset variables
@@ -384,9 +376,9 @@ int main(void)
 				else if (state == HELP)
 					ChangeState(state, MENU);
 				else if (state == PLAYING)
-				{
+				{	
 					FireBullet(bullets, NUM_BULLETS, player);
-					al_play_sample(sample[0], 1.0, 0.0, 1.0, ALLEGRO_PLAYMODE_ONCE, NULL);
+					//al_play_sample(sample[0], 1.0, 0.0, 1.0, ALLEGRO_PLAYMODE_ONCE, NULL);
 				}
 				else if (state == LOST)
 					ChangeState(state, PLAYING);
@@ -442,7 +434,6 @@ int main(void)
 						timeM = false;
 						al_draw_bitmap(scrns[1], scrn_W / 2 - 250, 100, 0);		//Show Pause menu
 						al_flip_display();										//Bring backbuffer forward (bring all set contents to the current frame)
-
 					}
 					else
 					{
@@ -476,8 +467,7 @@ int main(void)
 		{
 			crs_x = ev.mouse.x;									//get x co-ord of mouse
 			crs_y = ev.mouse.y;									//get y co-ord of mouse
-			//(stderr, "\nposition = x %f  y %f", crs_x,crs_y);
-
+			//fprintf(stderr, "\nposition = x %f  y %f", crs_x,crs_y);
 
 			if ((ev.mouse.x >= 0) && (ev.mouse.y >= 2))
 			{
@@ -658,15 +648,15 @@ int main(void)
 
 				if (bosslevel == true)
 				{
-				StartBoss(end, NUM_BOSS);
-				UpdateBoss(end, NUM_BOSS);
+				StartBoss(bossy, NUM_BOSS);
+				UpdateBoss(bossy, NUM_BOSS);
 				}
 				UpdateExplosions(explosions, NUM_EXPLOSIONS);
 				UpdateBullet(bullets, NUM_BULLETS, direction);
 				CollideBullet(bullets, NUM_BULLETS, comets, NUM_COMETS, player, explosions, NUM_EXPLOSIONS, sample[3]);
-				CollideBullet(bullets, NUM_BULLETS, end, NUM_BOSS, player, explosions, NUM_EXPLOSIONS, sample[2]);
+				CollideBullet(bullets, NUM_BULLETS, bossy, NUM_BOSS, player, explosions, NUM_EXPLOSIONS, sample[2]);
 				CollideEnemy(comets, NUM_COMETS, player);
-				CollideBoss(end, NUM_BOSS, player);
+				CollideBoss(bossy, NUM_BOSS, player);
 
 				if (player.lives <= 0) ChangeState(state, LOST);
 			}
@@ -702,6 +692,7 @@ int main(void)
 				al_draw_bitmap(btns[1], scrn_W / 2 - 130, scrn_H / 2 -50 , 0);		//Settings
 				al_draw_bitmap(btns[2], scrn_W / 2 - 130, scrn_H / 2 + 80, 0);		//Quit
 				al_draw_bitmap(btns[4], 965, 610, 0);								//Help
+				boss_sel = lecturers[rand()%7];
 				
 			}
 			else if (state == HELP)
@@ -804,7 +795,7 @@ int main(void)
 				DrawCharacter(player, select, curFrame, frameW, frameH);
 				DrawBullet(bullets, NUM_BULLETS, atksel);
 				DrawEnemy(comets, NUM_COMETS, enemsel, curFrame, frameW, frameH);	
-				DrawBoss(end, NUM_BOSS, boss_sel, curFrame, frameW, frameH);
+				DrawBoss(bossy, NUM_BOSS, boss_sel, curFrame, frameW, frameH);
 				DrawExplosions(explosions, NUM_EXPLOSIONS);
 
 				al_draw_textf(fonts[0], black, scrn_W/2-100, 5, 0, "Score : %i ", player.score*10);
@@ -821,16 +812,12 @@ int main(void)
 				int y = al_get_bitmap_width(numLives[player.lives-1]);
 
 				al_draw_scaled_bitmap(numLives[player.lives-1], 5, 5,x, y, 5, 5, 150, 150, 0);
-				
-
 			}
 			else if (state == LOST)
 			{
 				al_draw_bitmap(scrns[2], scrn_W / 2 - 250, 100, 0);                      // Game over Screen
 				al_draw_textf(fonts[2], black, scrn_W/2+70, 340, 0, "%i", player.score*10);
 			}
-
-
 			al_flip_display();
 			al_clear_to_color(black);
 			al_draw_scaled_bitmap(bgImage, 0, 0, al_get_bitmap_width(bgImage), al_get_bitmap_height(bgImage),0,0,scrn_W,scrn_H, 0);
@@ -1088,7 +1075,7 @@ void CollideBullet(Bullet bullet[], int bSize, Enemy comets[], int cSize, Charac
 		}
 	}
 }
-void CollideBullet(Bullet bullet[], int bSize, Boss end[], int cSize, Character &player, Explosion explosions[], int eSize, ALLEGRO_SAMPLE * sample)
+void CollideBullet(Bullet bullet[], int bSize, Boss bossy[], int cSize, Character &player, Explosion explosions[], int eSize, ALLEGRO_SAMPLE * sample)
 {
 	for (int i = 0; i < bSize; i++)
 	{
@@ -1096,21 +1083,22 @@ void CollideBullet(Bullet bullet[], int bSize, Boss end[], int cSize, Character 
 		{
 			for (int j = 0; j < cSize; j++)
 			{
-				if (end[j].live)
+				if (bossy[j].live)
 				{
-					if (bullet[i].x >(end[j].x - end[j].boundx+100) 
-					 && bullet[i].x < (end[j].x + end[j].boundx+60) 
-					 && bullet[i].y >(end[j].y - end[j].boundy)
-				     && bullet[i].y < (end[j].y + end[j].boundy+250))
+					if (bullet[i].x >(bossy[j].x - bossy[j].boundx+100) 
+					 && bullet[i].x < (bossy[j].x + bossy[j].boundx+60) 
+					 && bullet[i].y >(bossy[j].y - bossy[j].boundy)
+				     && bullet[i].y < (bossy[j].y + bossy[j].boundy+250))
 					{
 						bullet[i].live = false;
-						end[j].lives--;
+						bossy[j].lives--;
 						player.score++;
-						if (end[j].lives <= 0)
+						if (bossy[j].lives <= 0)
 						{
-					     end[j].live = false;
+					     bossy[j].live = false;
 						 // SHOW WINNER SCREEN
 						 bosslevel = false;
+						 bossy[j].lives = 30;
 						 al_play_sample(sample, 1.0, 0.0, 1.0, ALLEGRO_PLAYMODE_ONCE, NULL);
 						}
 						StartExplosions(explosions, eSize, bullet[i].x + 70, bullet[i].y + 30);
@@ -1211,82 +1199,82 @@ void CollideEnemy(Enemy comets[], int cSize, Character &player)
 	}
 }
 
-void InitBoss(Boss end[], int size)
+void InitBoss(Boss bossy[], int size)
 {
 	for (int i = 0; i < size; i++)
 	{
 		int spd = 1;
-		end[i].ID = BOSS;
-		end[i].live = false;
-		end[i].speed = spd;
-		end[i].boundx = 50;
-		end[i].boundy = 50;
-		end[i].lives = 30;
+		bossy[i].ID = BOSS;
+		bossy[i].live = false;
+		bossy[i].speed = spd;
+		bossy[i].boundx = 50;
+		bossy[i].boundy = 50;
+		bossy[i].lives = 30;
 		//comets[i].image = al_load_bitmap("./images/boom.png");
 	}
 }
-void DrawBoss(Boss end[], int size, ALLEGRO_BITMAP *bit, int cur, int fW, int fH)
+void DrawBoss(Boss bossy[], int size, ALLEGRO_BITMAP *bit, int cur, int fW, int fH)
 {
 	for (int i = 0; i < size; i++)
 	{
-		if (end[i].live)
+		if (bossy[i].live)
 		{
-			al_draw_scaled_bitmap(bit, cur * fW, 0, fW, fH, end[i].x, end[i].y, 325, 325, 0);
-			al_draw_filled_rectangle(end[i].x + 30, end[i].y - 5, end[i].x + (end[i].lives * 10) + 40, end[i].y + 15, black);
-			al_draw_filled_rectangle(end[i].x + 35, end[i].y, end[i].x + (end[i].lives * 10) + 35, end[i].y + 10, red);		
+			al_draw_scaled_bitmap(bit, cur * fW, 0, fW, fH, bossy[i].x, bossy[i].y, 325, 325, 0);
+			al_draw_filled_rectangle(bossy[i].x + 30, bossy[i].y - 5, bossy[i].x + (bossy[i].lives * 10) + 40, bossy[i].y + 15, black);
+			al_draw_filled_rectangle(bossy[i].x + 35, bossy[i].y, bossy[i].x + (bossy[i].lives * 10) + 35, bossy[i].y + 10, red);		
 		}
 	}
 
 
 }
-void StartBoss(Boss end[], int size)
+void StartBoss(Boss bossy[], int size)
 {
 	for (int i = 0; i < size; i++)
 	{
-		if (!end[i].live)
+		if (!bossy[i].live)
 		{
-				end[i].live = true;
-				end[i].x = scrn_W;
-				end[i].y = scrn_H / 2 -150;
+				bossy[i].live = true;
+				bossy[i].x = scrn_W;
+				bossy[i].y = scrn_H / 2 -150;
 		}
 	}
 }
-void UpdateBoss(Boss end[], int size)
+void UpdateBoss(Boss bossy[], int size)
 {
 	for (int i = 0; i < size; i++)
 	{
-		if (end[i].live)
+		if (bossy[i].live)
 		{
-			if (end[i].x > scrn_W / 2 - 50)
+			if (bossy[i].x > scrn_W / 2 - 50)
 			{
-				end[i].x -= end[i].speed;
+				bossy[i].x -= bossy[i].speed;
 			}
 			else
 			{
-				if (end[i].y > scrn_H - 286)sign = 1;
-				if (end[i].y <= 0) sign = -1;
-				end[i].y -= sign*end[i].speed;
+				if (bossy[i].y > scrn_H - 286)sign = 1;
+				if (bossy[i].y <= 0) sign = -1;
+				bossy[i].y -= sign*bossy[i].speed;
 			}
 		}
 	}
 }
-void CollideBoss(Boss end[], int cSize, Character &player)
+void CollideBoss(Boss bossy[], int cSize, Character &player)
 {
 	for (int i = 0; i < cSize; i++)
 	{
-		if (end[i].live)
+		if (bossy[i].live)
 		{
-			if (end[i].x - end[i].boundx < player.x + player.boundx &&
-				end[i].x + end[i].boundx > player.x - player.boundx &&
-				end[i].y - end[i].boundy < player.y + player.boundy &&
-				end[i].y + end[i].boundy > player.y - player.boundy)
+			if (bossy[i].x - bossy[i].boundx < player.x + player.boundx &&
+				bossy[i].x + bossy[i].boundx > player.x - player.boundx &&
+				bossy[i].y - bossy[i].boundy < player.y + player.boundy &&
+				bossy[i].y + bossy[i].boundy > player.y - player.boundy)
 			{
 				player.lives--;
-				//end[i].live = false;
+				//bossy[i].live = false;
 			}
-			else if (end[i].x < 0)
+			else if (bossy[i].x < 0)
 			{
-				//end[i].live = false;
+				//bossy[i].live = false;
 				player.lives--;
 			}
 			
@@ -1393,7 +1381,7 @@ void ChangeState(int &state, int newState)
 		InitCharacter(player);
 		InitBullet(player, bullets, NUM_BULLETS);
 		InitEnemy(comets, NUM_COMETS);
-		InitBoss(end, NUM_BOSS);
+		InitBoss(bossy, NUM_BOSS);
 		InitExplosions(explosions, NUM_EXPLOSIONS, al_load_bitmap("./images/boom1.png"));
 	}
 	else if (state == MENU)
