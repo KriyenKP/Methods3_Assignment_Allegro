@@ -12,8 +12,9 @@ static ALLEGRO_COLOR red, blue, black, white, green;		//Used to create quick acc
 int shrinkx = 200;										//x value used to adjust player size for depth 
 int shrinky = 200;										//x value used to adjust player size for depth 
 enum KEYS { UP, DOWN, LEFT, RIGHT, SPACE, ENTER };		//Key press shortcut 
-enum STATE{ TITLE, PLAYING, LOST, MENU, SETTINGS };		//Game state identification
+enum STATE{ TITLE, PLAYING, LOST, MENU, SETTINGS, HELP };		//Game state identification
 enum Direction { NORTH = 0, EAST = 1, SOUTH = 2, WEST = 3 };		//Direction of player identification
+int playone = 1;
 
 bool bosslevel = false;
 

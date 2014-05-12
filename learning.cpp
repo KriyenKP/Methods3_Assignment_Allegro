@@ -10,7 +10,6 @@
 #include <allegro5/allegro_audio.h>			//Audio yet to be used	
 #include <cstdio>								//Input/output - Used for displaying mouse pos atm
 #include <allegro5/allegro_primitives.h>		//Used for drawing Shapes
-
 using namespace std;
 
 //REMEMBER TO EDIT Linker -> System -> SubSystem -> WINDOW to hide console!
@@ -57,9 +56,9 @@ void InitBullet(Character &player, Bullet bullet[], int size);
 void DrawBullet(Bullet bullet[], int size, ALLEGRO_BITMAP *bit);
 void FireBullet(Bullet bullet[], int size, Character &player);
 void UpdateBullet(Bullet bullet[], int size, int dir);
-void CollideBullet(Bullet bullet[], int bSize, Enemy comets[], int cSize, Character &ship, Explosion explosions[], int eSize);
+void CollideBullet(Bullet bullet[], int bSize, Enemy comets[], int cSize, Character &ship, Explosion explosions[], int eSize, ALLEGRO_SAMPLE *sample);
 void CollideBullet(Bullet bullet[], int bSize, Enemy comets[], int cSize);
-void CollideBullet(Bullet bullet[], int bSize, Boss end[], int cSize, Character &player, Explosion explosions[], int eSize);
+void CollideBullet(Bullet bullet[], int bSize, Boss end[], int cSize, Character &player, Explosion explosions[], int eSize, ALLEGRO_SAMPLE * sample);
 
 void InitEnemy(Enemy comets[], int size);
 void DrawEnemy(Enemy comets[], int size);
@@ -107,8 +106,8 @@ int main(void)
 							//*font20			= NULL,
 							//*font18			= NULL,
 	ALLEGRO_STATE			*state1			= NULL;					//State
-	ALLEGRO_SAMPLE			*sample			= NULL,
-							*sample2		= NULL;
+	ALLEGRO_SAMPLE			*sample[5]		= {NULL, NULL, NULL,NULL,NULL};
+							//*sample2		= NULL;
 	ALLEGRO_BITMAP			*bgImage		= NULL,					//Title Page splash
 							*walkLeft		= NULL,					//Character walking left  	
 							*walkRight		= NULL,					//Character walking right
@@ -129,6 +128,7 @@ int main(void)
 							//*taps1			= NULL,
 							//*saha1			= NULL,
 							*enemsel		= NULL,							//Currently selected lecturer
+							*boss_sel		= NULL,
 							*exp			= NULL,							//Explosion image
 							*maps[6]		= {NULL,NULL,NULL,NULL,NULL},	//Maps array
 							//*howard			= NULL,
@@ -240,6 +240,7 @@ int main(void)
 	lecturers[5]	= al_load_bitmap("./images/viran.png");			//Viranjay
 
 	enemsel = lecturers[0];											//Default selected enemy/lecturer
+	boss_sel = lecturers[rand()*0+5];											//Default selected enemy/lecturer
 	
 	//Lecturer Thumbnails
 	minilect[0]			= al_load_bitmap("./images/poole1.png");	
@@ -265,22 +266,25 @@ int main(void)
 	mapsmini[2] = al_load_bitmap("./images/parks.png");			//The park
 	mapsmini[3] = al_load_bitmap("./images/sciences.png");	//science
 	mapsmini[4] = al_load_bitmap("./images/cafes.png");			//cafe
-	mapsmini[5] = al_load_bitmap("./images/amphis.png");
+	mapsmini[5] = al_load_bitmap("./images/amphis.png");		//Amphitheatre
 
 	//Button Images
 	btns[0]		= al_load_bitmap("./images/startbtn.png");		//start
 	btns[1]		= al_load_bitmap("./images/sttngbtn.png");		//settings
 	btns[2]		= al_load_bitmap("./images/stpbtn.png");		//stop
 	btns[3]		= al_load_bitmap("./images/back.png");			//back
+	btns[4]		= al_load_bitmap("./images/help.png");			//png
 
 	//Menu Images
 	scrns[0]		= al_load_bitmap("./images/BG1.png");		//Title Background
 	scrns[1]		= al_load_bitmap("./images/pause.png");
 	scrns[2]		= al_load_bitmap("./images/gameover.png");
+	scrns[3]		= al_load_bitmap("./images/config.png");
 	
-	sample = al_load_sample("./sounds/Pew_Pew.wav");
-	sample2 = al_load_sample("./sounds/Evil_Laugh.wav");
-	
+	sample[1] = al_load_sample("./sounds/Evil_Laugh.wav");
+	sample[2] = al_load_sample("./sounds/victory_fanfare.wav");
+	sample[3] = al_load_sample("./sounds/boom.wav");
+
 	int direction = 1;						//Default direction identifier init
 
    // al_convert_mask_to_alpha(walkLeft, al_map_rgb(106, 76, 48));  //clear designated colour to create clear image
@@ -377,10 +381,12 @@ int main(void)
 					ChangeState(state, MENU);
 				else if (state == MENU)
 					ChangeState(state, PLAYING);
+				else if (state == HELP)
+					ChangeState(state, MENU);
 				else if (state == PLAYING)
 				{
 					FireBullet(bullets, NUM_BULLETS, player);
-					al_play_sample(sample, 1.0, 0.0, 1.0, ALLEGRO_PLAYMODE_ONCE, NULL);
+					al_play_sample(sample[0], 1.0, 0.0, 1.0, ALLEGRO_PLAYMODE_ONCE, NULL);
 				}
 				else if (state == LOST)
 					ChangeState(state, PLAYING);
@@ -454,7 +460,7 @@ int main(void)
 				ChangeState(state, MENU);
 				break;
 			case ALLEGRO_KEY_ESCAPE:
-				if (state==TITLE || state == MENU)
+				if (state==TITLE || state == MENU || state == HELP)
 					done = true;
 				else 
 					ChangeState(state, MENU);
@@ -487,6 +493,7 @@ int main(void)
 		else if (ev.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN)
 		{
 			fprintf(stderr, "\nHERE !position = x %f  y %f", crs_x, crs_y);  //Prints mouse postion to console - used to identify position for clicks
+			
 			crs_x = ev.mouse.x;
 			crs_y = ev.mouse.y;
 			fired = true;
@@ -495,6 +502,7 @@ int main(void)
 				if (crs_x >= 400 && crs_x <=677 && crs_y >= 180 && crs_y <= 256)  ChangeState(state, PLAYING); //Start
 				if (crs_x >= 400 && crs_x <= 677 && crs_y >= 310 && crs_y <= 388) ChangeState(state, SETTINGS);	//Settings
 				if (crs_x >= 400 && crs_x <= 677 && crs_y >= 438 && crs_y <= 517) done = true; //Quit
+				if (crs_x >= 967 && crs_x <= 1023 && crs_y >= 615 && crs_y <= 685) ChangeState(state, HELP);
 			}
 			if (state == SETTINGS)
 			{
@@ -587,9 +595,6 @@ int main(void)
 			}
 			FireBullet(bullets, NUM_BULLETS, player);   //Fire Bullets
 		}
-		else if (ev.type == ALLEGRO_EVENT_MOUSE_BUTTON_UP) 
-		{		
-		}
 		if (ev.type == ALLEGRO_EVENT_DISPLAY_CLOSE)
 		{
 			done = true;
@@ -600,7 +605,7 @@ int main(void)
 			{
 				if (timeM == true)
 				{
-					al_stop_timer(timer);
+					al_stop_timer(timer);										//freezes game timer
 					al_draw_bitmap(scrns[1], scrn_W / 2 - 250, 100, 0);			//Show pause menu
 					al_flip_display();
 				}
@@ -610,9 +615,9 @@ int main(void)
 		{	
 			if (state == PLAYING)
 			{
-				al_stop_timer(timer);
-				timeM = false;
-				al_draw_bitmap(scrns[1], scrn_W / 2 - 250, 100, 0);
+				al_stop_timer(timer);									//freezes game timer
+				timeM = false;											
+				al_draw_bitmap(scrns[1], scrn_W / 2 - 250, 100, 0);		//show pause menu
 				al_flip_display();
 			}
 		}
@@ -640,6 +645,9 @@ int main(void)
 			else if (state == MENU)
 			{
 			}
+			else if (state == HELP)
+			{
+			}
 			else if (state == SETTINGS)
 			{
 			}
@@ -655,9 +663,9 @@ int main(void)
 				}
 				UpdateExplosions(explosions, NUM_EXPLOSIONS);
 				UpdateBullet(bullets, NUM_BULLETS, direction);
-				CollideBullet(bullets, NUM_BULLETS, comets, NUM_COMETS, player, explosions, NUM_EXPLOSIONS);
-				CollideBullet(bullets, NUM_BULLETS, end, NUM_BOSS, player, explosions, NUM_EXPLOSIONS);
-				//CollideEnemy(comets, NUM_COMETS, player);
+				CollideBullet(bullets, NUM_BULLETS, comets, NUM_COMETS, player, explosions, NUM_EXPLOSIONS, sample[3]);
+				CollideBullet(bullets, NUM_BULLETS, end, NUM_BOSS, player, explosions, NUM_EXPLOSIONS, sample[2]);
+				CollideEnemy(comets, NUM_COMETS, player);
 				CollideBoss(end, NUM_BOSS, player);
 
 				if (player.lives <= 0) ChangeState(state, LOST);
@@ -682,24 +690,9 @@ int main(void)
 		{
 			redraw = false;
 
-			/*DrawCharacter(player,select,curFrame,frameW, frameH);
-			DrawBullet(bullets, NUM_BULLETS, light);			
-			DrawEnemy(comets, NUM_COMETS, saha, curFrame, frameW, frameH);
-			DrawExplosions(explosions, NUM_EXPLOSIONS);*/
-
-			/*
-			//al_draw_filled_rectangle(pos_x, pos_y, pos_x + 30, pos_y + 30, green);
-			//al_draw_scaled_bitmap(select, curFrame*frameW, 0, 128, 128, pos_x, pos_y, 350, 350, 0);    //makes shit big
-			//al_draw_bitmap_region(select, curFrame * frameW, 0, frameW, frameH,pos_x,pos_y,0);
-			*/
-
 			if (state == TITLE)
 			{
-				//if (scrns[0] == NULL)
-				//	al_draw_filled_circle(0, 0, 20, green);
-				//else
 				al_draw_bitmap(scrns[0], 0, 0, 0);  //Title Screen
-				//al_draw_bitmap(scrns[0], 0, 0, 0);  //Title Screen
 				al_draw_textf(fonts[0],white, scrn_W/2+20, scrn_H-60, ALLEGRO_ALIGN_CENTRE, "PRESS SPACEBAR TO START");
 			}
 			else if (state == MENU)
@@ -708,6 +701,15 @@ int main(void)
 				al_draw_bitmap(btns[0], scrn_W/2 - 130, scrn_H/2 - 180 ,0);			//Start
 				al_draw_bitmap(btns[1], scrn_W / 2 - 130, scrn_H / 2 -50 , 0);		//Settings
 				al_draw_bitmap(btns[2], scrn_W / 2 - 130, scrn_H / 2 + 80, 0);		//Quit
+				al_draw_bitmap(btns[4], 965, 610, 0);								//Help
+				
+			}
+			else if (state == HELP)
+			{
+				al_draw_bitmap(scrns[3], 0, 0, 0);  //Title Screen
+				//al_draw_bitmap(btns[3], 800, 610, 0);								    //Back		<<fix this maybe?
+				//al_draw_scaled_bitmap(btns[3], 800, 610,150,150,100,100, 10,10, 0);	//Back
+				al_draw_textf(fonts[0], white, scrn_W - 300, scrn_H - 50, 0, "PRESS BACKSPACE TO RETURN");
 			}
 			else if (state == SETTINGS)
 			{
@@ -802,14 +804,18 @@ int main(void)
 				DrawCharacter(player, select, curFrame, frameW, frameH);
 				DrawBullet(bullets, NUM_BULLETS, atksel);
 				DrawEnemy(comets, NUM_COMETS, enemsel, curFrame, frameW, frameH);	
-				DrawBoss(end, NUM_BOSS, lecturers[2], curFrame, frameW, frameH);
+				DrawBoss(end, NUM_BOSS, boss_sel, curFrame, frameW, frameH);
 				DrawExplosions(explosions, NUM_EXPLOSIONS);
 
 				al_draw_textf(fonts[0], black, scrn_W/2-100, 5, 0, "Score : %i ", player.score*10);
-				if (player.score % 10 == 0 && player.score != 0)
+				if (player.score % 10 == 0 && player.score != 0) // <<<<< CHANGE SCORE FOR BOSS ARRIVAL
 				{
-					al_play_sample(sample2, 1.0, 0.0, 1.0, ALLEGRO_PLAYMODE_ONCE, NULL);
 					bosslevel = true;
+					if (playone == 1)
+					{
+							al_play_sample(sample[1], 1.0, 0.0, 1.0, ALLEGRO_PLAYMODE_ONCE, NULL);
+							playone++;
+					}
 				}
 				int x = al_get_bitmap_width(numLives[player.lives-1]);
 				int y = al_get_bitmap_width(numLives[player.lives-1]);
@@ -847,6 +853,7 @@ int main(void)
 		al_destroy_bitmap(mapsmini[i]);
 		al_destroy_bitmap(btns[i]);
 		al_destroy_bitmap(scrns[i]);
+		al_destroy_sample(sample[i]);
 		//al_destroy_bitmap(atk[i]);
 	}
 	for (int i = 0; i < 6; i++)
@@ -858,7 +865,7 @@ int main(void)
 	al_destroy_event_queue(event_queue);
 	al_destroy_display(display);
 	al_destroy_timer(timer);
-	al_destroy_sample(sample);
+	
 	//al_destroy_bitmap(select);
 	//end Destruction
 	return 0;
@@ -1053,7 +1060,8 @@ void UpdateBullet(Bullet bullet[], int size, int dir)
 	}
 	
 }
-void CollideBullet(Bullet bullet[], int bSize, Enemy comets[], int cSize, Character &player , Explosion explosions[], int eSize)
+
+void CollideBullet(Bullet bullet[], int bSize, Enemy comets[], int cSize, Character &player , Explosion explosions[], int eSize, ALLEGRO_SAMPLE *sample)
 {
 	for (int i = 0; i < bSize; i++)
 	{
@@ -1070,6 +1078,7 @@ void CollideBullet(Bullet bullet[], int bSize, Enemy comets[], int cSize, Charac
 					{
 						bullet[i].live = false;
 						comets[j].live = false;
+						al_play_sample(sample, 1.0, 0.0, 1.0, ALLEGRO_PLAYMODE_ONCE, NULL);
 						player.score++;
 						
 						StartExplosions(explosions, eSize, bullet[i].x + 70, bullet[i].y+30);
@@ -1079,7 +1088,7 @@ void CollideBullet(Bullet bullet[], int bSize, Enemy comets[], int cSize, Charac
 		}
 	}
 }
-void CollideBullet(Bullet bullet[], int bSize, Boss end[], int cSize, Character &player, Explosion explosions[], int eSize)
+void CollideBullet(Bullet bullet[], int bSize, Boss end[], int cSize, Character &player, Explosion explosions[], int eSize, ALLEGRO_SAMPLE * sample)
 {
 	for (int i = 0; i < bSize; i++)
 	{
@@ -1100,6 +1109,9 @@ void CollideBullet(Bullet bullet[], int bSize, Boss end[], int cSize, Character 
 						if (end[j].lives <= 0)
 						{
 					     end[j].live = false;
+						 // SHOW WINNER SCREEN
+						 bosslevel = false;
+						 al_play_sample(sample, 1.0, 0.0, 1.0, ALLEGRO_PLAYMODE_ONCE, NULL);
 						}
 						StartExplosions(explosions, eSize, bullet[i].x + 70, bullet[i].y + 30);
 					}
@@ -1357,6 +1369,9 @@ void ChangeState(int &state, int newState)
 	else if (state == MENU)
 	{
 	}
+	else if (state == HELP)
+	{
+	}
 	else if (state == SETTINGS)
 	{
 	}
@@ -1365,6 +1380,7 @@ void ChangeState(int &state, int newState)
 	}
 	else if (state == LOST)
 	{
+		al_rest(1);
 	}
 
 	state = newState;
@@ -1381,6 +1397,9 @@ void ChangeState(int &state, int newState)
 		InitExplosions(explosions, NUM_EXPLOSIONS, al_load_bitmap("./images/boom1.png"));
 	}
 	else if (state == MENU)
+	{
+	}
+	else if (state == HELP)
 	{
 	}
 	else if (state == SETTINGS)
