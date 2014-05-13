@@ -12,6 +12,9 @@
 #include <allegro5/allegro_primitives.h>		//Used for drawing Shapes
 using namespace std;
 
+#define SINEHEIGHT  20
+#define DEGREESTEP  5
+
 //REMEMBER TO EDIT Linker -> System -> SubSystem -> WINDOW to hide console!
 
 //asset Init
@@ -46,7 +49,7 @@ void InitProjectile(Projectile thrown[], int size, bool s);
 void DrawProjectile(Projectile thrown[], int size);
 void DrawProjectile(Projectile thrown[], int size, ALLEGRO_BITMAP *bit, int cur, int fW, int fH);
 void StartProjectile(Projectile thrown[], int size);
-void UpdateProjectile(Projectile thrown[], int size, bool move);
+void UpdateProjectile(Projectile thrown[], int size, int bouncer);
 void CollideProjectile(Projectile thrown[], int cSize, Character &player, int type);
 
 void InitBoss(Boss bossy[], int size);
@@ -112,7 +115,6 @@ int main(void)
 	if (!al_init())											//initialize and check Allegro
 	{
 		al_show_native_message_box(display, "Error!", "Warning!", "Failed to initialise Allegro! \n Closing Application!", NULL, ALLEGRO_MESSAGEBOX_WARN);
-		//fprintf(stderr, "failed to initialize allegro!\n");
 		al_destroy_display(display);
 		al_destroy_timer(timer);
 		return -1;
@@ -122,7 +124,6 @@ int main(void)
 	if (!display)											//Check display
 	{
 		al_show_native_message_box(display, "Error!", "Warning!", "Failed to initialise display! \n Closing Application!", NULL, ALLEGRO_MESSAGEBOX_WARN);
-		//fprintf(stderr, "failed to create display!\n");
 		al_destroy_display(display);
 		al_destroy_timer(timer);
 		return -1;
@@ -132,7 +133,6 @@ int main(void)
 	if (!timer)													//Check timer creation
 	{				
 		al_show_native_message_box(display, "Error!", "Warning!", "Failed to initialise timer! \n Closing Application!", NULL, ALLEGRO_MESSAGEBOX_WARN);
-		//fprintf(stderr, "failed to create timer!\n");
 		al_destroy_display(display);
 		al_destroy_timer(timer);
 		return -1;
@@ -142,7 +142,6 @@ int main(void)
 	if (!event_queue)											//Check event queue creation
 	{											
 		al_show_native_message_box(display, "Error!", "Warning!", "Failed to initialise event queue! \n Closing Application!", NULL, ALLEGRO_MESSAGEBOX_WARN);
-		//fprintf(stderr, "failed to create event_queue!\n");
 		al_destroy_display(display);
 		al_destroy_timer(timer);
 		return -1;
@@ -611,13 +610,14 @@ int main(void)
 			}
 			else if (state == PLAYING)
 			{
+				int random = rand() % 100;
 				StartProjectile(comets, NUM_COMETS);
 				UpdateProjectile(comets, NUM_COMETS, 0);
 
 				if (player.score % 100)
 				{
 					StartProjectile(powerUp, NUM_POWER);
-					UpdateProjectile(powerUp, NUM_POWER, 1);
+					UpdateProjectile(powerUp, NUM_POWER, 5);
 				}
 				if (bosslevel == true)
 				{
@@ -967,8 +967,6 @@ void FireBullet(Bullet bullet[], int size, Character &player)
 		bullet[index].y = player.spritey + 50;
 	}
 
-	fprintf(stderr, "\nBullet x [%d]", bullet[index].x);
-
 }
 void UpdateBullet(Bullet bullet[], int size, int dir)
 {
@@ -1143,7 +1141,7 @@ void StartProjectile(Projectile thrown[], int size)
 		}
 	}
 }
-void UpdateProjectile(Projectile thrown[], int size, bool move)
+void UpdateProjectile(Projectile thrown[], int size, int bouncer)
 {
 	for (int i = 0; i < size; i++)
 	{
@@ -1154,11 +1152,10 @@ void UpdateProjectile(Projectile thrown[], int size, bool move)
 			//thrown[i].start_x = thrown[i].x + 25;
 			//thrown[i].start_y = thrown[i].y + 10;
 
-			if (move)
+			if (bouncer == 5)
 			{
 				if (thrown[i].y >= (thrown[i].start_y + 100) || thrown[i].y < 0) sign = 1;
 				if (thrown[i].y <= (thrown[i].start_y - 100) || thrown[i].y > scrn_H) sign = -1;
-				
 				thrown[i].y -= sign*thrown[i].speed;
 			}
 			
@@ -1187,7 +1184,6 @@ void CollideProjectile(Projectile thrown[], int cSize, Character &player, int ty
 				}
 				else if (type == 1)
 				{
-					fprintf(stderr,"collide!");
 					if (player.lives < 3)
 					{
 						player.lives++;
