@@ -18,7 +18,7 @@ using namespace std;
 Character player;	
 Bullet bullets[NUM_BULLETS];
 Projectile comets[NUM_COMETS];
-Projectile life[NUM_POWER];
+Projectile powerUp[NUM_POWER];
 Boss bossy[NUM_BOSS];
 Explosion explosions[NUM_EXPLOSIONS];
 //End asset init
@@ -38,16 +38,16 @@ void InitBullet(Character &player, Bullet bullet[], int size);
 void DrawBullet(Bullet bullet[], int size, ALLEGRO_BITMAP *bit);
 void FireBullet(Bullet bullet[], int size, Character &player);
 void UpdateBullet(Bullet bullet[], int size, int dir);
-void CollideBullet(Bullet bullet[], int bSize, Projectile comets[], int cSize, Character &ship, Explosion explosions[], int eSize, ALLEGRO_SAMPLE *sample);
-void CollideBullet(Bullet bullet[], int bSize, Projectile comets[], int cSize);
+void CollideBullet(Bullet bullet[], int bSize, Projectile thrown[], int cSize, Character &ship, Explosion explosions[], int eSize, ALLEGRO_SAMPLE *sample);
+void CollideBullet(Bullet bullet[], int bSize, Projectile thrown[], int cSize);
 void CollideBullet(Bullet bullet[], int bSize, Boss bossy[], int cSize, Character &player, Explosion explosions[], int eSize, ALLEGRO_SAMPLE * sample);
 
-void InitProjectile(Projectile comets[], int size, bool s);
-void DrawProjectile(Projectile comets[], int size);
-void DrawProjectile(Projectile comets[], int size, ALLEGRO_BITMAP *bit, int cur, int fW, int fH);
-void StartProjectile(Projectile comets[], int size);
-void UpdateProjectile(Projectile comets[], int size);
-void CollideProjectile(Projectile comets[], int cSize, Character &player, int type);
+void InitProjectile(Projectile thrown[], int size, bool s);
+void DrawProjectile(Projectile thrown[], int size);
+void DrawProjectile(Projectile thrown[], int size, ALLEGRO_BITMAP *bit, int cur, int fW, int fH);
+void StartProjectile(Projectile thrown[], int size);
+void UpdateProjectile(Projectile thrown[], int size, bool move);
+void CollideProjectile(Projectile thrown[], int cSize, Character &player, int type);
 
 void InitBoss(Boss bossy[], int size);
 void DrawBoss(Boss bossy[], int size);
@@ -612,12 +612,12 @@ int main(void)
 			else if (state == PLAYING)
 			{
 				StartProjectile(comets, NUM_COMETS);
-				UpdateProjectile(comets, NUM_COMETS);
+				UpdateProjectile(comets, NUM_COMETS, 0);
 
 				if (player.score % 100)
 				{
-					StartProjectile(life, NUM_POWER);
-					UpdateProjectile(life, NUM_POWER);
+					StartProjectile(powerUp, NUM_POWER);
+					UpdateProjectile(powerUp, NUM_POWER, 1);
 				}
 				if (bosslevel == true)
 				{
@@ -630,7 +630,7 @@ int main(void)
 				CollideBullet(bullets, NUM_BULLETS, comets, NUM_COMETS, player, explosions, NUM_EXPLOSIONS, sample[3]);
 				CollideBullet(bullets, NUM_BULLETS, bossy, NUM_BOSS, player, explosions, NUM_EXPLOSIONS, sample[2]);
 				CollideProjectile(comets, NUM_COMETS, player,0);
-				CollideProjectile(life, NUM_POWER, player, 1);
+				CollideProjectile(powerUp, NUM_POWER, player, 1);
 				CollideBoss(bossy, NUM_BOSS, player);
 
 				if (player.lives <= 0) ChangeState(state, LOST);
@@ -771,8 +771,8 @@ int main(void)
 
 				DrawCharacter(player, select, curFrame, frameW, frameH);
 				DrawBullet(bullets, NUM_BULLETS, atksel);
-				DrawProjectile(comets, NUM_COMETS, enemsel, curFrame, frameW, frameH);	
-				DrawProjectile(life, NUM_POWER, power, curFrame, frameW, frameH);
+				DrawProjectile(comets, NUM_COMETS, enemsel, curFrame, frameW, frameH);
+				DrawProjectile(powerUp, NUM_POWER, power, curFrame, frameW, frameH);
 				DrawBoss(bossy, NUM_BOSS, boss_sel, curFrame, frameW, frameH);
 				DrawExplosions(explosions, NUM_EXPLOSIONS);
 
@@ -938,36 +938,36 @@ void FireBullet(Bullet bullet[], int size, Character &player)
 	bullet[index].dir = player.dir;
 
 	// set bullet position to character's position ...
-	bullet[index].x = player.spritex;
-	bullet[index].y = player.spritey+30;
+	bullet[index].x = player.spritex + 25;
+	bullet[index].y = player.spritey + 25;
 
 	// ... or adjust position based on direction, if you want:
 	if (player.dir == NORTH) 
 	{
 		
-		bullet[index].x = player.spritex;
-		bullet[index].y = player.spritey + 17;
+		bullet[index].x = player.spritex +50;
+		bullet[index].y = player.spritey ;
 	}
 	else if (player.dir == EAST)
 	{
 		
-		bullet[index].x = player.spritex + 17;
-		bullet[index].y = player.spritey;
+		bullet[index].x = player.spritex + 20 + player.boundx;
+		bullet[index].y = player.spritey + 50;
 	}
 	else if (player.dir == SOUTH)
 	{
 		
-		bullet[index].x = player.spritex;
-		bullet[index].y = player.spritey - 17;
+		bullet[index].x = player.spritex + 50;
+		bullet[index].y = player.spritey + 25;
 	}
 	else if (player.dir == WEST)
 	{
 		
-		bullet[index].x = player.spritex -17;
-		bullet[index].y = player.spritey;
+		bullet[index].x = player.spritex - 20 ;
+		bullet[index].y = player.spritey + 50;
 	}
 
-	//fprintf(stderr, "\nBullet [%d] direction :  %d", index, bullet[index].dir);
+	fprintf(stderr, "\nBullet x [%d]", bullet[index].x);
 
 }
 void UpdateBullet(Bullet bullet[], int size, int dir)
@@ -1025,7 +1025,7 @@ void UpdateBullet(Bullet bullet[], int size, int dir)
 	
 }
 
-void CollideBullet(Bullet bullet[], int bSize, Projectile comets[], int cSize, Character &player , Explosion explosions[], int eSize, ALLEGRO_SAMPLE *sample)
+void CollideBullet(Bullet bullet[], int bSize, Projectile thrown[], int cSize, Character &player , Explosion explosions[], int eSize, ALLEGRO_SAMPLE *sample)
 {
 	for (int i = 0; i < bSize; i++)
 	{
@@ -1033,15 +1033,15 @@ void CollideBullet(Bullet bullet[], int bSize, Projectile comets[], int cSize, C
 		{
 			for (int j = 0; j < cSize; j++)
 			{
-				if (comets[j].live)
+				if (thrown[j].live)
 				{
-					if (bullet[i].x > (comets[j].x - comets[j].boundx) 
-					 && bullet[i].x < (comets[j].x + comets[j].boundx) 
-					 && bullet[i].y > (comets[j].y - comets[j].boundy) 
-					 && bullet[i].y < (comets[j].y + comets[j].boundy))
+					if (bullet[i].x > (thrown[j].x - thrown[j].boundx) 
+					 && bullet[i].x < (thrown[j].x + thrown[j].boundx) 
+					 && bullet[i].y > (thrown[j].y - thrown[j].boundy) 
+					 && bullet[i].y < (thrown[j].y + thrown[j].boundy))
 					{
 						bullet[i].live = false;
-						comets[j].live = false;
+						thrown[j].live = false;
 						al_play_sample(sample, 1.0, 0.0, 1.0, ALLEGRO_PLAYMODE_ONCE, NULL);
 						player.score++;
 						
@@ -1086,96 +1086,104 @@ void CollideBullet(Bullet bullet[], int bSize, Boss bossy[], int cSize, Characte
 	}
 }
 
-void InitProjectile(Projectile comets[], int size, bool s)
+void InitProjectile(Projectile thrown[], int size, bool s)
 {
 	int spd = 3;
 	for (int i = 0; i < size; i++)
 	{
-		if (s)
-		{
-		spd = (rand() % 3 + 1) * 3;
-		}
-		comets[i].ID = PROJECTILE;
-		comets[i].live = false;
-		comets[i].speed = spd;
-		comets[i].boundx = 110;
-		comets[i].boundy = 120;
-		//comets[i].image = al_load_bitmap("./images/boom.png");
+		if (s) spd = (rand() % 3 + 1) * 3;
+		thrown[i].ID = PROJECTILE;
+		thrown[i].live = false;
+		thrown[i].speed = spd;
+		thrown[i].boundx = 110;
+		thrown[i].boundy = 120;
+		//thrown[i].start_x = thrown[i].x + 25;
+		//thrown[i].start_y = thrown[i].y + 10;
 	}
 }
-void DrawProjectile(Projectile comets[], int size, ALLEGRO_BITMAP *bit, int cur, int fW, int fH)
+void DrawProjectile(Projectile thrown[], int size, ALLEGRO_BITMAP *bit, int cur, int fW, int fH)
 {
 	for (int i = 0; i < size; i++)
 	{
-		if (comets[i].live)
+		if (thrown[i].live)
 		{
-			
-			al_draw_filled_rectangle((comets[i].x + 25), (comets[i].y+10), (comets[i].x + comets[i].boundx), comets[i].y + comets[i].boundy, green);// << test purposes - check collision area
-			al_draw_bitmap_region(bit, cur * fW, 0, fW, fH, comets[i].x, comets[i].y, 0);
-			fprintf(stderr,"\n %d : %d",i, comets[i].boundx);
-			//al_draw_scaled_bitmap(bit, cur * fW, 0, fW, fH, comets[i].x, comets[i].y,400,400, 0);
+			//al_draw_filled_rectangle((thrown[i].start_x), thrown[i].start_y, (thrown[i].x + thrown[i].boundx), thrown[i].y + thrown[i].boundy, green);// << test purposes - check collision area
+			al_draw_bitmap_region(bit, cur * fW, 0, fW, fH, thrown[i].x, thrown[i].y, 0);
 		}
 	}
 	
 	
 }
-void StartProjectile(Projectile comets[], int size)
+void StartProjectile(Projectile thrown[], int size)
 {
 	for (int i = 0; i < size; i++)
 	{
-		if (!comets[i].live)
+		if (!thrown[i].live)
 		{
 			if (rand() % 500 == 0)
 			{
-				comets[i].live = true;
-				comets[i].x = scrn_W;
+				thrown[i].live = true;
+				thrown[i].x = scrn_W;
 				
 				retry:
 				int y = 30 + rand() % (scrn_H - 20);
 				if (y < 475)
 				{ 
-					comets[i].y = y;
+					thrown[i].y = y;
+					thrown[i].start_y = y;
 				}
 				else
 				{
 					goto retry;
 				}
-
+				//thrown[i].start_x = thrown[i].x + 25;
+				//thrown[i].start_y = thrown[i].y + 10;
 				break;
 			}
 		}
 	}
 }
-void UpdateProjectile(Projectile comets[], int size)
+void UpdateProjectile(Projectile thrown[], int size, bool move)
 {
 	for (int i = 0; i < size; i++)
 	{
-		if (comets[i].live)
+		if (thrown[i].live)
 		{
-			comets[i].x -= comets[i].speed;
+			thrown[i].x -= thrown[i].speed;
+			
+			//thrown[i].start_x = thrown[i].x + 25;
+			//thrown[i].start_y = thrown[i].y + 10;
 
-			if (comets[i].x < 0)
-				comets[i].live = false;
+			if (move)
+			{
+				if (thrown[i].y >= (thrown[i].start_y + 100) || thrown[i].y < 0) sign = 1;
+				if (thrown[i].y <= (thrown[i].start_y - 100) || thrown[i].y > scrn_H) sign = -1;
+				
+				thrown[i].y -= sign*thrown[i].speed;
+			}
+			
+			if (thrown[i].x < 0)
+				thrown[i].live = false;
 		}
 	}
 }
-void CollideProjectile(Projectile comets[], int cSize, Character &player, int type)
+void CollideProjectile(Projectile thrown[], int cSize, Character &player, int type)
 {
 
 	for (int i = 0; i < cSize; i++)
 	{
-		if (comets[i].live)
+		if (thrown[i].live)
 		{
-			if ((comets[i].x + 20 ) < (player.spritex + 20 + player.boundx) &&			//the + 20 sets it to be on the sprite instead of the outer graphic box
-				(comets[i].x + comets[i].boundx) > (player.spritex + 75) &&
-				(comets[i].y + 10 ) < (player.spritey + 20 + player.boundy) &&			//the + 10 sets it to be on the sprites instead of the outer graphic box
-				(comets[i].y + comets[i].boundy) > (player.spritey + 25))
+			if ((thrown[i].x + 20 ) < (player.spritex + 20 + player.boundx) &&			//the + 20 sets it to be on the sprite instead of the outer graphic box
+				(thrown[i].x + thrown[i].boundx) > (player.spritex + 75) &&
+				(thrown[i].y + 10 ) < (player.spritey + 20 + player.boundy) &&			//the + 10 sets it to be on the sprites instead of the outer graphic box
+				(thrown[i].y + thrown[i].boundy) > (player.spritey + 25))
 			{
-				al_draw_filled_rectangle((comets[i].x - comets[i].boundx),(comets[i].y - comets[i].boundy), (comets[i].x + comets[i].boundx), comets[i].y + comets[i].boundy, green);// << test purposes - check collision area
+				//al_draw_filled_rectangle((thrown[i].x - thrown[i].boundx),(thrown[i].y - thrown[i].boundy), (thrown[i].x + thrown[i].boundx), thrown[i].y + thrown[i].boundy, green);// << test purposes - check collision area
 				if (type == 0)
 				{
 					player.lives--;
-					comets[i].live = false;
+					thrown[i].live = false;
 				}
 				else if (type == 1)
 				{
@@ -1185,13 +1193,13 @@ void CollideProjectile(Projectile comets[], int cSize, Character &player, int ty
 						player.lives++;
 					}
 					player.score += 50;
-					comets[i].live = false;
+					thrown[i].live = false;
 				}
 
 			}
-			else if (comets[i].x < 0)
+			else if (thrown[i].x < 0)
 			{
-				comets[i].live = false;
+				thrown[i].live = false;
 				//player.lives--;
 			}
 		}
@@ -1209,7 +1217,7 @@ void InitBoss(Boss bossy[], int size)
 		bossy[i].boundx = 50;
 		bossy[i].boundy = 50;
 		bossy[i].lives = 30;
-		//comets[i].image = al_load_bitmap("./images/boom.png");
+		//thrown[i].image = al_load_bitmap("./images/boom.png");
 	}
 }
 void DrawBoss(Boss bossy[], int size, ALLEGRO_BITMAP *bit, int cur, int fW, int fH)
@@ -1218,9 +1226,11 @@ void DrawBoss(Boss bossy[], int size, ALLEGRO_BITMAP *bit, int cur, int fW, int 
 	{
 		if (bossy[i].live)
 		{
+			fprintf(stderr, "\nBOSS #%d", i);
+			//al_draw_filled_rectangle((bossy[i].x+50), bossy[i].y+30, (bossy[i].x + 250 + bossy[i].boundx), (bossy[i].y + 250 +bossy[i].boundy), green);// << test purposes - check collision area
 			al_draw_scaled_bitmap(bit, cur * fW, 0, fW, fH, bossy[i].x, bossy[i].y, 325, 325, 0);
-			al_draw_filled_rectangle(bossy[i].x + 30, bossy[i].y - 5, bossy[i].x + (bossy[i].lives * 10) + 40, bossy[i].y + 15, black);
-			al_draw_filled_rectangle(bossy[i].x + 35, bossy[i].y, bossy[i].x + (bossy[i].lives * 10) + 35, bossy[i].y + 10, red);		
+			al_draw_filled_rectangle(bossy[i].x + 30, bossy[i].y - 5, bossy[i].x + 300 + 40, bossy[i].y + 15, black); //life bar
+			al_draw_filled_rectangle(bossy[i].x + 35, bossy[i].y, bossy[i].x + (bossy[i].lives * 10) + 35, bossy[i].y + 10, red);		//life bar
 		}
 	}
 
@@ -1380,7 +1390,7 @@ void ChangeState(int &state, int newState)
 		InitCharacter(player);
 		InitBullet(player, bullets, NUM_BULLETS);
 		InitProjectile(comets, NUM_COMETS,1);
-		InitProjectile(life, NUM_POWER,0);
+		InitProjectile(powerUp, NUM_POWER, 0);
 		InitBoss(bossy, NUM_BOSS);
 		InitExplosions(explosions, NUM_EXPLOSIONS, al_load_bitmap("./images/boom1.png"));
 	}

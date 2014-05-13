@@ -47,17 +47,8 @@ struct Projectile {
 	int speed;
 	int boundx;
 	int boundy;
-
-	/*int maxFrame;
-	int curFrame;
-	int frameCount;
-	int frameDelay;
-	int frameWidth;
-	int frameHeight;
-	int animationColumns;
-	int animationDirection;*/
-
-	//ALLEGRO_BITMAP *image;
+	int start_x;
+	int start_y;
 };
 
 struct Boss {
