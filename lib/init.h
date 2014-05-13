@@ -4,7 +4,8 @@ const int scrn_H = 686;											//Screen Height
 const int NUM_BULLETS = 5;										//Number of bullets  (not actual amount - more like a limit that can be on shot on the screen at any one time)
 const int NUM_COMETS = 10;										//Number of enemies  (same as above)
 const int NUM_BOSS = 1;											//Number of enemies  (same as above)
-const int NUM_EXPLOSIONS = 5;									//Number of explosions (same as above)			
+const int NUM_EXPLOSIONS = 5;									//Number of explosions (same as above)		
+const int NUM_POWER = 1;
 
 float crs_x = scrn_W / 2.0;										//default x location for mouse position detection
 float crs_y = scrn_H / 2.0;										//default y location for mouse position detection

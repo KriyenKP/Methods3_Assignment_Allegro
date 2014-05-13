@@ -1,13 +1,13 @@
 //objects
 
-enum IDS { PLAYER, BULLET, ENEMY, BOSS };
+enum IDS { PLAYER, BULLET, PROJECTILE, BOSS };
 
 //player
 
 struct Character {
 	int ID;
-	int x;
-	int y;
+	int spritex;
+	int spritey;
 	int lives;
 	int dir;
 	int speed;
@@ -39,7 +39,7 @@ struct Bullet {
 
 };
 
-struct Enemy {
+struct Projectile {
 	int ID;
 	int x;
 	int y;
@@ -57,7 +57,7 @@ struct Enemy {
 	int animationColumns;
 	int animationDirection;*/
 
-	ALLEGRO_BITMAP *image;
+	//ALLEGRO_BITMAP *image;
 };
 
 struct Boss {

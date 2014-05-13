@@ -14,29 +14,11 @@ using namespace std;
 
 //REMEMBER TO EDIT Linker -> System -> SubSystem -> WINDOW to hide console!
 
-/*
-const float FPS				= 60;					//Frames per second
-const int scrn_W			= 1024;					// Screen Width 
-const int scrn_H			= 686;					//Screen Height
-const int NUM_BULLETS		= 5;					//Number of bullets  (not actual amount - more like a limit that can be on shot on the screen at any one time)
-const int NUM_COMETS		= 10;					//Number of enemies  (same as above)
-const int NUM_EXPLOSIONS	= 5;					//Number of explosions (same as above)		
-
-float crs_x					= scrn_W / 2.0;			//default x location for mouse position detection
-float crs_y					= scrn_H / 2.0;			//default y location for mouse position detection
-
-
-static ALLEGRO_COLOR red,blue,black,white,green;		//Used to create quick access to colours (versus al_map_rgb(0,0,0)
-int shrinkx = 200;										//x value used to adjust player size for depth 
-int shrinky = 200;										//x value used to adjust player size for depth 
-enum KEYS { UP, DOWN, LEFT, RIGHT, SPACE, ENTER };		//Key press shortcut 
-enum STATE{ TITLE, PLAYING, LOST, MENU, SETTINGS};		//Game state identification
-enum Direction { NORTH = 0, EAST = 1, SOUTH = 2, WEST = 3};		//Direction of player identification
-*/
 //asset Init
 Character player;	
 Bullet bullets[NUM_BULLETS];
-Enemy comets[NUM_COMETS];
+Projectile comets[NUM_COMETS];
+Projectile life[NUM_POWER];
 Boss bossy[NUM_BOSS];
 Explosion explosions[NUM_EXPLOSIONS];
 //End asset init
@@ -56,16 +38,16 @@ void InitBullet(Character &player, Bullet bullet[], int size);
 void DrawBullet(Bullet bullet[], int size, ALLEGRO_BITMAP *bit);
 void FireBullet(Bullet bullet[], int size, Character &player);
 void UpdateBullet(Bullet bullet[], int size, int dir);
-void CollideBullet(Bullet bullet[], int bSize, Enemy comets[], int cSize, Character &ship, Explosion explosions[], int eSize, ALLEGRO_SAMPLE *sample);
-void CollideBullet(Bullet bullet[], int bSize, Enemy comets[], int cSize);
+void CollideBullet(Bullet bullet[], int bSize, Projectile comets[], int cSize, Character &ship, Explosion explosions[], int eSize, ALLEGRO_SAMPLE *sample);
+void CollideBullet(Bullet bullet[], int bSize, Projectile comets[], int cSize);
 void CollideBullet(Bullet bullet[], int bSize, Boss bossy[], int cSize, Character &player, Explosion explosions[], int eSize, ALLEGRO_SAMPLE * sample);
 
-void InitEnemy(Enemy comets[], int size);
-void DrawEnemy(Enemy comets[], int size);
-void DrawEnemy(Enemy comets[], int size, ALLEGRO_BITMAP *bit, int cur, int fW, int fH);
-void StartEnemy(Enemy comets[], int size);
-void UpdateEnemy(Enemy comets[], int size);
-void CollideEnemy(Enemy comets[], int cSize, Character &player);
+void InitProjectile(Projectile comets[], int size, bool s);
+void DrawProjectile(Projectile comets[], int size);
+void DrawProjectile(Projectile comets[], int size, ALLEGRO_BITMAP *bit, int cur, int fW, int fH);
+void StartProjectile(Projectile comets[], int size);
+void UpdateProjectile(Projectile comets[], int size);
+void CollideProjectile(Projectile comets[], int cSize, Character &player, int type);
 
 void InitBoss(Boss bossy[], int size);
 void DrawBoss(Boss bossy[], int size);
@@ -112,34 +94,19 @@ int main(void)
 							*select			= NULL,					//Current Selected position of character
 							*icon			= NULL,					//Current icon -- NOT SET YET
 							*numLives[3]	= { NULL, NULL, NULL},		//Attack array
-							//*lives			= NULL,					//Number of lives remaining
 							*atk[5]			= { NULL, NULL, NULL, NULL, NULL },		//Attack array
 							*atksel			= NULL,
 							*lecturers[6]	= {NULL, NULL, NULL, NULL, NULL, NULL},  //Lecturer array
-							//*poole		= NULL,
-							//*taps			= NULL,
-							//*saha			= NULL,
 							*minilect[6]	= { NULL, NULL, NULL, NULL, NULL, NULL },	//Lecturer Thumbnail
-							//*poole1			= NULL,
-							//*taps1			= NULL,
-							//*saha1			= NULL,
 							*enemsel		= NULL,							//Currently selected lecturer
+							*power			= NULL,
 							*boss_sel		= NULL,
 							*exp			= NULL,							//Explosion image
 							*maps[6]		= {NULL,NULL,NULL,NULL,NULL},	//Maps array
-							//*howard			= NULL,
-							//*tbdavis		= NULL,
 							*mapsmini[6]	= {NULL,NULL,NULL,NULL,NULL},	//Map Thumbnails
-							//*howards		= NULL,
-							//*tbdaviss		= NULL,
 							*mapsel			= NULL,				//Currently selected map
 							*scrns[5]		= { NULL, NULL, NULL, NULL, NULL },		//Box images array (pause, gameover, etc)
-							//*title			= NULL,
-							//*pause			= NULL,
 							*btns[5]		= { NULL, NULL, NULL, NULL, NULL };		//Buttons Array
-							//*start			= NULL,
-							//*stop				= NULL,
-							//*setting			= NULL,
 
 
 	if (!al_init())											//initialize and check Allegro
@@ -235,7 +202,8 @@ int main(void)
 	lecturers[5]	= al_load_bitmap("./images/viran.png");			//Viranjay
 
 	enemsel	 = lecturers[0];											//Default selected enemy/lecturer
-	boss_sel = lecturers[rand()*0+5];											//Default selected enemy/lecturer
+	boss_sel = lecturers[rand()%6];											//Default selected enemy/lecturer
+	power = al_load_bitmap("./images/dp.png");
 	
 	//Lecturer Thumbnails
 	minilect[0]			= al_load_bitmap("./images/poole1.png");	
@@ -482,8 +450,8 @@ int main(void)
 
 		else if (ev.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN)
 		{
-			fprintf(stderr, "\nHERE !position = x %f  y %f", crs_x, crs_y);  //Prints mouse postion to console - used to identify position for clicks
-			
+		//	fprintf(stderr, "\nHERE !position = x %f  y %f", crs_x - (player.x), crs_y-(player.y));  //Prints mouse postion to console - used to identify position for clicks
+
 			crs_x = ev.mouse.x;
 			crs_y = ev.mouse.y;
 			fired = true;
@@ -643,19 +611,26 @@ int main(void)
 			}
 			else if (state == PLAYING)
 			{
-				StartEnemy(comets, NUM_COMETS);
-				UpdateEnemy(comets, NUM_COMETS);
+				StartProjectile(comets, NUM_COMETS);
+				UpdateProjectile(comets, NUM_COMETS);
 
+				if (player.score % 100)
+				{
+					StartProjectile(life, NUM_POWER);
+					UpdateProjectile(life, NUM_POWER);
+				}
 				if (bosslevel == true)
 				{
 				StartBoss(bossy, NUM_BOSS);
 				UpdateBoss(bossy, NUM_BOSS);
 				}
+
 				UpdateExplosions(explosions, NUM_EXPLOSIONS);
 				UpdateBullet(bullets, NUM_BULLETS, direction);
 				CollideBullet(bullets, NUM_BULLETS, comets, NUM_COMETS, player, explosions, NUM_EXPLOSIONS, sample[3]);
 				CollideBullet(bullets, NUM_BULLETS, bossy, NUM_BOSS, player, explosions, NUM_EXPLOSIONS, sample[2]);
-				CollideEnemy(comets, NUM_COMETS, player);
+				CollideProjectile(comets, NUM_COMETS, player,0);
+				CollideProjectile(life, NUM_POWER, player, 1);
 				CollideBoss(bossy, NUM_BOSS, player);
 
 				if (player.lives <= 0) ChangeState(state, LOST);
@@ -693,6 +668,8 @@ int main(void)
 				al_draw_bitmap(btns[2], scrn_W / 2 - 130, scrn_H / 2 + 80, 0);		//Quit
 				al_draw_bitmap(btns[4], 965, 610, 0);								//Help
 				boss_sel = lecturers[rand()%7];
+				bosslevel = false;
+				player.score = 0;
 				
 			}
 			else if (state == HELP)
@@ -794,7 +771,8 @@ int main(void)
 
 				DrawCharacter(player, select, curFrame, frameW, frameH);
 				DrawBullet(bullets, NUM_BULLETS, atksel);
-				DrawEnemy(comets, NUM_COMETS, enemsel, curFrame, frameW, frameH);	
+				DrawProjectile(comets, NUM_COMETS, enemsel, curFrame, frameW, frameH);	
+				DrawProjectile(life, NUM_POWER, power, curFrame, frameW, frameH);
 				DrawBoss(bossy, NUM_BOSS, boss_sel, curFrame, frameW, frameH);
 				DrawExplosions(explosions, NUM_EXPLOSIONS);
 
@@ -861,58 +839,63 @@ int main(void)
 
 void InitCharacter(Character &player)
 {
-	player.x = scrn_W / 2;
-	player.y = scrn_H / 2;
+	player.spritex = scrn_W / 2;
+	player.spritey = scrn_H / 2;
 	player.ID = PLAYER;
 	player.lives = 3;
-	player.speed = 7;
-	player.boundx = 5;
-	player.boundy = 5;
+	player.speed = 5;
+	player.boundx = 65;
+	player.boundy = 160;
 	player.score = 0;
 }
 void DrawCharacter(Character &player, ALLEGRO_BITMAP *select, int cur, int fW, int fH)
 {
-	al_draw_scaled_bitmap(select, cur * fW, 0, fW, fH, player.x, player.y, shrinkx, shrinky, 0);
-	//al_draw_bitmap_region(select, cur * fW, 0, fW, fH, player.x, player.y, 0);
-}
+	al_draw_scaled_bitmap(select, cur * fW, 0, fW, fH, player.spritex, player.spritey, shrinkx, shrinky, 0); //character
+	//al_draw_filled_rectangle(player.spritex + 75, player.spritey + 25, player.spritex + 75 + player.boundx , player.spritey + 25 + player.boundy, green);  << test purposes - check collision area
+	//al_draw_bitmap_region(select, cur * fW, 0, fW, fH, player.spritex, player.spritey, 0);
 
+}
 void MoveCharacterUp(Character &player)
 {
-	player.y -= player.speed;
-	if (player.y < 0) player.y = 0;
+	player.spritey -= player.speed;
+	if (player.spritey < 0) player.spritey = 0;
 	player.dir = 0;
+/*
 	if (shrinkx >= 200 && shrinky >= 200)
 	{
 		shrinky -= 5;
 		shrinkx -= 5;
 		player.boundy -= 2;
 	}
+*/
 }
 void MoveCharacterRight(Character &player)
 {
-	player.x += player.speed;
-	if (player.x > scrn_W - 80)
-		player.x = scrn_W - 80;
+	player.spritex += player.speed;
+	if (player.spritex > scrn_W - 80)
+		player.spritex = scrn_W - 80;
 	player.dir = 1;
 }
 void MoveCharacterDown(Character &player)
 {
-	player.y += player.speed;
-	if (player.y > scrn_H-200)
-		player.y = scrn_H-200;
+	player.spritey += player.speed;
+	//player.y = player.spritey + 100;
+	if (player.spritey > scrn_H-200)
+		player.spritey = scrn_H-200;
 	player.dir = 2;
-	if (shrinkx <= 350 && shrinky <= 350)
+/*	if (shrinkx <= 350 && shrinky <= 350)
 	{
 		shrinky += 5;
 		shrinkx += 5;
 		player.boundy += 2;
 	}
+*/
 }
 void MoveCharacterLeft(Character &player)
 {
-	player.x -= player.speed;
-	if (player.x < 0)
-		player.x = 0;
+	player.spritex -= player.speed;
+	if (player.spritex < 0)
+		player.spritex = 0;
 	player.dir = 3;
 
 }
@@ -931,13 +914,7 @@ void DrawBullet(Bullet bullet[], int size, ALLEGRO_BITMAP *bit)
 {
 	for (int i = 0; i < size; i++)
 	{
-		if (bullet[i].live)
-
-			//al_draw_filled_circle(bullet[i].x, bullet[i].y, 2, al_map_rgb(255, 255, 255));
-			//al_draw_scaled_bitmap(select, curFrame*frameW, 0, 128, 128, pos_x, pos_y, 350, 350, 0);    //makes shit big
-			al_draw_bitmap(bit, bullet[i].x, bullet[i].y,0 );
-
-			//al_draw_scaled_bitmap(bit, bullet[i].x, bullet[i].y, 117, 117, (float)bullet[i].x, (float)bullet[i].y, 100.0, 100.0, 0);
+		if (bullet[i].live)al_draw_bitmap(bit, bullet[i].x, bullet[i].y,0 );
 	}
 }
 int FindDeadBulletIndex(Bullet bullet[], int size) 
@@ -961,33 +938,33 @@ void FireBullet(Bullet bullet[], int size, Character &player)
 	bullet[index].dir = player.dir;
 
 	// set bullet position to character's position ...
-	bullet[index].x = player.x;
-	bullet[index].y = player.y+30;
+	bullet[index].x = player.spritex;
+	bullet[index].y = player.spritey+30;
 
 	// ... or adjust position based on direction, if you want:
 	if (player.dir == NORTH) 
 	{
 		
-		bullet[index].x = player.x;
-		bullet[index].y = player.y + 17;
+		bullet[index].x = player.spritex;
+		bullet[index].y = player.spritey + 17;
 	}
 	else if (player.dir == EAST)
 	{
 		
-		bullet[index].x = player.x + 17;
-		bullet[index].y = player.y;
+		bullet[index].x = player.spritex + 17;
+		bullet[index].y = player.spritey;
 	}
 	else if (player.dir == SOUTH)
 	{
 		
-		bullet[index].x = player.x;
-		bullet[index].y = player.y - 17;
+		bullet[index].x = player.spritex;
+		bullet[index].y = player.spritey - 17;
 	}
 	else if (player.dir == WEST)
 	{
 		
-		bullet[index].x = player.x -17;
-		bullet[index].y = player.y;
+		bullet[index].x = player.spritex -17;
+		bullet[index].y = player.spritey;
 	}
 
 	//fprintf(stderr, "\nBullet [%d] direction :  %d", index, bullet[index].dir);
@@ -1048,7 +1025,7 @@ void UpdateBullet(Bullet bullet[], int size, int dir)
 	
 }
 
-void CollideBullet(Bullet bullet[], int bSize, Enemy comets[], int cSize, Character &player , Explosion explosions[], int eSize, ALLEGRO_SAMPLE *sample)
+void CollideBullet(Bullet bullet[], int bSize, Projectile comets[], int cSize, Character &player , Explosion explosions[], int eSize, ALLEGRO_SAMPLE *sample)
 {
 	for (int i = 0; i < bSize; i++)
 	{
@@ -1058,10 +1035,10 @@ void CollideBullet(Bullet bullet[], int bSize, Enemy comets[], int cSize, Charac
 			{
 				if (comets[j].live)
 				{
-					if (bullet[i].x >(comets[j].x - comets[j].boundx) 
-						&& bullet[i].x < (comets[j].x + comets[j].boundx) 
-						&& bullet[i].y > (comets[j].y - comets[j].boundy) 
-						&& bullet[i].y < (comets[j].y + comets[j].boundy))
+					if (bullet[i].x > (comets[j].x - comets[j].boundx) 
+					 && bullet[i].x < (comets[j].x + comets[j].boundx) 
+					 && bullet[i].y > (comets[j].y - comets[j].boundy) 
+					 && bullet[i].y < (comets[j].y + comets[j].boundy))
 					{
 						bullet[i].live = false;
 						comets[j].live = false;
@@ -1109,34 +1086,40 @@ void CollideBullet(Bullet bullet[], int bSize, Boss bossy[], int cSize, Characte
 	}
 }
 
-void InitEnemy(Enemy comets[], int size)
+void InitProjectile(Projectile comets[], int size, bool s)
 {
+	int spd = 3;
 	for (int i = 0; i < size; i++)
 	{
-		int spd = (rand()%3+1)*3;
-		comets[i].ID = ENEMY;
+		if (s)
+		{
+		spd = (rand() % 3 + 1) * 3;
+		}
+		comets[i].ID = PROJECTILE;
 		comets[i].live = false;
 		comets[i].speed = spd;
-		comets[i].boundx = 50;
-		comets[i].boundy = 100;
+		comets[i].boundx = 110;
+		comets[i].boundy = 120;
 		//comets[i].image = al_load_bitmap("./images/boom.png");
 	}
 }
-void DrawEnemy(Enemy comets[], int size, ALLEGRO_BITMAP *bit, int cur, int fW, int fH)
+void DrawProjectile(Projectile comets[], int size, ALLEGRO_BITMAP *bit, int cur, int fW, int fH)
 {
 	for (int i = 0; i < size; i++)
 	{
 		if (comets[i].live)
 		{
-
+			
+			al_draw_filled_rectangle((comets[i].x + 25), (comets[i].y+10), (comets[i].x + comets[i].boundx), comets[i].y + comets[i].boundy, green);// << test purposes - check collision area
 			al_draw_bitmap_region(bit, cur * fW, 0, fW, fH, comets[i].x, comets[i].y, 0);
+			fprintf(stderr,"\n %d : %d",i, comets[i].boundx);
 			//al_draw_scaled_bitmap(bit, cur * fW, 0, fW, fH, comets[i].x, comets[i].y,400,400, 0);
 		}
 	}
 	
 	
 }
-void StartEnemy(Enemy comets[], int size)
+void StartProjectile(Projectile comets[], int size)
 {
 	for (int i = 0; i < size; i++)
 	{
@@ -1163,7 +1146,7 @@ void StartEnemy(Enemy comets[], int size)
 		}
 	}
 }
-void UpdateEnemy(Enemy comets[], int size)
+void UpdateProjectile(Projectile comets[], int size)
 {
 	for (int i = 0; i < size; i++)
 	{
@@ -1176,24 +1159,40 @@ void UpdateEnemy(Enemy comets[], int size)
 		}
 	}
 }
-void CollideEnemy(Enemy comets[], int cSize, Character &player)
+void CollideProjectile(Projectile comets[], int cSize, Character &player, int type)
 {
+
 	for (int i = 0; i < cSize; i++)
 	{
 		if (comets[i].live)
 		{
-			if (comets[i].x - comets[i].boundx < player.x + player.boundx &&
-				comets[i].x + comets[i].boundx > player.x - player.boundx &&
-				comets[i].y - comets[i].boundy < player.y + player.boundy &&
-				comets[i].y + comets[i].boundy > player.y - player.boundy)
+			if ((comets[i].x + 20 ) < (player.spritex + 20 + player.boundx) &&			//the + 20 sets it to be on the sprite instead of the outer graphic box
+				(comets[i].x + comets[i].boundx) > (player.spritex + 75) &&
+				(comets[i].y + 10 ) < (player.spritey + 20 + player.boundy) &&			//the + 10 sets it to be on the sprites instead of the outer graphic box
+				(comets[i].y + comets[i].boundy) > (player.spritey + 25))
 			{
-				player.lives--;
-				comets[i].live = false;
+				al_draw_filled_rectangle((comets[i].x - comets[i].boundx),(comets[i].y - comets[i].boundy), (comets[i].x + comets[i].boundx), comets[i].y + comets[i].boundy, green);// << test purposes - check collision area
+				if (type == 0)
+				{
+					player.lives--;
+					comets[i].live = false;
+				}
+				else if (type == 1)
+				{
+					fprintf(stderr,"collide!");
+					if (player.lives < 3)
+					{
+						player.lives++;
+					}
+					player.score += 50;
+					comets[i].live = false;
+				}
+
 			}
 			else if (comets[i].x < 0)
 			{
 				comets[i].live = false;
-				player.lives--;
+				//player.lives--;
 			}
 		}
 	}
@@ -1264,10 +1263,10 @@ void CollideBoss(Boss bossy[], int cSize, Character &player)
 	{
 		if (bossy[i].live)
 		{
-			if (bossy[i].x - bossy[i].boundx < player.x + player.boundx &&
-				bossy[i].x + bossy[i].boundx > player.x - player.boundx &&
-				bossy[i].y - bossy[i].boundy < player.y + player.boundy &&
-				bossy[i].y + bossy[i].boundy > player.y - player.boundy)
+			if (bossy[i].x - bossy[i].boundx < player.spritex + player.boundx &&
+				bossy[i].x + bossy[i].boundx > player.spritex - player.boundx &&
+				bossy[i].y - bossy[i].boundy < player.spritey + player.boundy &&
+				bossy[i].y + bossy[i].boundy > player.spritey - player.boundy)
 			{
 				player.lives--;
 				//bossy[i].live = false;
@@ -1380,7 +1379,8 @@ void ChangeState(int &state, int newState)
 	{
 		InitCharacter(player);
 		InitBullet(player, bullets, NUM_BULLETS);
-		InitEnemy(comets, NUM_COMETS);
+		InitProjectile(comets, NUM_COMETS,1);
+		InitProjectile(life, NUM_POWER,0);
 		InitBoss(bossy, NUM_BOSS);
 		InitExplosions(explosions, NUM_EXPLOSIONS, al_load_bitmap("./images/boom1.png"));
 	}
