@@ -102,7 +102,7 @@ int main(void)
 							*lecturers[6]	= {NULL, NULL, NULL, NULL, NULL, NULL},  //Lecturer array
 							*minilect[6]	= { NULL, NULL, NULL, NULL, NULL, NULL },	//Lecturer Thumbnail
 							*enemsel		= NULL,							//Currently selected lecturer
-							*power			= NULL,
+							*power[2]		= {NULL,NULL},
 							*boss_sel		= NULL,
 							*exp			= NULL,							//Explosion image
 							*maps[6]		= {NULL,NULL,NULL,NULL,NULL},	//Maps array
@@ -161,7 +161,7 @@ int main(void)
 	//end addon innit
 	
 	if (!al_reserve_samples(5)){
-		fprintf(stderr, "failed to reserve samples!\n");
+		al_show_native_message_box(display, "Error!", "Warning!", "Failed to initialise Sound samples! \n Closing Application!", NULL, ALLEGRO_MESSAGEBOX_WARN);
 		return -1;
 	}
 
@@ -200,9 +200,11 @@ int main(void)
 	lecturers[4]	= al_load_bitmap("./images/tom.png");			//Walingo
 	lecturers[5]	= al_load_bitmap("./images/viran.png");			//Viranjay
 
-	enemsel	 = lecturers[0];											//Default selected enemy/lecturer
+	enemsel	 = lecturers[0];											//Default selected enemy/
 	boss_sel = lecturers[rand()%6];											//Default selected enemy/lecturer
-	power = al_load_bitmap("./images/dp.png");
+
+	power[0] = al_load_bitmap("./images/dp.png");
+	power[1] = al_load_bitmap("./images/power.png");
 	
 	//Lecturer Thumbnails
 	minilect[0]			= al_load_bitmap("./images/poole1.png");	
@@ -220,33 +222,37 @@ int main(void)
 	maps[4]		= al_load_bitmap("./images/cafe.png");		//cafe
 	maps[5]		= al_load_bitmap("./images/amphi.png");	//amphitheatre
 
-	bgImage		= maps[0];								//Default selected map
+	bgImage			= maps[0];								//Default selected map
 
 	//Map thumbnail
-	mapsmini[0]	= al_load_bitmap("./images/howards.png");		//Howard Building
-	mapsmini[1]	= al_load_bitmap("./images/tbdaviss.png");		//TB Davis 
-	mapsmini[2] = al_load_bitmap("./images/parks.png");			//The park
-	mapsmini[3] = al_load_bitmap("./images/sciences.png");	//science
-	mapsmini[4] = al_load_bitmap("./images/cafes.png");			//cafe
-	mapsmini[5] = al_load_bitmap("./images/amphis.png");		//Amphitheatre
+	mapsmini[0]		= al_load_bitmap("./images/howards.png");		//Howard Building
+	mapsmini[1]		= al_load_bitmap("./images/tbdaviss.png");		//TB Davis 
+	mapsmini[2]		= al_load_bitmap("./images/parks.png");			//The park
+	mapsmini[3]		= al_load_bitmap("./images/sciences.png");	//science
+	mapsmini[4]		= al_load_bitmap("./images/cafes.png");			//cafe
+	mapsmini[5]		= al_load_bitmap("./images/amphis.png");		//Amphitheatre
 
 	//Button Images
-	btns[0]		= al_load_bitmap("./images/startbtn.png");		//start
-	btns[1]		= al_load_bitmap("./images/sttngbtn.png");		//settings
-	btns[2]		= al_load_bitmap("./images/stpbtn.png");		//stop
-	btns[3]		= al_load_bitmap("./images/back.png");			//back
-	btns[4]		= al_load_bitmap("./images/help.png");			//png
+	btns[0]			= al_load_bitmap("./images/startbtn.png");		//start
+	btns[1]			= al_load_bitmap("./images/sttngbtn.png");		//settings
+	btns[2]			= al_load_bitmap("./images/stpbtn.png");		//stop
+	btns[3]			= al_load_bitmap("./images/back.png");			//back
+	btns[4]			= al_load_bitmap("./images/help.png");			//png
 
 	//Menu Images
 	scrns[0]		= al_load_bitmap("./images/BG1.png");		//Title Background
 	scrns[1]		= al_load_bitmap("./images/pause.png");
 	scrns[2]		= al_load_bitmap("./images/gameover.png");
 	scrns[3]		= al_load_bitmap("./images/config.png");
-	
+	scrns[4]		= al_load_bitmap("./images/ukzn_msc.png");
+			
 	sample[0]		= al_load_sample("./sounds/Pew_Pew.wav");
 	sample[1]		= al_load_sample("./sounds/Evil_Laugh.wav");
 	sample[2]		= al_load_sample("./sounds/victory_fanfare.wav");
 	sample[3]		= al_load_sample("./sounds/boom.wav");
+
+	//icon = al_load_bitmap("./images/favicon.ico");
+
 
 	int direction = 1;						//Default direction identifier init
 
@@ -274,7 +280,7 @@ int main(void)
 	//end Asset variables
 
 	//End initialisers
-	//al_set_display_icon(display, icon);  
+//	al_set_display_icon(display, icon);  
 	al_set_window_title(display, "UKZN - LECTURE DEFENCE - HOWARD EDITION");   //set window title 
 	al_start_timer(timer);											//Start event timer (program clock)
 	al_clear_to_color(black);										//Clear and set Background black
@@ -415,7 +421,11 @@ int main(void)
 					timeM = true;
 					al_start_timer(timer);
 				}
-				ChangeState(state, MENU);
+					ChangeState(state, MENU);
+				break;
+			case ALLEGRO_KEY_ENTER:
+				if (state == WIN)
+					ChangeState(state, PLAYING);
 				break;
 			case ALLEGRO_KEY_ESCAPE:
 				if (state==TITLE || state == MENU || state == HELP)
@@ -434,6 +444,7 @@ int main(void)
 		{
 			crs_x = ev.mouse.x;									//get x co-ord of mouse
 			crs_y = ev.mouse.y;									//get y co-ord of mouse
+
 			//fprintf(stderr, "\nposition = x %f  y %f", crs_x,crs_y);
 
 			if ((ev.mouse.x >= 0) && (ev.mouse.y >= 2))
@@ -599,15 +610,6 @@ int main(void)
 			if (state == TITLE)
 			{
 			}
-			else if (state == MENU)
-			{
-			}
-			else if (state == HELP)
-			{
-			}
-			else if (state == SETTINGS)
-			{
-			}
 			else if (state == PLAYING)
 			{
 				int random = rand() % 100;
@@ -656,31 +658,41 @@ int main(void)
 			redraw = false;
 
 			if (state == TITLE)
-			{
+			{//title
 				al_draw_bitmap(scrns[0], 0, 0, 0);  //Title Screen
 				al_draw_textf(fonts[0],white, scrn_W/2+20, scrn_H-60, ALLEGRO_ALIGN_CENTRE, "PRESS SPACEBAR TO START");
+			//end title
 			}
 			else if (state == MENU)
-			{
+			{//menu
 				al_clear_to_color(black);
 				al_draw_bitmap(btns[0], scrn_W/2 - 130, scrn_H/2 - 180 ,0);			//Start
 				al_draw_bitmap(btns[1], scrn_W / 2 - 130, scrn_H / 2 -50 , 0);		//Settings
 				al_draw_bitmap(btns[2], scrn_W / 2 - 130, scrn_H / 2 + 80, 0);		//Quit
 				al_draw_bitmap(btns[4], 965, 610, 0);								//Help
-				boss_sel = lecturers[rand()%7];
+				boss_sel = lecturers[rand()%6];
 				bosslevel = false;
 				player.score = 0;
-				
+			//end menu
 			}
 			else if (state == HELP)
-			{
+			{//help
 				al_draw_bitmap(scrns[3], 0, 0, 0);  //Title Screen
 				//al_draw_bitmap(btns[3], 800, 610, 0);								    //Back		<<fix this maybe?
 				//al_draw_scaled_bitmap(btns[3], 800, 610,150,150,100,100, 10,10, 0);	//Back
 				al_draw_textf(fonts[0], white, scrn_W - 300, scrn_H - 50, 0, "PRESS BACKSPACE TO RETURN");
+			//end help
+			}
+			else if (state == WIN)
+			{//win
+				al_draw_bitmap(scrns[4], 0, 0, 0);  //Win!
+				al_draw_textf(fonts[0], black, scrn_W / 2 + 20, scrn_H - 30, ALLEGRO_ALIGN_CENTRE, "PRESS ENTER TO CONTINUE");
+				boss_sel = lecturers[rand() % 6];
+			//end win
 			}
 			else if (state == SETTINGS)
 			{
+				//settings
 				al_clear_to_color(black);
 				al_draw_textf(fonts[1], white,scrn_W/2-100, 20, 0, "CHOOSE YOUR LECTURER : ");
 
@@ -765,19 +777,21 @@ int main(void)
 				}
 
 				al_draw_textf(fonts[0], white, scrn_W - 300, scrn_H-50, 0, "PRESS BACKSPACE TO RETURN");
+
+				//end setting
 			}
 			else if (state == PLAYING)
 			{
-
+				//playing
 				DrawCharacter(player, select, curFrame, frameW, frameH);
 				DrawBullet(bullets, NUM_BULLETS, atksel);
 				DrawProjectile(comets, NUM_COMETS, enemsel, curFrame, frameW, frameH);
-				DrawProjectile(powerUp, NUM_POWER, power, curFrame, frameW, frameH);
+				DrawProjectile(powerUp, NUM_POWER, power[0], curFrame, frameW, frameH);
 				DrawBoss(bossy, NUM_BOSS, boss_sel, curFrame, frameW, frameH);
 				DrawExplosions(explosions, NUM_EXPLOSIONS);
 
 				al_draw_textf(fonts[0], black, scrn_W/2-100, 5, 0, "Score : %i ", player.score*10);
-				if (player.score % 10 == 0 && player.score != 0) // <<<<< CHANGE SCORE FOR BOSS ARRIVAL
+				if (player.score % 20 == 0 && player.score != 0) // <<<<< CHANGE SCORE FOR BOSS ARRIVAL
 				{
 					bosslevel = true;
 					if (playone == 1)
@@ -786,20 +800,29 @@ int main(void)
 							playone++;
 					}
 				}
+				if (win == true)
+				{
+					ChangeState(state, WIN);
+					al_rest(1.5);
+					win = false;
+				}
 				int x = al_get_bitmap_width(numLives[player.lives-1]);
 				int y = al_get_bitmap_width(numLives[player.lives-1]);
 
 				al_draw_scaled_bitmap(numLives[player.lives-1], 5, 5,x, y, 5, 5, 150, 150, 0);
+
+				//end playing 
 			}
 			else if (state == LOST)
-			{
+			{//lost
 				al_draw_bitmap(scrns[2], scrn_W / 2 - 250, 100, 0);                      // Game over Screen
 				al_draw_textf(fonts[2], black, scrn_W/2+70, 340, 0, "%i", player.score*10);
+
+			//end lost
 			}
 			al_flip_display();
 			al_clear_to_color(black);
 			al_draw_scaled_bitmap(bgImage, 0, 0, al_get_bitmap_width(bgImage), al_get_bitmap_height(bgImage),0,0,scrn_W,scrn_H, 0);
-
 		}
 
 	}
@@ -819,7 +842,7 @@ int main(void)
 		al_destroy_bitmap(btns[i]);
 		al_destroy_bitmap(scrns[i]);
 		al_destroy_sample(sample[i]);
-		//al_destroy_bitmap(atk[i]);
+	//	al_destroy_bitmap(atk[i]);
 	}
 	for (int i = 0; i < 6; i++)
 	{
@@ -849,11 +872,15 @@ void InitCharacter(Character &player)
 	player.score = 0;
 }
 void DrawCharacter(Character &player, ALLEGRO_BITMAP *select, int cur, int fW, int fH)
-{
-	al_draw_scaled_bitmap(select, cur * fW, 0, fW, fH, player.spritex, player.spritey, shrinkx, shrinky, 0); //character
+{	
 	//al_draw_filled_rectangle(player.spritex + 75, player.spritey + 25, player.spritex + 75 + player.boundx , player.spritey + 25 + player.boundy, green);  << test purposes - check collision area
 	//al_draw_bitmap_region(select, cur * fW, 0, fW, fH, player.spritex, player.spritey, 0);
-
+	if (poweredNum < 60 && poweredNum > 0)
+	{
+		al_draw_scaled_bitmap(al_load_bitmap("./images/power.png"), cur * fW, 0, fW, fH, player.spritex, player.spritey, shrinkx, shrinky, 0);
+		poweredNum++;
+	}
+	al_draw_scaled_bitmap(select, cur * fW, 0, fW, fH, player.spritex, player.spritey, shrinkx, shrinky, 0); //character
 }
 void MoveCharacterUp(Character &player)
 {
@@ -1071,8 +1098,8 @@ void CollideBullet(Bullet bullet[], int bSize, Boss bossy[], int cSize, Characte
 						if (bossy[j].lives <= 0)
 						{
 					     bossy[j].live = false;
-						 // SHOW WINNER SCREEN
 						 bosslevel = false;
+						 win = 1;
 						 bossy[j].lives = 30;
 						 al_play_sample(sample, 1.0, 0.0, 1.0, ALLEGRO_PLAYMODE_ONCE, NULL);
 						}
@@ -1154,7 +1181,8 @@ void UpdateProjectile(Projectile thrown[], int size, int bouncer)
 
 			if (bouncer == 5)
 			{
-				if (thrown[i].y >= (thrown[i].start_y + 100) || thrown[i].y < 0) sign = 1;
+				if (thrown[i].y >= (thrown[i].start_y + 100)) sign = 1;
+				if (thrown[i].y < 0) thrown[i].y = scrn_H - 30;
 				if (thrown[i].y <= (thrown[i].start_y - 100) || thrown[i].y > scrn_H) sign = -1;
 				thrown[i].y -= sign*thrown[i].speed;
 			}
@@ -1189,6 +1217,7 @@ void CollideProjectile(Projectile thrown[], int cSize, Character &player, int ty
 						player.lives++;
 					}
 					player.score += 50;
+					poweredNum = 1;
 					thrown[i].live = false;
 				}
 
@@ -1213,7 +1242,6 @@ void InitBoss(Boss bossy[], int size)
 		bossy[i].boundx = 50;
 		bossy[i].boundy = 50;
 		bossy[i].lives = 30;
-		//thrown[i].image = al_load_bitmap("./images/boom.png");
 	}
 }
 void DrawBoss(Boss bossy[], int size, ALLEGRO_BITMAP *bit, int cur, int fW, int fH)
@@ -1222,7 +1250,6 @@ void DrawBoss(Boss bossy[], int size, ALLEGRO_BITMAP *bit, int cur, int fW, int 
 	{
 		if (bossy[i].live)
 		{
-			fprintf(stderr, "\nBOSS #%d", i);
 			//al_draw_filled_rectangle((bossy[i].x+50), bossy[i].y+30, (bossy[i].x + 250 + bossy[i].boundx), (bossy[i].y + 250 +bossy[i].boundy), green);// << test purposes - check collision area
 			al_draw_scaled_bitmap(bit, cur * fW, 0, fW, fH, bossy[i].x, bossy[i].y, 325, 325, 0);
 			al_draw_filled_rectangle(bossy[i].x + 30, bossy[i].y - 5, bossy[i].x + 300 + 40, bossy[i].y + 15, black); //life bar
@@ -1363,6 +1390,9 @@ void ChangeState(int &state, int newState)
 	{
 	}
 	else if (state == HELP)
+	{
+	}
+	else if (state == WIN)
 	{
 	}
 	else if (state == SETTINGS)

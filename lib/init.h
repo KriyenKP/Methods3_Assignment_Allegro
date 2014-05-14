@@ -16,12 +16,15 @@ int shrinkx = 200;												//x value used to adjust player size for depth
 int shrinky = 200;												//x value used to adjust player size for depth 
 
 enum KEYS { UP, DOWN, LEFT, RIGHT, SPACE, ENTER };				//Key press shortcut 
-enum STATE{ TITLE, PLAYING, LOST, MENU, SETTINGS, HELP };		//Game state identification
+enum STATE{ TITLE, PLAYING, LOST, MENU, SETTINGS, HELP, WIN };		//Game state identification
 enum Direction { NORTH = 0, EAST = 1, SOUTH = 2, WEST = 3 };	//Direction of player identification
 
 int playone = 1;												//restrict sound to play only once
 int sign = 1;													//direction for boss movement
 bool bosslevel = false;											//only let boss come after certain score
+bool win = 0;
+bool SecLife = false;
+int poweredNum = 0;
 
 //animated image var
 int curFrame = 0;					//Current frame of animated image
