@@ -95,7 +95,7 @@ int main(void)
 							*standLeft		= NULL,					//Character Standing left
 							*standRight		= NULL,					//character standing right
 							*select			= NULL,					//Current Selected position of character
-							*icon			= NULL,					//Current icon -- NOT SET YET
+							*icon1			= NULL,					//Current icon -- NOT SET YET
 							*numLives[3]	= { NULL, NULL, NULL},		//Attack array
 							*atk[5]			= { NULL, NULL, NULL, NULL, NULL },		//Attack array
 							*atksel			= NULL,
@@ -251,7 +251,8 @@ int main(void)
 	sample[2]		= al_load_sample("./sounds/victory_fanfare.wav");
 	sample[3]		= al_load_sample("./sounds/boom.wav");
 
-	//icon = al_load_bitmap("./images/favicon.ico");
+	icon1			= al_load_bitmap("./images/icon.png");
+
 
 
 	int direction = 1;						//Default direction identifier init
@@ -280,7 +281,7 @@ int main(void)
 	//end Asset variables
 
 	//End initialisers
-//	al_set_display_icon(display, icon);  
+	al_set_display_icon(display, icon1);  
 	al_set_window_title(display, "UKZN - LECTURE DEFENCE - HOWARD EDITION");   //set window title 
 	al_start_timer(timer);											//Start event timer (program clock)
 	al_clear_to_color(black);										//Clear and set Background black
