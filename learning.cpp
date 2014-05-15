@@ -1127,7 +1127,7 @@ void CollideBullet(Bullet bullet[], int bSize, Projectile thrown[], int cSize, C
 						bullet[i].live = false;
 						thrown[j].live = false;
 						al_play_sample(sample, 1.0, 0.0, 1.0, ALLEGRO_PLAYMODE_ONCE, NULL);
-						player.score++;
+						player.score += thrown[j].speed/3;
 						
 						StartExplosions(explosions, eSize, bullet[i].x + 70, bullet[i].y+30);
 					}
@@ -1153,7 +1153,7 @@ void CollideBullet(Bullet bullet[], int bSize, Boss bossy[], int cSize, Characte
 					{
 						bullet[i].live = false;
 						bossy[j].lives--;
-						player.score++;
+//						player.score++;
 						if (bossy[j].lives <= 0)
 						{
 					     bossy[j].live = false;
