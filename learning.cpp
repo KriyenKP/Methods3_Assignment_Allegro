@@ -252,7 +252,7 @@ int main(void)
 	icon1			= al_load_bitmap("./images/icon.png");
 
 
-	`
+
 	int direction = 1;						//Default direction identifier init
 
    // al_convert_mask_to_alpha(walkLeft, al_map_rgb(106, 76, 48));  //clear designated colour to create clear image
