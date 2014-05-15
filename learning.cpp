@@ -182,6 +182,7 @@ int main(void)
 	atk[0]	= al_load_bitmap("./images/calc.png");
 	atk[1]	= al_load_bitmap("./images/pencil.png");
 	atk[2]	= al_load_bitmap("./images/c.png");
+	atk[3]  = al_load_bitmap("./images/light.png");
 	atksel = atk[0];
 
 	numLives[0]		= al_load_bitmap("./images/1.png");			//Number of Lives
@@ -809,6 +810,8 @@ int main(void)
 					player_img[2] = al_load_bitmap("./images/pikaWalkR.png");
 					player_img[3] = al_load_bitmap("./images/pikaWalkL.png");
 
+					atksel = atk[3];
+
 				}
 				else
 				{
@@ -854,13 +857,14 @@ int main(void)
 					{
 						ChangeState(state, WIN);
 						al_rest(1.5);
-						//write high score to config
-						player.score = 0;
+						egg = 0;
 					}
 					boss_sel = lecturers[rand() % 6];											//Default selected enemy/lecturer
-					al_rest(0.5);
+
+					al_draw_textf(fonts[0], white, scrn_W / 2 + 20, scrn_H / 2, ALLEGRO_ALIGN_CENTRE, "PASSED THE YEAR!!");
+					
 					win = false;
-					egg = 0;
+					
 				}
 				int x = al_get_bitmap_width(numLives[player.lives-1]);
 				int y = al_get_bitmap_width(numLives[player.lives-1]);
