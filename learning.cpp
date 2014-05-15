@@ -836,7 +836,8 @@ int main(void)
 				al_draw_textf(fonts[0], black, scrn_W/2-100, 5, 0, "Score : %i ", player.score);
 				if (player.score != 0) // <<<<< CHANGE SCORE FOR BOSS ARRIVAL
 				{
-					if (player.score % 20 == 0)
+					int newBossIndicator = player.score - (level * 100 + 50);
+					if ( newBossIndicator >= 0 && newBossIndicator < 3)
 					{
 						bosslevel = true;
 						if (playone == 1)
@@ -853,6 +854,8 @@ int main(void)
 					{
 						ChangeState(state, WIN);
 						al_rest(1.5);
+						//write high score to config
+						player.score = 0;
 					}
 					boss_sel = lecturers[rand() % 6];											//Default selected enemy/lecturer
 					al_rest(0.5);
@@ -1147,7 +1150,7 @@ void CollideBullet(Bullet bullet[], int bSize, Boss bossy[], int cSize, Characte
 					{
 						bullet[i].live = false;
 						bossy[j].lives--;
-//						player.score++;
+						player.score++;
 						if (bossy[j].lives <= 0)
 						{
 					     bossy[j].live = false;
