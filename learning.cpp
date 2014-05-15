@@ -713,6 +713,7 @@ int main(void)
 				al_draw_bitmap(scrns[4], 0, 0, 0);  //Win!
 				al_draw_textf(fonts[0], black, scrn_W / 2 + 20, scrn_H - 30, ALLEGRO_ALIGN_CENTRE, "PRESS ENTER TO CONTINUE");
 				boss_sel = lecturers[rand() % 6];
+				player.score = 0;
 			//end win
 			}
 			else if (state == SETTINGS)
@@ -834,13 +835,13 @@ int main(void)
 				DrawProjectile(comets, NUM_COMETS, enemsel, curFrame, frameW, frameH);
 				DrawProjectile(powerUp, NUM_POWER, power[0], curFrame, frameW, frameH);
 				DrawBoss(bossy, NUM_BOSS, boss_sel, curFrame, frameW, frameH);
-				DrawExplosions(explosions, NUM_EXPLOSIONS);
+				DrawExplosions(explosions, NUM_EXPLOSIONS); 
 
-				al_draw_textf(fonts[0], black, scrn_W/2-100, 5, 0, "Score : %i ", player.score);
+				al_draw_textf(fonts[0], black, scrn_W / 2 - 100, 5, 0, "Score : %d * Level : %d", player.score, level);
+				if (bosslevel) al_draw_textf(fonts[2], red, scrn_W / 2 -50, 20, 0, "BOSS!");
 				if (player.score != 0) // <<<<< CHANGE SCORE FOR BOSS ARRIVAL
 				{
-					int newBossIndicator = player.score - (level * 100 + 50);
-					if ( newBossIndicator >= 0 && newBossIndicator < 3)
+					if (bossCheck + 50 == player.score || bossCheck + 51 == player.score || bossCheck + 52 == player.score)
 					{
 						bosslevel = true;
 						if (playone == 1)
@@ -853,6 +854,7 @@ int main(void)
 				if (win == true)
 				{
 					level++;
+					bossCheck = player.score;
 					if (level >= 4)
 					{
 						ChangeState(state, WIN);
@@ -1031,9 +1033,8 @@ void FireBullet(Bullet bullet[], int size, Character &player)
 	// ... or adjust position based on direction, if you want:
 	if (player.dir == NORTH) 
 	{
-		
 		bullet[index].x = player.spritex +50;
-		bullet[index].y = player.spritey ;
+		bullet[index].y = player.spritey;
 	}
 	else if (player.dir == EAST)
 	{
@@ -1128,8 +1129,9 @@ void CollideBullet(Bullet bullet[], int bSize, Projectile thrown[], int cSize, C
 						bullet[i].live = false;
 						thrown[j].live = false;
 						al_play_sample(sample, 1.0, 0.0, 1.0, ALLEGRO_PLAYMODE_ONCE, NULL);
-						player.score += thrown[j].speed/3;
-						
+						//player.score += thrown[j].speed/3;
+						for (int k = 0; k < thrown[j].speed / 3;++k)
+							player.score++;			
 						StartExplosions(explosions, eSize, bullet[i].x + 70, bullet[i].y+30);
 					}
 				}

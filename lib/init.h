@@ -27,6 +27,8 @@ bool SecLife = false;
 int poweredNum = 0;
 int level = 0;
 
+int bossCheck = 0;
+
 int egg = 0;
 
 //animated image var
