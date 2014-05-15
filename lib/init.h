@@ -25,6 +25,9 @@ bool bosslevel = false;											//only let boss come after certain score
 bool win = 0;
 bool SecLife = false;
 int poweredNum = 0;
+int level = 0;
+
+int egg = 0;
 
 //animated image var
 int curFrame = 0;					//Current frame of animated image

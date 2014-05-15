@@ -90,10 +90,7 @@ int main(void)
 	ALLEGRO_STATE			*state1			= NULL;					//State
 	ALLEGRO_SAMPLE			*sample[5]		= {NULL, NULL, NULL,NULL,NULL};
 	ALLEGRO_BITMAP			*bgImage		= NULL,					//Title Page splash
-							*walkLeft		= NULL,					//Character walking left  	
-							*walkRight		= NULL,					//Character walking right
-							*standLeft		= NULL,					//Character Standing left
-							*standRight		= NULL,					//character standing right
+							*player_img[5]  = {NULL,NULL, NULL, NULL, NULL},	
 							*select			= NULL,					//Current Selected position of character
 							*icon1			= NULL,					//Current icon -- NOT SET YET
 							*numLives[3]	= { NULL, NULL, NULL},		//Attack array
@@ -164,7 +161,7 @@ int main(void)
 		al_show_native_message_box(display, "Error!", "Warning!", "Failed to initialise Sound samples! \n Closing Application!", NULL, ALLEGRO_MESSAGEBOX_WARN);
 		return -1;
 	}
-
+	
 	//cursor = al_load_bitmap("./images/target.png");
 	//custom_cursor = al_create_mouse_cursor(cursor, 0, 0);
 	fonts[2] = al_load_ttf_font("arial.ttf", 36, 0);				//
@@ -174,11 +171,12 @@ int main(void)
 	//Init images
 
 	//Character Images
-	walkRight	= al_load_bitmap("./images/kriWalkR.png");
-	walkLeft	= al_load_bitmap("./images/kriWalkL.png");
-	standLeft	= al_load_bitmap("./images/kriL.png");
-	standRight	= al_load_bitmap("./images/kriR.png");
-	select		= standRight;
+	player_img[0] = al_load_bitmap("./images/KriR.png");		
+	player_img[1] = al_load_bitmap("./images/KriL.png");
+	player_img[2] = al_load_bitmap("./images/KriWalkR.png");
+	player_img[3] = al_load_bitmap("./images/KriWalkL.png");	
+
+	select		= player_img[0];
 	
 	//Attack images
 	atk[0]	= al_load_bitmap("./images/calc.png");
@@ -281,8 +279,8 @@ int main(void)
 	//end Asset variables
 
 	//End initialisers
-	al_set_display_icon(display, icon1);  
-	al_set_window_title(display, "UKZN - LECTURE DEFENCE - HOWARD EDITION");   //set window title 
+	//al_set_display_icon(display, icon1);  
+	//al_set_window_title(display, "UKZN - LECTURE DEFENCE - HOWARD EDITION");   //set window title 
 	al_start_timer(timer);											//Start event timer (program clock)
 	al_clear_to_color(black);										//Clear and set Background black
 	al_set_target_bitmap(al_get_backbuffer(display));				//
@@ -301,42 +299,57 @@ int main(void)
 			{
 			case ALLEGRO_KEY_UP:				
 				keys[UP] = true;
-				if (direction == 1) select = walkRight;			//set character sprite to ____
-				else select = walkLeft;
+				if (direction == 1) select = player_img[2];			//set character sprite to ____
+				else select = player_img[3];
 				break;
 			case ALLEGRO_KEY_W:									
 				keys[UP] = true;
-				if (direction == 1) select = walkRight;
-				else select = walkLeft;
+				if (direction == 1) select = player_img[2];
+				else select = player_img[3];
 				break;
 			case ALLEGRO_KEY_DOWN:
 				keys[DOWN] = true;
-				if (direction == 1) select = walkRight;
-				else select = walkLeft;
+				if (direction == 1) select = player_img[2];
+				else select = player_img[3];
 				break;
 			case ALLEGRO_KEY_S:
 				keys[DOWN] = true;
-				if (direction == 1) select = walkRight;
-				else select = walkLeft;
+				if (direction == 1) select = player_img[2];
+				else select = player_img[3];
 				break;
 			case ALLEGRO_KEY_RIGHT:
 				keys[RIGHT] = true;
-				select = walkRight;
+				select = player_img[2];
 				direction = 1;
+				break;
+			case ALLEGRO_KEY_N:
+				if (egg < 1 && state == SETTINGS)
+				{
+					egg++;
+				}
+				break;
+			case ALLEGRO_KEY_M:
+				if (egg < 2 && state == SETTINGS)
+				{
+					egg++;
+				}
+				break;
+			case ALLEGRO_KEY_K:
+				egg = 0;
 				break;
 			case ALLEGRO_KEY_D:
 				keys[RIGHT] = true;
-				select = walkRight;
+				select = player_img[2];
 				direction = 1;
 				break;
 			case ALLEGRO_KEY_LEFT:
 				keys[LEFT] = true;
-				select = walkLeft;
+				select = player_img[3];
 				direction = 0;
 				break;
 			case ALLEGRO_KEY_A:
 				keys[LEFT] = true;
-				select = walkLeft;
+				select = player_img[3];
 				direction = 0;
 				break;
 			case ALLEGRO_KEY_ENTER:
@@ -366,38 +379,38 @@ int main(void)
 			{
 			case ALLEGRO_KEY_UP:
 				keys[UP] = false;
-				if (direction == 1) select = standRight;
-				else select = standLeft;
+				if (direction == 1) select = player_img[0];
+				else select = player_img[1];
 				break;
 			case ALLEGRO_KEY_W:
 				keys[UP] = false;
-				if (direction == 1) select = standRight;
-				else select = standLeft;
+				if (direction == 1) select = player_img[0];
+				else select = player_img[1];
 				break;
 			case ALLEGRO_KEY_DOWN:
 				keys[DOWN] = false;
-				if (direction == 1) select = standRight;
-				else select = standLeft;
+				if (direction == 1) select = player_img[0];
+				else select = player_img[1];
 				break;
 			case ALLEGRO_KEY_S:
 				keys[DOWN] = false;
-				if (direction == 1) select = standRight;
-				else select = standLeft;
+				if (direction == 1) select = player_img[0];
+				else select = player_img[1];
 				break;
 			case ALLEGRO_KEY_RIGHT:
 				keys[RIGHT] = false;
-				select = standRight;
+				select = player_img[0];
 				break;
 			case ALLEGRO_KEY_D:
 				keys[RIGHT] = false;
-				select = standRight;
+				select = player_img[0];
 				break;
 			case ALLEGRO_KEY_LEFT:
 				keys[LEFT] = false;
-				select = standLeft;
+				select = player_img[1];
 				break;
 			case ALLEGRO_KEY_A:
-				select = standLeft;
+				select = player_img[1];
 				break;
 			case ALLEGRO_KEY_P:
 				if (state == PLAYING)					//Check state		-- THIS FUNCTION NEEDS REPAIRS	
@@ -426,6 +439,7 @@ int main(void)
 				break;
 			case ALLEGRO_KEY_ENTER:
 				if (state == WIN)
+					boss_sel = lecturers[rand() % 6];											//Default selected enemy/lecturer
 					ChangeState(state, PLAYING);
 				break;
 			case ALLEGRO_KEY_ESCAPE:
@@ -436,6 +450,15 @@ int main(void)
 				break;
 			case ALLEGRO_KEY_SPACE:
 				keys[SPACE] = false;
+				break;
+			case ALLEGRO_KEY_K:
+					egg = 0;
+				break;
+			case ALLEGRO_KEY_M:
+				//	egg = 0;
+				break;
+			case ALLEGRO_KEY_N:
+				//	egg = 0;
 				break;
 			}
 		}
@@ -779,10 +802,29 @@ int main(void)
 
 				al_draw_textf(fonts[0], white, scrn_W - 300, scrn_H-50, 0, "PRESS BACKSPACE TO RETURN");
 
+				if (egg >= 2)
+				{
+					player_img[0] = al_load_bitmap("./images/pikaR.png");
+					player_img[1] = al_load_bitmap("./images/pikaL.png");
+					player_img[2] = al_load_bitmap("./images/pikaWalkR.png");
+					player_img[3] = al_load_bitmap("./images/pikaWalkL.png");
+
+				}
+				else
+				{
+					player_img[0] = al_load_bitmap("./images/kriR.png");
+					player_img[1] = al_load_bitmap("./images/kriL.png");
+					player_img[2] = al_load_bitmap("./images/kriWalkR.png");
+					player_img[3] = al_load_bitmap("./images/kriWalkL.png");
+				}
+				
+
 				//end setting
 			}
 			else if (state == PLAYING)
 			{
+				//fprintf(stderr, "\negg = %d", egg);
+
 				//playing
 				DrawCharacter(player, select, curFrame, frameW, frameH);
 				DrawBullet(bullets, NUM_BULLETS, atksel);
@@ -791,21 +833,31 @@ int main(void)
 				DrawBoss(bossy, NUM_BOSS, boss_sel, curFrame, frameW, frameH);
 				DrawExplosions(explosions, NUM_EXPLOSIONS);
 
-				al_draw_textf(fonts[0], black, scrn_W/2-100, 5, 0, "Score : %i ", player.score*10);
-				if (player.score % 20 == 0 && player.score != 0) // <<<<< CHANGE SCORE FOR BOSS ARRIVAL
+				al_draw_textf(fonts[0], black, scrn_W/2-100, 5, 0, "Score : %i ", player.score);
+				if (player.score != 0) // <<<<< CHANGE SCORE FOR BOSS ARRIVAL
 				{
-					bosslevel = true;
-					if (playone == 1)
+					if (player.score % 20 == 0)
 					{
+						bosslevel = true;
+						if (playone == 1)
+						{
 							al_play_sample(sample[1], 1.0, 0.0, 1.0, ALLEGRO_PLAYMODE_ONCE, NULL);
 							playone++;
+						}
 					}
 				}
 				if (win == true)
 				{
-					ChangeState(state, WIN);
-					al_rest(1.5);
+					level++;
+					if (level >= 4)
+					{
+						ChangeState(state, WIN);
+						al_rest(1.5);
+					}
+					boss_sel = lecturers[rand() % 6];											//Default selected enemy/lecturer
+					al_rest(0.5);
 					win = false;
+					egg = 0;
 				}
 				int x = al_get_bitmap_width(numLives[player.lives-1]);
 				int y = al_get_bitmap_width(numLives[player.lives-1]);
@@ -817,7 +869,8 @@ int main(void)
 			else if (state == LOST)
 			{//lost
 				al_draw_bitmap(scrns[2], scrn_W / 2 - 250, 100, 0);                      // Game over Screen
-				al_draw_textf(fonts[2], black, scrn_W/2+70, 340, 0, "%i", player.score*10);
+				al_draw_textf(fonts[2], black, scrn_W/2+70, 340, 0, "%i", player.score);
+				egg = 0;
 
 			//end lost
 			}
@@ -829,10 +882,10 @@ int main(void)
 	}
 
 	//Destruction
-	al_destroy_bitmap(walkLeft);
-	al_destroy_bitmap(walkRight);
-	al_destroy_bitmap(standLeft);
-	al_destroy_bitmap(standRight);
+	al_destroy_bitmap(player_img[3]);
+	al_destroy_bitmap(player_img[2]);
+	al_destroy_bitmap(player_img[1]);
+	al_destroy_bitmap(player_img[0]);
 	al_destroy_bitmap(atksel);
 
 	for (int i = 0; i < 5; i++)
@@ -870,7 +923,6 @@ void InitCharacter(Character &player)
 	player.speed = 5;
 	player.boundx = 65;
 	player.boundy = 160;
-	player.score = 0;
 }
 void DrawCharacter(Character &player, ALLEGRO_BITMAP *select, int cur, int fW, int fH)
 {	
@@ -1217,7 +1269,7 @@ void CollideProjectile(Projectile thrown[], int cSize, Character &player, int ty
 					{
 						player.lives++;
 					}
-					player.score += 50;
+					player.score += 2;
 					poweredNum = 1;
 					thrown[i].live = false;
 				}

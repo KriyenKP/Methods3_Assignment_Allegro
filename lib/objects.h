@@ -13,7 +13,7 @@ struct Character {
 	int speed;
 	int boundx;
 	int boundy;
-	int score;
+	int score = 0;
 
 	int maxFrame;
 	int curFrame;
