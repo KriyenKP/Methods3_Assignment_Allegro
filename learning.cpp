@@ -12,9 +12,6 @@
 #include <allegro5/allegro_primitives.h>		//Used for drawing Shapes
 using namespace std;
 
-#define SINEHEIGHT  20
-#define DEGREESTEP  5
-
 //REMEMBER TO EDIT Linker -> System -> SubSystem -> WINDOW to hide console!
 
 //asset Init
@@ -252,12 +249,7 @@ int main(void)
 
 	icon1			= al_load_bitmap("./images/icon.png");
 
-
-
 	int direction = 1;						//Default direction identifier init
-
-   // al_convert_mask_to_alpha(walkLeft, al_map_rgb(106, 76, 48));  //clear designated colour to create clear image
-
 
 	//Event queue - register listeners
 	al_register_event_source(event_queue, al_get_timer_event_source(timer));
@@ -280,8 +272,8 @@ int main(void)
 	//end Asset variables
 
 	//End initialisers
-	//al_set_display_icon(display, icon1);  
-	//al_set_window_title(display, "UKZN - LECTURE DEFENCE - HOWARD EDITION");   //set window title 
+	al_set_display_icon(display, icon1);  
+	al_set_window_title(display, "UKZN - LECTURE DEFENCE - HOWARD EDITION");   //set window title 
 	al_start_timer(timer);											//Start event timer (program clock)
 	al_clear_to_color(black);										//Clear and set Background black
 	al_set_target_bitmap(al_get_backbuffer(display));				//
@@ -711,9 +703,13 @@ int main(void)
 			else if (state == WIN)
 			{//win
 				al_draw_bitmap(scrns[4], 0, 0, 0);  //Win!
-				al_draw_textf(fonts[0], black, scrn_W / 2 + 20, scrn_H - 30, ALLEGRO_ALIGN_CENTRE, "PRESS ENTER TO CONTINUE");
+				al_draw_textf(fonts[0], black, scrn_W / 2 - 110, scrn_H - 30, ALLEGRO_ALIGN_CENTRE, "ENTER FOR NEW GAME");
+				al_draw_textf(fonts[0], white, 110, 0, ALLEGRO_ALIGN_CENTRE, "ENTER FOR NEW GAME");
+				al_draw_textf(fonts[0], black, scrn_W / 2 + 130, scrn_H - 30, ALLEGRO_ALIGN_CENTRE, "BKSPACE FOR MENU");
+				al_draw_textf(fonts[0], white, scrn_W - 100, 0, ALLEGRO_ALIGN_CENTRE, "BKSPACE FOR MENU");
 				boss_sel = lecturers[rand() % 6];
 				player.score = 0;
+				level = 0;
 			//end win
 			}
 			else if (state == SETTINGS)
