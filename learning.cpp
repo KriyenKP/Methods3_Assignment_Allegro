@@ -79,7 +79,6 @@ int main(void)
 		curMap = 0,			//current map identifier
 		curAtk = 0;			//current attack identifier
 
-
 	//Initialisers
 	ALLEGRO_DISPLAY			*display		= NULL;					//Screen display
 	ALLEGRO_EVENT_QUEUE		*event_queue	= NULL;					//Event Queue
@@ -512,7 +511,6 @@ int main(void)
 			}
 			if (state == SETTINGS)
 			{
-				al_rest(0.2);	//ensure "level is locked" position derp doesn't trigger immediately
 				// Position of Lecturers
 				if (crs_x >= 100 && crs_x <= 224 && crs_y >= 50 && crs_y <= 180)
 				{
@@ -555,11 +553,10 @@ int main(void)
 				
 				if (crs_x >= 240 && crs_x <= 354 && crs_y >= 250 && crs_y <= 380)
 				{
-					if (strcmp(al_get_config_value(savegame, "venueunlock 2", "unlocked"), "0") == 0)
+					if ((strcmp(al_get_config_value(savegame, "venueunlock 2", "unlocked"), "0") == 0))
 					{
-						al_show_native_message_box(display, "Locked Level", "Sorry!", "That's a locked level. Keep playing to unlock it.", NULL, ALLEGRO_MESSAGEBOX_WARN);
-						bgImage = maps[0]; // Default to Howard
-						curMap = 0;						
+						curMap = 6;			//send default state
+					
 					}
 					else {
 						bgImage = maps[1]; // tbdavis unlocked
@@ -571,9 +568,8 @@ int main(void)
 				{
 					if (strcmp(al_get_config_value(savegame, "venueunlock 3", "unlocked"), "0") == 0)
 					{
-						al_show_native_message_box(display, "Locked Level", "Sorry!", "That's a locked level. Keep playing to unlock it.", NULL, ALLEGRO_MESSAGEBOX_WARN);
-						bgImage = maps[0]; // Default to Howard
-						curMap = 0;
+						curMap = 6;			//send default state
+
 					}
 					else {
 						bgImage = maps[2]; // Park unlocked
@@ -584,9 +580,8 @@ int main(void)
 				{
 					if (strcmp(al_get_config_value(savegame, "venueunlock 4", "unlocked"), "0") == 0)
 					{
-						al_show_native_message_box(display, "Locked Level", "Sorry!", "That's a locked level. Keep playing to unlock it.", NULL, ALLEGRO_MESSAGEBOX_WARN);
-						bgImage = maps[0]; // Default to Howard
-						curMap = 0;
+						curMap = 6;			//send default state
+
 					}
 					else {
 						bgImage = maps[3]; // Science unlocked
@@ -597,9 +592,8 @@ int main(void)
 				{
 					if (strcmp(al_get_config_value(savegame, "venueunlock 5", "unlocked"), "0") == 0)
 					{
-						al_show_native_message_box(display, "Locked Level", "Sorry!", "That's a locked level. Keep playing to unlock it.", NULL, ALLEGRO_MESSAGEBOX_WARN);
-						bgImage = maps[0]; // Default to Howard
-						curMap = 0;
+						curMap = 6;			//send default state
+
 					}
 					else {
 						bgImage = maps[4]; // Science unlocked
@@ -610,9 +604,7 @@ int main(void)
 				{
 					if (strcmp(al_get_config_value(savegame, "venueunlock 6", "unlocked"), "0") == 0)
 					{
-						al_show_native_message_box(display, "Locked Level", "Sorry!", "That's a locked level. Keep playing to unlock it.", NULL, ALLEGRO_MESSAGEBOX_WARN);
-						bgImage = maps[0]; // Default to Howard
-						curMap = 0;
+						curMap = 6;			//send default state
 					}
 					else {
 						bgImage = maps[5]; // Science unlocked
@@ -839,6 +831,7 @@ int main(void)
 				{	al_draw_bitmap(lockedmap[5], 800, 250, 0);
 				}		else{ al_draw_bitmap(mapsmini[5], 800, 250, 0); }//Cafe
 
+
 				switch (curMap)
 				{
 					//need savegame unlockables
@@ -847,7 +840,7 @@ int main(void)
 					break;
 				case 1:
 					al_draw_textf(fonts[1], white, scrn_W / 2 - 150, 380, 0, "CURRENT VENUE : T.B Davis");
-					break;
+					break;					
 				case 2:
 					al_draw_textf(fonts[1], white, scrn_W / 2 - 150, 380, 0, "CURRENT VENUE : The Park");
 					break;
@@ -859,6 +852,11 @@ int main(void)
 					break;
 				case 5:
 					al_draw_textf(fonts[1], white, scrn_W / 2 - 150, 380, 0, "CURRENT VENUE : The Amphitheatre");
+					break;
+				case 6:
+					al_draw_textf(fonts[1], red, scrn_W / 2 - 190, 380, 0, "This is a locked venue. Keep playing to unlock it.");
+					//curMap = 0;
+					bgImage = maps[0]; // Default to Howard
 					break;
 				}
 
@@ -981,6 +979,7 @@ int main(void)
 		al_destroy_font(fonts[i]);
 		al_destroy_bitmap(maps[i]);
 		al_destroy_bitmap(mapsmini[i]);
+		al_destroy_bitmap(lockedmap[i]);
 		al_destroy_bitmap(btns[i]);
 		al_destroy_bitmap(scrns[i]);
 		al_destroy_sample(sample[i]);
