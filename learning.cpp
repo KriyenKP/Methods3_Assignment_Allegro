@@ -74,6 +74,7 @@ int main(void)
 		 redraw = true,					//Redraw frame
 	     timeM	= true;					//Pause Timer  -- NEEDS TO BE FIXED
 
+
 	int curLect = 0,		//current lecture identifier
 		curMap = 0,			//current map identifier
 		curAtk = 0;			//current attack identifier
@@ -196,7 +197,7 @@ int main(void)
 	lecturers[4]	= al_load_bitmap("./images/tom.png");			//Walingo
 	lecturers[5]	= al_load_bitmap("./images/viran.png");			//Viranjay
 
-	enemsel	 = lecturers[0];											//Default selected enemy/
+	enemsel	 = lecturers[0];										//Default selected enemy/
 	boss_sel = lecturers[rand()%6];											//Default selected enemy/lecturer
 
 	power[0] = al_load_bitmap("./images/dp.png");
@@ -210,7 +211,7 @@ int main(void)
 	minilect[4]			= al_load_bitmap("./images/tom1.png");
 	minilect[5]			= al_load_bitmap("./images/viran1.png");
 	
-	//Map Images
+	//Map Images	
 	maps[0]		= al_load_bitmap("./images/howard.png");		//Howard Building
 	maps[1]		= al_load_bitmap("./images/tbdavis.png");		//TB Davis
 	maps[2]		= al_load_bitmap("./images/park.png");			//The park
@@ -218,7 +219,7 @@ int main(void)
 	maps[4]		= al_load_bitmap("./images/cafe.png");		//cafe
 	maps[5]		= al_load_bitmap("./images/amphi.png");	//amphitheatre
 
-	bgImage			= maps[0];								//Default selected map
+	bgImage			= maps[0];								//Default selected map --always unlocked
 
 	//Map thumbnail
 	mapsmini[0]		= al_load_bitmap("./images/howards.png");		//Howard Building
@@ -267,7 +268,7 @@ int main(void)
 	//End Colours
 
 	//Asset variables
-	ChangeState(state, TITLE);
+	ChangeState(state, TITLE);					//game state function
 	srand(time(NULL));
 	//end Asset variables
 
@@ -276,8 +277,8 @@ int main(void)
 	al_set_window_title(display, "UKZN - LECTURE DEFENCE - HOWARD EDITION");   //set window title 
 	al_start_timer(timer);											//Start event timer (program clock)
 	al_clear_to_color(black);										//Clear and set Background black
-	al_set_target_bitmap(al_get_backbuffer(display));				//
-	al_flip_display();
+	al_set_target_bitmap(al_get_backbuffer(display));				//Backbuffer--next frame to write to display
+	al_flip_display();												//Allows manual switch between current disp & backbuffer
 	
 	
 	while (!done)
@@ -295,7 +296,7 @@ int main(void)
 				if (direction == 1) select = player_img[2];			//set character sprite to ____
 				else select = player_img[3];
 				break;
-			case ALLEGRO_KEY_W:									
+			case ALLEGRO_KEY_W:										//button press actions for sprite dir
 				keys[UP] = true;
 				if (direction == 1) select = player_img[2];
 				else select = player_img[3];
@@ -350,27 +351,27 @@ int main(void)
 			case ALLEGRO_KEY_SPACE:
 				keys[SPACE] = true;
 				if (state == TITLE)
-					ChangeState(state, MENU);
+					ChangeState(state, MENU);					//Splash->Menu on Spacebar press
 				else if (state == MENU)
-					ChangeState(state, PLAYING);
+					ChangeState(state, PLAYING);				//Menu-> Game if Spacebar press
 				else if (state == HELP)
-					ChangeState(state, MENU);
-				else if (state == PLAYING)
+					ChangeState(state, MENU);					//Help-> Menu if spacebar press
+				else if (state == PLAYING)						//Spacebar fires bullets in-game
 				{	
 					FireBullet(bullets, NUM_BULLETS, player);
-					//al_play_sample(sample[0], 1.0, 0.0, 1.0, ALLEGRO_PLAYMODE_ONCE, NULL);
+					//al_play_sample(sample[0], 1.0, 0.0, 1.0, ALLEGRO_PLAYMODE_ONCE, NULL); <--What did this do? 
 				}
 				else if (state == LOST)
-					ChangeState(state, PLAYING);
+					ChangeState(state, PLAYING);				
 				break;
 			}
 		}
 
-		else if (ev.type == ALLEGRO_EVENT_KEY_UP)					//If Key down event
+		else if (ev.type == ALLEGRO_EVENT_KEY_UP)					//If Key up event
 		{
 			switch (ev.keyboard.keycode)
 			{
-			case ALLEGRO_KEY_UP:
+			case ALLEGRO_KEY_UP:									//Keypress sprite and dir updates
 				keys[UP] = false;
 				if (direction == 1) select = player_img[0];
 				else select = player_img[1];
@@ -423,7 +424,7 @@ int main(void)
 				}
 				break;
 			case ALLEGRO_KEY_BACKSPACE:
-				if (timeM == false)
+				if (timeM == false)										//if game on pause, BKSP to menu
 				{
 					timeM = true;
 					al_start_timer(timer);
@@ -432,10 +433,10 @@ int main(void)
 				break;
 			case ALLEGRO_KEY_ENTER:
 				if (state == WIN)
-					boss_sel = lecturers[rand() % 6];											//Default selected enemy/lecturer
+					boss_sel = lecturers[rand() % 6];				//Random Boss character selected
 					ChangeState(state, PLAYING);
 				break;
-			case ALLEGRO_KEY_ESCAPE:
+			case ALLEGRO_KEY_ESCAPE:								//should it be mentioned on menus that ESC quits?
 				if (state==TITLE || state == MENU || state == HELP)
 					done = true;
 				else 
@@ -528,31 +529,37 @@ int main(void)
 				if (crs_x >= 100 && crs_x <= 224 && crs_y >= 250 && crs_y <= 380)
 				{
 					bgImage = maps[0]; // howard
+					//savegame unlockables
 					curMap = 0;
 				}
 				if (crs_x >= 240 && crs_x <= 354 && crs_y >= 250 && crs_y <= 380)
 				{
 					bgImage = maps[1]; // tbdavis
+					//savegame unlockables
 					curMap = 1;
 				}
 				if (crs_x >= 380 && crs_x <= 504 && crs_y >= 250 && crs_y <= 380)
 				{
 					bgImage = maps[2];		//Park
+					//savegame unlockables
 					curMap = 2;
 				}
 				if (crs_x >= 520 && crs_x <= 644 && crs_y >= 250 && crs_y <= 380) 
 				{
 					bgImage = maps[3];		//science
+					//savegame unlockables
 					curMap = 3;
 				}
 				if (crs_x >= 660 && crs_x <= 784 && crs_y >= 250 && crs_y <= 380)
 				{
 					bgImage = maps[4];		//cafe
+					//savegame unlockables
 					curMap = 4;
 				}
 				if (crs_x >= 800 && crs_x <= 924 && crs_y >= 250 && crs_y <= 380)
 				{
 					bgImage = maps[5];		//amphi
+					//savegame unlockables
 					curMap = 5;
 				}
 				// End Position of Maps
@@ -562,18 +569,21 @@ int main(void)
 				if (crs_x >= 330 && crs_x <= 430 && crs_y >= 470 && crs_y <= 560)
 				{
 					atksel = atk[0]; //Calculator
+					//savegame unlockables
 					curAtk = 0;
 				}
 
 				if (crs_x >= 500 && crs_x <= 615 && crs_y >= 470 && crs_y <= 560)
 				{
 					atksel = atk[1]; //Pencil
+					//savegame unlockables
 					curAtk = 1;
 
 				}
 				if (crs_x >= 670 && crs_x <= 800 && crs_y >= 470 && crs_y <= 560)
 				{
 					atksel = atk[2]; //C++
+					//savegame unlockables
 					curAtk = 2;
 				}
 				// End Position of Powers
@@ -759,6 +769,7 @@ int main(void)
 
 				switch (curMap)
 				{
+					//need savegame unlockables
 				case 0:
 					al_draw_textf(fonts[1], white, scrn_W / 2 - 150,380, 0, "CURRENT VENUE : Howard Building");
 					break;
@@ -780,7 +791,7 @@ int main(void)
 				}
 
 				al_draw_textf(fonts[1], white, scrn_W / 2 - 80, 425, 0, "CHOOSE YOUR POWER : ");
-
+				//need savegame unlockables
 				al_draw_bitmap(atk[0], scrn_W / 2 - 200, 475, 0);	//Calculator
 				al_draw_bitmap(atk[1], scrn_W / 2 - 20, 475, 0);	//Pencil
 				al_draw_bitmap(atk[2], scrn_W / 2 + 160, 475, 0);	//C++
@@ -931,6 +942,7 @@ void InitCharacter(Character &player)
 }
 void DrawCharacter(Character &player, ALLEGRO_BITMAP *select, int cur, int fW, int fH)
 {	
+	//can we remove the below?
 	//al_draw_filled_rectangle(player.spritex + 75, player.spritey + 25, player.spritex + 75 + player.boundx , player.spritey + 25 + player.boundy, green);  << test purposes - check collision area
 	//al_draw_bitmap_region(select, cur * fW, 0, fW, fH, player.spritex, player.spritey, 0);
 	if (poweredNum < 60 && poweredNum > 0)
