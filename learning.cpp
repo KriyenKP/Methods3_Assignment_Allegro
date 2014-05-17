@@ -833,7 +833,7 @@ int main(void)
 				DrawBoss(bossy, NUM_BOSS, boss_sel, curFrame, frameW, frameH);
 				DrawExplosions(explosions, NUM_EXPLOSIONS); 
 
-				al_draw_textf(fonts[0], black, scrn_W / 2 - 100, 5, 0, "Score : %d * Level : %d", player.score, level);
+				al_draw_textf(fonts[0], black, scrn_W / 2 - 100, 5, 0, "Score : %d * Level : %d", player.score, level+1);
 				if (bosslevel) al_draw_textf(fonts[2], red, scrn_W / 2 -50, 20, 0, "BOSS!");
 				if (player.score != 0) // <<<<< CHANGE SCORE FOR BOSS ARRIVAL
 				{
