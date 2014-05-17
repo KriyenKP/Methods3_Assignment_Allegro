@@ -91,8 +91,9 @@ int main(void)
 							*player_img[5]  = {NULL,NULL, NULL, NULL, NULL},	
 							*select			= NULL,					//Current Selected position of character
 							*icon1			= NULL,					//Current icon -- NOT SET YET
-							*numLives[3]	= { NULL, NULL, NULL},		//Attack array
+							*numLives[3]	= { NULL, NULL, NULL},		//Lives array
 							*atk[5]			= { NULL, NULL, NULL, NULL, NULL },		//Attack array
+							*lockatk[5]		= { NULL, NULL, NULL, NULL, NULL },		//locked weapons
 							*atksel			= NULL,
 							*lecturers[6]	= {NULL, NULL, NULL, NULL, NULL, NULL},  //Lecturer array
 							*minilect[6]	= { NULL, NULL, NULL, NULL, NULL, NULL },	//Lecturer Thumbnail
@@ -111,6 +112,7 @@ int main(void)
 //	const char *unven1 = al_get_config_value(savegame, "venueunlock 1", "unlocked");	<-- test to check if config readable
 //	printf("The first value for venue 1 is %s", unven1);
 	bool savefile = TRUE;
+	savefile = al_save_config_file("config.ini", savegame);
 
 	if (!al_init())											//initialize and check Allegro
 	{
@@ -149,7 +151,6 @@ int main(void)
 
 	if (savegame == NULL || savefile == FALSE)
 	{
-		savefile = al_save_config_file("config.ini", savegame);
 		al_show_native_message_box(display, "Error!", "Savegame File Initialise/Save Failed!", "\n Check directory for config.ini\nClosing Application!", NULL, ALLEGRO_MESSAGEBOX_WARN);
 		al_destroy_display(display);
 		al_destroy_timer(timer);
@@ -190,12 +191,16 @@ int main(void)
 
 	select		= player_img[0];
 	
-	//Attack images
+	//Attack images (unlocked)
 	atk[0]	= al_load_bitmap("./images/calc.png");
 	atk[1]	= al_load_bitmap("./images/pencil.png");
 	atk[2]	= al_load_bitmap("./images/c.png");
 	atk[3]  = al_load_bitmap("./images/light.png");
 	atksel = atk[0];
+
+	//Attack images (locked)
+	lockatk[1] = al_load_bitmap("./images/pencillock.png");
+	lockatk[2] = al_load_bitmap("./images/clock.png");
 
 	numLives[0]		= al_load_bitmap("./images/1.png");			//Number of Lives
 	numLives[1]		= al_load_bitmap("./images/2.png");
@@ -620,22 +625,25 @@ int main(void)
 				if (crs_x >= 330 && crs_x <= 430 && crs_y >= 470 && crs_y <= 560)
 				{
 					atksel = atk[0]; //Calculator
-					//savegame unlockables
 					curAtk = 0;
 				}
 
 				if (crs_x >= 500 && crs_x <= 615 && crs_y >= 470 && crs_y <= 560)
 				{
-					atksel = atk[1]; //Pencil
-					//savegame unlockables
-					curAtk = 1;
-
+					if (strcmp(al_get_config_value(savegame, "weaponunlocks", "unlocked2"), "0") == 0)
+					{
+						curAtk = 3; //Pencil locked, revert to calc
+					}
+					else { atksel = atk[1]; curAtk = 1; } //Pencil unlocked
 				}
+
 				if (crs_x >= 670 && crs_x <= 800 && crs_y >= 470 && crs_y <= 560)
 				{
-					atksel = atk[2]; //C++
-					//savegame unlockables
-					curAtk = 2;
+					if (strcmp(al_get_config_value(savegame, "weaponunlocks", "unlocked3"), "0") == 0)
+					{
+						curAtk = 3; //C++ locked, revert to calc
+					}
+					else { atksel = atk[2]; curAtk = 2; } //C++ unlocked
 				}
 				// End Position of Powers
 			}
@@ -863,10 +871,21 @@ int main(void)
 				}
 
 				al_draw_textf(fonts[1], white, scrn_W / 2 - 80, 425, 0, "CHOOSE YOUR POWER : ");
-				//need savegame unlockables
+
 				al_draw_bitmap(atk[0], scrn_W / 2 - 200, 475, 0);	//Calculator
-				al_draw_bitmap(atk[1], scrn_W / 2 - 20, 475, 0);	//Pencil
-				al_draw_bitmap(atk[2], scrn_W / 2 + 160, 475, 0);	//C++
+				
+				if (strcmp(al_get_config_value(savegame, "weaponunlocks", "unlocked2"), "0") == 0)
+				{
+					al_draw_bitmap(lockatk[1], scrn_W / 2 - 20, 475, 0);	//Pencil locked
+				}
+				else{ al_draw_bitmap(atk[1], scrn_W / 2 - 20, 475, 0); };	//Pencil
+
+				if (strcmp(al_get_config_value(savegame, "weaponunlocks", "unlocked3"), "0") == 0)
+				{
+					al_draw_bitmap(lockatk[2], scrn_W / 2 + 160, 475, 0);	//C++ locked
+				}
+				else{al_draw_bitmap(atk[2], scrn_W / 2 + 160, 475, 0);};	//C++
+				
 
 				switch (curAtk)
 				{
@@ -879,6 +898,9 @@ int main(void)
 				case 2:
 					al_draw_textf(fonts[1], white, scrn_W / 2 - 150, 575, 0, "CURRENT POWER : C++ Programming");
 					break;
+				case 3:
+					al_draw_textf(fonts[1], red, scrn_W / 2 - 150, 575, 0, "This weapon is locked. Keep playing to unlock!");
+					atksel = atk[0]; //revert to calc
 				}
 
 				al_draw_textf(fonts[0], white, scrn_W - 300, scrn_H-50, 0, "PRESS BACKSPACE TO RETURN");
@@ -999,12 +1021,20 @@ int main(void)
 
 	}
 
-	//Destruction
+	//Destruction of assets (prevents assert fails)
 	al_destroy_bitmap(player_img[3]);
 	al_destroy_bitmap(player_img[2]);
 	al_destroy_bitmap(player_img[1]);
 	al_destroy_bitmap(player_img[0]);
 	al_destroy_bitmap(atksel);
+
+	//this part might be buggy
+	for (int i = 1; i < 4; i++)
+	{
+//		al_destroy_bitmap(atk[i]);
+		al_destroy_bitmap(lockatk[i]);
+	}
+	
 
 	for (int i = 0; i < 5; i++)
 	{
@@ -1015,7 +1045,7 @@ int main(void)
 		al_destroy_bitmap(btns[i]);
 		al_destroy_bitmap(scrns[i]);
 		al_destroy_sample(sample[i]);
-	//	al_destroy_bitmap(atk[i]);
+
 	}
 	for (int i = 0; i < 6; i++)
 	{
