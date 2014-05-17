@@ -24,7 +24,7 @@ Boss bossy[NUM_BOSS];
 Explosion explosions[NUM_EXPLOSIONS];
 //End asset init
 
-bool keys[6] = { false, false, false, false, false, false }; // enum KEYS init
+bool keys[10] = { false, false, false, false, false, false, false, false, false, false }; // Keystate array, stores the state of keys we are intersted in. True when key is pressed
 
 //Asset Functions
 void InitCharacter(Character &player);
@@ -166,6 +166,7 @@ int main(void)
 	al_init_acodec_addon();
 	al_init_ttf_addon();									//load truetype font addon	
 	al_init_image_addon();									//load image processing addon
+// Should we not have error checking here? Ref http://wiki.allegro.cc/index.php?title=Basic_Keyboard_Example
 	al_install_keyboard();									//install keyboard
 	al_install_mouse();										//install mouse
 	//end addon innit
@@ -281,8 +282,8 @@ int main(void)
 	int direction = 1;						//Default direction identifier init
 
 	//Event queue - register listeners
-	al_register_event_source(event_queue, al_get_timer_event_source(timer));
-	al_register_event_source(event_queue, al_get_keyboard_event_source());
+	al_register_event_source(event_queue, al_get_timer_event_source(timer)); 
+	al_register_event_source(event_queue, al_get_keyboard_event_source());				// get keyboard presses
 	al_register_event_source(event_queue, al_get_mouse_event_source());
 	al_register_event_source(event_queue, al_get_display_event_source(display));
 	//end event queue
@@ -313,179 +314,261 @@ int main(void)
 		ALLEGRO_EVENT ev;										//Allegro event init
 		al_wait_for_event(event_queue, &ev);					//wait for and accept events 
 
-		if (ev.type == ALLEGRO_EVENT_KEY_DOWN)					//If Key down event
+		// game logic should not be in here? should be in timer ? I've moved it there anyway... 
+		if (ev.type == ALLEGRO_EVENT_KEY_DOWN)					//If Key down event. I.E. A keyboard key has been pressed, we must process and update key array
 		{
-			fired = false;										//Bullet Fired False 
-			switch (ev.keyboard.keycode)						//Switch keyboard code returned
+			switch (ev.keyboard.keycode)						//Switch keyboard code returned. 
 			{
-			case ALLEGRO_KEY_UP:				
-				keys[UP] = true;
-				if (direction == 1) select = player_img[2];			//set character sprite to ____
-				else select = player_img[3];
-				break;
-			case ALLEGRO_KEY_W:										//button press actions for sprite dir
-				keys[UP] = true;
-				if (direction == 1) select = player_img[2];
-				else select = player_img[3];
-				break;
-			case ALLEGRO_KEY_DOWN:
-				keys[DOWN] = true;
-				if (direction == 1) select = player_img[2];
-				else select = player_img[3];
-				break;
-			case ALLEGRO_KEY_S:
-				keys[DOWN] = true;
-				if (direction == 1) select = player_img[2];
-				else select = player_img[3];
-				break;
-			case ALLEGRO_KEY_RIGHT:
-				keys[RIGHT] = true;
-				select = player_img[2];
-				direction = 1;
-				break;
-			case ALLEGRO_KEY_N:
-				if (egg < 1 && state == SETTINGS)
-				{
-					egg++;
-				}
-				break;
-			case ALLEGRO_KEY_M:
-				if (egg < 2 && state == SETTINGS)
-				{
-					egg++;
-				}
-				break;
-			case ALLEGRO_KEY_K:
-				egg = 0;
-				break;
-			case ALLEGRO_KEY_D:
-				keys[RIGHT] = true;
-				select = player_img[2];
-				direction = 1;
-				break;
-			case ALLEGRO_KEY_LEFT:
-				keys[LEFT] = true;
-				select = player_img[3];
-				direction = 0;
-				break;
-			case ALLEGRO_KEY_A:
-				keys[LEFT] = true;
-				select = player_img[3];
-				direction = 0;
-				break;
-			case ALLEGRO_KEY_ENTER:
-				break;
-			case ALLEGRO_KEY_SPACE:
-				keys[SPACE] = true;
-				if (state == TITLE)
-					ChangeState(state, MENU);					//Splash->Menu on Spacebar press
-				else if (state == MENU)
-					ChangeState(state, PLAYING);				//Menu-> Game if Spacebar press
-				else if (state == HELP)
-					ChangeState(state, MENU);					//Help-> Menu if spacebar press
-				else if (state == PLAYING)						//Spacebar fires bullets in-game
-				{	
-					FireBullet(bullets, NUM_BULLETS, player);
-					//al_play_sample(sample[0], 1.0, 0.0, 1.0, ALLEGRO_PLAYMODE_ONCE, NULL); <--What did this do? 
-				}
-				else if (state == LOST)
-					ChangeState(state, PLAYING);				
-				break;
-			}
+				// Movement
+				case ALLEGRO_KEY_W:
+					keys[UP] = true;
+					break;
+				case ALLEGRO_KEY_A:
+					keys[LEFT] = true;
+					break;
+				case ALLEGRO_KEY_S:
+					keys[DOWN] = true;
+					break;
+				case ALLEGRO_KEY_D:
+					keys[RIGHT] = true;
+					break;
+
+				// shoot keys
+				case ALLEGRO_KEY_UP:
+					keys[S_UP] = true;
+					break;
+				case ALLEGRO_KEY_DOWN:
+					keys[S_DOWN] = true;
+					break;
+				case ALLEGRO_KEY_RIGHT:
+					keys[S_RIGHT] = true;
+					break;
+				case ALLEGRO_KEY_LEFT:
+					keys[S_LEFT] = true;
+					break;
+				case ALLEGRO_KEY_SPACE:
+					keys[SPACE] = true;
+					break;
+
+				// control
+				case ALLEGRO_KEY_ENTER:
+					keys[ENTER] = true;
+					break;
+				
+			} // Keydown detect
 		}
 
 		else if (ev.type == ALLEGRO_EVENT_KEY_UP)					//If Key up event
 		{
 			switch (ev.keyboard.keycode)
 			{
-			case ALLEGRO_KEY_UP:									//Keypress sprite and dir updates
-				keys[UP] = false;
-				if (direction == 1) select = player_img[0];
-				else select = player_img[1];
-				break;
-			case ALLEGRO_KEY_W:
-				keys[UP] = false;
-				if (direction == 1) select = player_img[0];
-				else select = player_img[1];
-				break;
-			case ALLEGRO_KEY_DOWN:
-				keys[DOWN] = false;
-				if (direction == 1) select = player_img[0];
-				else select = player_img[1];
-				break;
-			case ALLEGRO_KEY_S:
-				keys[DOWN] = false;
-				if (direction == 1) select = player_img[0];
-				else select = player_img[1];
-				break;
-			case ALLEGRO_KEY_RIGHT:
-				keys[RIGHT] = false;
-				select = player_img[0];
-				break;
-			case ALLEGRO_KEY_D:
-				keys[RIGHT] = false;
-				select = player_img[0];
-				break;
-			case ALLEGRO_KEY_LEFT:
-				keys[LEFT] = false;
-				select = player_img[1];
-				break;
-			case ALLEGRO_KEY_A:
-				select = player_img[1];
-				break;
-			case ALLEGRO_KEY_P:
-				if (state == PLAYING)					//Check state		-- THIS FUNCTION NEEDS REPAIRS	
-				{
-					if (timeM == true)
-					{
-						al_stop_timer(timer);									//Stop timer for pause menu
-						timeM = false;
-						al_draw_bitmap(scrns[1], scrn_W / 2 - 250, 100, 0);		//Show Pause menu
-						al_flip_display();										//Bring backbuffer forward (bring all set contents to the current frame)
-					}
-					else
-					{
-						al_start_timer(timer);									//Continue timer
-						timeM = true;
-					}
-				}
-				break;
-			case ALLEGRO_KEY_BACKSPACE:
-				if (timeM == false)										//if game on pause, BKSP to menu
-				{
-					timeM = true;
-					al_start_timer(timer);
-				}
-					ChangeState(state, MENU);
-				break;
-			case ALLEGRO_KEY_ENTER:
-				if (state == WIN)
-					boss_sel = lecturers[rand() % 6];				//Random Boss character selected
-					ChangeState(state, PLAYING);
-				break;
-			case ALLEGRO_KEY_ESCAPE:								
-				if (state==TITLE || state == MENU || state == HELP)
-					done = true;
-				else 
-					ChangeState(state, MENU);
-				break;
-			case ALLEGRO_KEY_SPACE:
-				keys[SPACE] = false;
-				break;
-			case ALLEGRO_KEY_K:
-					egg = 0;
-				break;
-			case ALLEGRO_KEY_M:
-				//	egg = 0;
-				break;
-			case ALLEGRO_KEY_N:
-				//	egg = 0;
-				break;
-			}
+					// Movement
+				case ALLEGRO_KEY_W:
+					keys[UP] = false;
+					break;
+				case ALLEGRO_KEY_A:
+					keys[LEFT] = false;
+					break;
+				case ALLEGRO_KEY_S:
+					keys[DOWN] = false;
+					break;
+				case ALLEGRO_KEY_D:
+					keys[RIGHT] = false;
+					break;
+
+					// shoot keys
+				case ALLEGRO_KEY_UP:
+					keys[S_UP] = false;
+					break;
+				case ALLEGRO_KEY_DOWN:
+					keys[S_DOWN] = false;
+					break;
+				case ALLEGRO_KEY_RIGHT:
+					keys[S_RIGHT] = false;
+					break;
+				case ALLEGRO_KEY_LEFT:
+					keys[S_LEFT] = false;
+					break;
+				case ALLEGRO_KEY_SPACE:
+					keys[SPACE] = false;
+					break;
+
+					// control
+				case ALLEGRO_KEY_ENTER:
+					keys[ENTER] = false;
+					break;
+			} // keyup detect
+		//	fired = false;										//Bullet Fired False. 
+		//	switch (ev.keyboard.keycode)						//Switch keyboard code returned. 
+		//	{
+		//	case ALLEGRO_KEY_UP:				
+		//		keys[UP] = true;
+		//		if (direction == 1) select = player_img[2];			//set character sprite to ____
+		//		else select = player_img[3];
+		//		break;
+		//	case ALLEGRO_KEY_W:										//button press actions for sprite dir
+		//		keys[UP] = true;
+		//		if (direction == 1) select = player_img[2];
+		//		else select = player_img[3];
+		//		break;
+		//	case ALLEGRO_KEY_DOWN:
+		//		keys[DOWN] = true;
+		//		if (direction == 1) select = player_img[2];
+		//		else select = player_img[3];
+		//		break;
+		//	case ALLEGRO_KEY_S:
+		//		keys[DOWN] = true;
+		//		if (direction == 1) select = player_img[2];
+		//		else select = player_img[3];
+		//		break;
+		//	case ALLEGRO_KEY_RIGHT:
+		//		keys[RIGHT] = true;
+		//		select = player_img[2];
+		//		direction = 1;
+		//		break;
+		//	case ALLEGRO_KEY_N:
+		//		if (egg < 1 && state == SETTINGS)
+		//		{
+		//			egg++;
+		//		}
+		//		break;
+		//	case ALLEGRO_KEY_M:
+		//		if (egg < 2 && state == SETTINGS)
+		//		{
+		//			egg++;
+		//		}
+		//		break;
+		//	case ALLEGRO_KEY_K:
+		//		egg = 0;
+		//		break;
+		//	case ALLEGRO_KEY_D:
+		//		keys[RIGHT] = true;
+		//		select = player_img[2];
+		//		direction = 1;
+		//		break;
+		//	case ALLEGRO_KEY_LEFT:
+		//		keys[LEFT] = true;
+		//		select = player_img[3];
+		//		direction = 0;
+		//		break;
+		//	case ALLEGRO_KEY_A:
+		//		keys[LEFT] = true;
+		//		select = player_img[3];
+		//		direction = 0;
+		//		break;
+		//	case ALLEGRO_KEY_ENTER:
+		//		break;
+		//	case ALLEGRO_KEY_SPACE:
+		//		keys[SPACE] = true;
+		//		if (state == TITLE)
+		//			ChangeState(state, MENU);					//Splash->Menu on Spacebar press
+		//		else if (state == MENU)
+		//			ChangeState(state, PLAYING);				//Menu-> Game if Spacebar press
+		//		else if (state == HELP)
+		//			ChangeState(state, MENU);					//Help-> Menu if spacebar press
+		//		else if (state == PLAYING)						//Spacebar fires bullets in-game
+		//		{	
+		//			FireBullet(bullets, NUM_BULLETS, player);
+		//			//al_play_sample(sample[0], 1.0, 0.0, 1.0, ALLEGRO_PLAYMODE_ONCE, NULL); <--What did this do? 
+		//		}
+		//		else if (state == LOST)
+		//			ChangeState(state, PLAYING);				
+		//		break;
+		//	}
+		//}
+
+		//else if (ev.type == ALLEGRO_EVENT_KEY_UP)					//If Key up event
+		//{
+		//	switch (ev.keyboard.keycode)
+		//	{
+		//	case ALLEGRO_KEY_UP:									//Keypress sprite and dir updates
+		//		keys[UP] = false;
+		//		if (direction == 1) select = player_img[0];
+		//		else select = player_img[1];
+		//		break;
+		//	case ALLEGRO_KEY_W:
+		//		keys[UP] = false;
+		//		if (direction == 1) select = player_img[0];
+		//		else select = player_img[1];
+		//		break;
+		//	case ALLEGRO_KEY_DOWN:
+		//		keys[DOWN] = false;
+		//		if (direction == 1) select = player_img[0];
+		//		else select = player_img[1];
+		//		break;
+		//	case ALLEGRO_KEY_S:
+		//		keys[DOWN] = false;
+		//		if (direction == 1) select = player_img[0];
+		//		else select = player_img[1];
+		//		break;
+		//	case ALLEGRO_KEY_RIGHT:
+		//		keys[RIGHT] = false;
+		//		select = player_img[0];
+		//		break;
+		//	case ALLEGRO_KEY_D:
+		//		keys[RIGHT] = false;
+		//		select = player_img[0];
+		//		break;
+		//	case ALLEGRO_KEY_LEFT:
+		//		keys[LEFT] = false;
+		//		select = player_img[1];
+		//		break;
+		//	case ALLEGRO_KEY_A:
+		//		select = player_img[1];
+		//		break;
+		//	case ALLEGRO_KEY_P:
+		//		if (state == PLAYING)					//Check state		-- THIS FUNCTION NEEDS REPAIRS	
+		//		{
+		//			if (timeM == true)
+		//			{
+		//				al_stop_timer(timer);									//Stop timer for pause menu
+		//				timeM = false;
+		//				al_draw_bitmap(scrns[1], scrn_W / 2 - 250, 100, 0);		//Show Pause menu
+		//				al_flip_display();										//Bring backbuffer forward (bring all set contents to the current frame)
+		//			}
+		//			else
+		//			{
+		//				al_start_timer(timer);									//Continue timer
+		//				timeM = true;
+		//			}
+		//		}
+		//		break;
+		//	case ALLEGRO_KEY_BACKSPACE:
+		//		if (timeM == false)										//if game on pause, BKSP to menu
+		//		{
+		//			timeM = true;
+		//			al_start_timer(timer);
+		//		}
+		//			ChangeState(state, MENU);
+		//		break;
+		//	case ALLEGRO_KEY_ENTER:
+		//		if (state == WIN)
+		//			boss_sel = lecturers[rand() % 6];				//Random Boss character selected
+		//			ChangeState(state, PLAYING);
+		//		break;
+		//	case ALLEGRO_KEY_ESCAPE:								
+		//		if (state==TITLE || state == MENU || state == HELP)
+		//			done = true;
+		//		else 
+		//			ChangeState(state, MENU);
+		//		break;
+		//	case ALLEGRO_KEY_SPACE:
+		//		keys[SPACE] = false;
+		//		break;
+		//	case ALLEGRO_KEY_K:
+		//			egg = 0;
+		//		break;
+		//	case ALLEGRO_KEY_M:
+		//		//	egg = 0;
+		//		break;
+		//	case ALLEGRO_KEY_N:
+		//		//	egg = 0;
+		//		break;
+		//	}
 		}
 		
 	
-		else if (ev.type == ALLEGRO_EVENT_MOUSE_AXES || ev.type == ALLEGRO_EVENT_MOUSE_ENTER_DISPLAY)  
+		else if (ev.type == ALLEGRO_EVENT_MOUSE_AXES || ev.type == ALLEGRO_EVENT_MOUSE_ENTER_DISPLAY)    // deal with mouse
 		{
 			crs_x = ev.mouse.x;									//get x co-ord of mouse
 			crs_y = ev.mouse.y;									//get y co-ord of mouse
@@ -681,6 +764,9 @@ int main(void)
 		{
 			al_set_new_display_flags(ALLEGRO_FULLSCREEN_WINDOW);
 		}
+
+
+		// THIS IS WHERE THE MAGIC HAPPENS. 
 		else if (ev.type == ALLEGRO_EVENT_TIMER)
 		{
 			//Start Animation for all images
@@ -694,11 +780,42 @@ int main(void)
 			}
 			//End animation
 
+			// TITLE
 			if (state == TITLE)
 			{
-			}
+				// We're just chillin in here, waiting for eternity for you to press SPACE... 
+				if (keys[SPACE]){
+					ChangeState(state, MENU);					//Splash->Menu on Spacebar press
+				}
+
+			} //end title 
+
+			// MENU
+			else if (state == MENU)
+			{
+				if (keys[SPACE]){ // pressing space starts the game
+					ChangeState(state, PLAYING);				//Menu-> Game if Spacebar press
+				}
+
+
+				al_clear_to_color(black);
+				al_draw_bitmap(btns[0], scrn_W / 2 - 130, scrn_H / 2 - 180, 0);			//Start
+				al_draw_bitmap(btns[1], scrn_W / 2 - 130, scrn_H / 2 - 50, 0);		//Settings
+				al_draw_bitmap(btns[2], scrn_W / 2 - 130, scrn_H / 2 + 80, 0);		//Quit
+				al_draw_bitmap(btns[4], 965, 610, 0);								//Help
+				boss_sel = lecturers[rand() % 6];
+				bosslevel = false;
+				player.score = 0;
+			} 	//end menu
+
+			// PLAYING (the game! that you just lost ;)
 			else if (state == PLAYING)
 			{
+				if (keys[SPACE]){ // space shoot bullies :D 
+					FireBullet(bullets, NUM_BULLETS, player);
+					//al_play_sample(sample[0], 1.0, 0.0, 1.0, ALLEGRO_PLAYMODE_ONCE, NULL); <--What did this do? 
+				}
+
 				int random = rand() % 100;
 				StartProjectile(comets, NUM_COMETS);
 				UpdateProjectile(comets, NUM_COMETS, 0);
@@ -723,17 +840,23 @@ int main(void)
 				CollideBoss(bossy, NUM_BOSS, player);
 
 				if (player.lives <= 0) ChangeState(state, LOST);
-			}
+			} // end playing
+
+
+			// LOST... and this does? 
 			else if (state == LOST)
 			{
-			}
+				if (keys[SPACE]){ // press space to play again
+					ChangeState(state, PLAYING);
+				}
+			} // end lost
 
 			redraw = true;
 			if (keys[UP])    MoveCharacterUp(player);
 			if (keys[DOWN])  MoveCharacterDown(player);
 			if (keys[LEFT])  MoveCharacterLeft(player);
 			if (keys[RIGHT]) MoveCharacterRight(player);
-		}
+		} 
 
 		else if (ev.type == ALLEGRO_EVENT_DISPLAY_CLOSE)
 		{
@@ -750,26 +873,20 @@ int main(void)
 				al_draw_textf(fonts[0],white, scrn_W/2+20, scrn_H-60, ALLEGRO_ALIGN_CENTRE, "PRESS SPACEBAR TO START");
 			//end title
 			}
-			else if (state == MENU)
-			{//menu
-				al_clear_to_color(black);
-				al_draw_bitmap(btns[0], scrn_W/2 - 130, scrn_H/2 - 180 ,0);			//Start
-				al_draw_bitmap(btns[1], scrn_W / 2 - 130, scrn_H / 2 -50 , 0);		//Settings
-				al_draw_bitmap(btns[2], scrn_W / 2 - 130, scrn_H / 2 + 80, 0);		//Quit
-				al_draw_bitmap(btns[4], 965, 610, 0);								//Help
-				boss_sel = lecturers[rand()%6];
-				bosslevel = false;
-				player.score = 0;
-			//end menu
-			}
+
+
+
+			//HELP
 			else if (state == HELP)
-			{//help
+			{
+				if (keys[SPACE]){
+					ChangeState(state, MENU);					//Help-> Menu if spacebar press
+				}
 				al_draw_bitmap(scrns[3], 0, 0, 0);  //Title Screen
 				//al_draw_bitmap(btns[3], 800, 610, 0);								    //Back		<<fix this maybe?
 				//al_draw_scaled_bitmap(btns[3], 800, 610,150,150,100,100, 10,10, 0);	//Back
 				al_draw_textf(fonts[0], white, scrn_W - 300, scrn_H - 50, 0, "PRESS BACKSPACE TO RETURN");
-			//end help
-			}
+			} // end help
 			else if (state == WIN)
 			{//win
 				al_draw_bitmap(scrns[4], 0, 0, 0);  //Win!
