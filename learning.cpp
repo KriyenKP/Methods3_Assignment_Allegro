@@ -512,7 +512,7 @@ int main(void)
 			}
 			if (state == SETTINGS)
 			{
-				
+				al_rest(0.2);	//ensure "level is locked" position derp doesn't trigger immediately
 				// Position of Lecturers
 				if (crs_x >= 100 && crs_x <= 224 && crs_y >= 50 && crs_y <= 180)
 				{
@@ -552,35 +552,72 @@ int main(void)
 					bgImage = maps[0]; // howard--always unlocked
 					curMap = 0;
 				}
+				
 				if (crs_x >= 240 && crs_x <= 354 && crs_y >= 250 && crs_y <= 380)
 				{
-					//call check function on save-file
+					if (strcmp(al_get_config_value(savegame, "venueunlock 2", "unlocked"), "0") == 0)
+					{
+						al_show_native_message_box(display, "Locked Level", "Sorry!", "That's a locked level. Keep playing to unlock it.", NULL, ALLEGRO_MESSAGEBOX_WARN);
+						bgImage = maps[0]; // Default to Howard
+						curMap = 0;						
+					}
+					else {
 						bgImage = maps[1]; // tbdavis unlocked
-						curMap = 1;	
+						curMap = 1;
+					}
+						
 				}
 				if (crs_x >= 380 && crs_x <= 504 && crs_y >= 250 && crs_y <= 380)
 				{
-					bgImage = maps[2];		//Park
-					//savegame unlockables
-					curMap = 2;
+					if (strcmp(al_get_config_value(savegame, "venueunlock 3", "unlocked"), "0") == 0)
+					{
+						al_show_native_message_box(display, "Locked Level", "Sorry!", "That's a locked level. Keep playing to unlock it.", NULL, ALLEGRO_MESSAGEBOX_WARN);
+						bgImage = maps[0]; // Default to Howard
+						curMap = 0;
+					}
+					else {
+						bgImage = maps[2]; // Park unlocked
+						curMap = 2;
+					}
 				}
 				if (crs_x >= 520 && crs_x <= 644 && crs_y >= 250 && crs_y <= 380) 
 				{
-					bgImage = maps[3];		//science
-					//savegame unlockables
-					curMap = 3;
+					if (strcmp(al_get_config_value(savegame, "venueunlock 4", "unlocked"), "0") == 0)
+					{
+						al_show_native_message_box(display, "Locked Level", "Sorry!", "That's a locked level. Keep playing to unlock it.", NULL, ALLEGRO_MESSAGEBOX_WARN);
+						bgImage = maps[0]; // Default to Howard
+						curMap = 0;
+					}
+					else {
+						bgImage = maps[3]; // Science unlocked
+						curMap = 3;
+					}
 				}
 				if (crs_x >= 660 && crs_x <= 784 && crs_y >= 250 && crs_y <= 380)
 				{
-					bgImage = maps[4];		//cafe
-					//savegame unlockables
-					curMap = 4;
+					if (strcmp(al_get_config_value(savegame, "venueunlock 5", "unlocked"), "0") == 0)
+					{
+						al_show_native_message_box(display, "Locked Level", "Sorry!", "That's a locked level. Keep playing to unlock it.", NULL, ALLEGRO_MESSAGEBOX_WARN);
+						bgImage = maps[0]; // Default to Howard
+						curMap = 0;
+					}
+					else {
+						bgImage = maps[4]; // Science unlocked
+						curMap = 4;
+					}
 				}
 				if (crs_x >= 800 && crs_x <= 924 && crs_y >= 250 && crs_y <= 380)
 				{
-					bgImage = maps[5];		//amphi
-					//savegame unlockables
-					curMap = 5;
+					if (strcmp(al_get_config_value(savegame, "venueunlock 6", "unlocked"), "0") == 0)
+					{
+						al_show_native_message_box(display, "Locked Level", "Sorry!", "That's a locked level. Keep playing to unlock it.", NULL, ALLEGRO_MESSAGEBOX_WARN);
+						bgImage = maps[0]; // Default to Howard
+						curMap = 0;
+					}
+					else {
+						bgImage = maps[5]; // Science unlocked
+						curMap = 5;
+					}
 				}
 				// End Position of Maps
 
@@ -794,11 +831,11 @@ int main(void)
 				{		al_draw_bitmap(lockedmap[3], 520, 250, 0);
 				}		else{ al_draw_bitmap(mapsmini[3], 520, 250, 0); }//Science
 
-				if (strcmp(al_get_config_value(savegame, "venueunlock 4", "unlocked"), "0") == 0)
+				if (strcmp(al_get_config_value(savegame, "venueunlock 5", "unlocked"), "0") == 0)
 				{		al_draw_bitmap(lockedmap[4], 660, 250, 0);
 				}		else{ al_draw_bitmap(mapsmini[4], 660, 250, 0); }//Cafe
 
-				if (strcmp(al_get_config_value(savegame, "venueunlock 4", "unlocked"), "0") == 0)
+				if (strcmp(al_get_config_value(savegame, "venueunlock 6", "unlocked"), "0") == 0)
 				{	al_draw_bitmap(lockedmap[5], 800, 250, 0);
 				}		else{ al_draw_bitmap(mapsmini[5], 800, 250, 0); }//Cafe
 
