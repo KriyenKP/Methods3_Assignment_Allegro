@@ -9,6 +9,7 @@
 #include <allegro5/allegro_acodec.h>
 #include <allegro5/allegro_audio.h>				//Audio yet to be used	
 #include <cstdio>								//Input/output - Used for displaying mouse pos atm
+#include <sstream>
 #include <allegro5/allegro_primitives.h>		//Used for drawing Shapes
 using namespace std;
 
@@ -109,6 +110,7 @@ int main(void)
 	ALLEGRO_CONFIG			*savegame		= al_load_config_file("config.ini");	//inits the save game file
 //	const char *unven1 = al_get_config_value(savegame, "venueunlock 1", "unlocked");	<-- test to check if config readable
 //	printf("The first value for venue 1 is %s", unven1);
+	bool savefile = TRUE;
 
 	if (!al_init())											//initialize and check Allegro
 	{
@@ -145,8 +147,9 @@ int main(void)
 		return -1;
 	}
 
-	if (savegame == NULL)
+	if (savegame == NULL || savefile == FALSE)
 	{
+		savefile = al_save_config_file("config.ini", savegame);
 		al_show_native_message_box(display, "Error!", "Savegame File Initialise/Save Failed!", "\n Check directory for config.ini\nClosing Application!", NULL, ALLEGRO_MESSAGEBOX_WARN);
 		al_destroy_display(display);
 		al_destroy_timer(timer);
@@ -298,8 +301,7 @@ int main(void)
 	al_clear_to_color(black);										//Clear and set Background black
 	al_set_target_bitmap(al_get_backbuffer(display));				//Backbuffer--next frame to write to display
 	al_flip_display();												//Allows manual switch between current disp & backbuffer
-	
-	
+
 	while (!done)
 	{
 		ALLEGRO_EVENT ev;										//Allegro event init
@@ -956,6 +958,36 @@ int main(void)
 			{//lost
 				al_draw_bitmap(scrns[2], scrn_W / 2 - 250, 100, 0);                      // Game over Screen
 				al_draw_textf(fonts[2], black, scrn_W/2+70, 340, 0, "%i", player.score);
+				int ps = player.score;
+				char score[10];
+				sprintf_s(score, "%i", ps);
+				al_set_config_value(savegame,"highscore", "playsc",score);	//saves player score
+
+				//check for unlocks
+				if (ps > 50)
+				{
+					al_set_config_value(savegame, "venueunlock 2", "unlocked", "1"); //unlock TB Davis
+				}
+				else if (ps > 150)
+				{
+					al_set_config_value(savegame, "venueunlock 3", "unlocked", "1");//unlock Park
+				}
+				else if (ps > 250)
+				{
+					al_set_config_value(savegame, "venueunlock 3", "unlocked", "1");//unlock Science
+					al_set_config_value(savegame, "weaponunlocks", "unlocked2", "1");//unlock Pencil
+				}
+				else if (ps > 350)
+				{
+					al_set_config_value(savegame, "venueunlock 4", "unlocked", "1");//Unlock Cafe
+				}
+				else if (ps > 450)
+				{
+					al_set_config_value(savegame, "venueunlock 5", "unlocked", "1");//unlock Amphitheatre
+					al_set_config_value(savegame, "weaponunlocks", "unlocked3", "1");//unlock Pencil
+				}
+				al_save_config_file("config.ini", savegame);
+
 				egg = 0;
 
 			//end lost
@@ -995,7 +1027,7 @@ int main(void)
 	al_destroy_display(display);
 	al_destroy_timer(timer);
 
-	//al_save_config_file("config.ini", savegame);	//writes default unlocks back if config file removed during gameplay
+	al_save_config_file("config.ini", savegame);	//writes default unlocks back if config file removed during gameplay
 	
 	//al_destroy_bitmap(select);
 	//end Destruction
