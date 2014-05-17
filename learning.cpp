@@ -106,6 +106,9 @@ int main(void)
 							*scrns[5]		= { NULL, NULL, NULL, NULL, NULL },		//Box images array (pause, gameover, etc)
 							*btns[5]		= { NULL, NULL, NULL, NULL, NULL };		//Buttons Array
 
+	//Savegame inits
+	ALLEGRO_CONFIG			*savegame		= al_load_config_file("config.ini");
+
 
 	if (!al_init())											//initialize and check Allegro
 	{
@@ -137,6 +140,14 @@ int main(void)
 	if (!event_queue)											//Check event queue creation
 	{											
 		al_show_native_message_box(display, "Error!", "Warning!", "Failed to initialise event queue! \n Closing Application!", NULL, ALLEGRO_MESSAGEBOX_WARN);
+		al_destroy_display(display);
+		al_destroy_timer(timer);
+		return -1;
+	}
+
+	if (savegame == NULL)
+	{
+		al_show_native_message_box(display, "Error!", "Savegame File Initialise/Save Failed!", "\n Check directory for config.ini\nClosing Application!", NULL, ALLEGRO_MESSAGEBOX_WARN);
 		al_destroy_display(display);
 		al_destroy_timer(timer);
 		return -1;
@@ -436,7 +447,7 @@ int main(void)
 					boss_sel = lecturers[rand() % 6];				//Random Boss character selected
 					ChangeState(state, PLAYING);
 				break;
-			case ALLEGRO_KEY_ESCAPE:								//should it be mentioned on menus that ESC quits?
+			case ALLEGRO_KEY_ESCAPE:								
 				if (state==TITLE || state == MENU || state == HELP)
 					done = true;
 				else 
@@ -923,6 +934,8 @@ int main(void)
 	al_destroy_event_queue(event_queue);
 	al_destroy_display(display);
 	al_destroy_timer(timer);
+
+	al_save_config_file("config.ini", savegame);	//writes default unlocks back if config file removed during gameplay
 	
 	//al_destroy_bitmap(select);
 	//end Destruction
