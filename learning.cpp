@@ -199,6 +199,7 @@ int main(void)
 	atksel = atk[0];
 
 	//Attack images (locked)
+	lockatk[0] = NULL;
 	lockatk[1] = al_load_bitmap("./images/pencillock.png");
 	lockatk[2] = al_load_bitmap("./images/clock.png");
 
@@ -999,7 +1000,7 @@ int main(void)
 				if (ps > 20)
 				{
 					al_set_config_value(savegame, "venueunlock 3", "unlocked", "1");//unlock Park
-					if (al_get_config_value(savegame, "highscore", "playsc")<score); //only shows if not unlocked before
+					if (al_get_config_value(savegame, "highscore", "playsc")<score) //only shows if not unlocked before
 					{
 						al_draw_textf(fonts[0], green, scrn_W / 2 - 100, 400, 0, "NEW UNLOCKS: Park!"); }
 				}
@@ -1007,22 +1008,25 @@ int main(void)
 				{
 					al_set_config_value(savegame, "venueunlock 4", "unlocked", "1");//unlock Science
 					al_set_config_value(savegame, "weaponunlocks", "unlocked2", "1");//unlock Pencil
-					if (al_get_config_value(savegame, "highscore", "playsc")<score); //only shows if not unlocked before
+					if (al_get_config_value(savegame, "highscore", "playsc")<score) //only shows if not unlocked before
 					{
 						al_draw_textf(fonts[0], green, scrn_W / 2 - 100, 420, 0, "NEW UNLOCKS: Science & Pencil!"); }
 				}
 				if (ps > 40)
 				{
 					al_set_config_value(savegame, "venueunlock 5", "unlocked", "1");//Unlock Cafe
-					if (al_get_config_value(savegame, "highscore", "playsc")<score); //only shows if not unlocked before
+					
+					if (al_get_config_value(savegame, "highscore", "playsc")<score) //only shows if not unlocked before
 					{
 						al_draw_textf(fonts[0], green, scrn_W / 2 - 100, 440, 0, "NEW UNLOCKS: Cafe!"); }
 				}
+
 				if (ps > 50)
 				{
 					al_set_config_value(savegame, "venueunlock 6", "unlocked", "1");//unlock Amphitheatre
 					al_set_config_value(savegame, "weaponunlocks", "unlocked3", "1");//unlock C++
-					if (al_get_config_value(savegame, "highscore", "playsc") < score); //only shows if not unlocked before
+					
+					if (al_get_config_value(savegame, "highscore", "playsc") < score) //only shows if not unlocked before
 					{
 						al_draw_textf(fonts[0], green, scrn_W / 2 - 100, 460, 0, "NEW UNLOCKS: Amphitheatre & C++"); }
 				}
