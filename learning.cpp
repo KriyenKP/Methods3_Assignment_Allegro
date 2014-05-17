@@ -24,7 +24,7 @@ Boss bossy[NUM_BOSS];
 Explosion explosions[NUM_EXPLOSIONS];
 //End asset init
 
-bool keys[10] = { false, false, false, false, false, false, false, false, false, false }; // Keystate array, stores the state of keys we are intersted in. True when key is pressed
+bool keys[13] = { false, false, false, false, false, false, false, false, false, false, false, false, false }; // Keystate array, stores the state of keys we are intersted in. True when key is pressed
 
 //Asset Functions
 void InitCharacter(Character &player);
@@ -280,6 +280,7 @@ int main(void)
 	icon1			= al_load_bitmap("./images/icon.png");
 
 	int direction = 1;						//Default direction identifier init
+	bool loaded_gun = true;					// Has the player just fired a shot and need to reload or not? 
 
 	//Event queue - register listeners
 	al_register_event_source(event_queue, al_get_timer_event_source(timer)); 
@@ -354,6 +355,15 @@ int main(void)
 				case ALLEGRO_KEY_ENTER:
 					keys[ENTER] = true;
 					break;
+				case ALLEGRO_KEY_P:
+					keys[PAUSE] = true;
+					break;
+				case ALLEGRO_KEY_ESCAPE:
+					keys[ESC] = true;
+					break;
+				case ALLEGRO_KEY_BACKSPACE:
+					keys[BKSPCE] = true;
+					break;
 				
 			} // Keydown detect
 		}
@@ -397,7 +407,19 @@ int main(void)
 				case ALLEGRO_KEY_ENTER:
 					keys[ENTER] = false;
 					break;
+				case ALLEGRO_KEY_P:
+					keys[PAUSE] = false;
+					break;
+				case ALLEGRO_KEY_ESCAPE:
+					keys[ESC] = false;
+					break;
+				case ALLEGRO_KEY_BACKSPACE:
+					keys[BKSPCE] = false;
+					break;
+
 			} // keyup detect
+
+
 		//	fired = false;										//Bullet Fired False. 
 		//	switch (ev.keyboard.keycode)						//Switch keyboard code returned. 
 		//	{
@@ -765,12 +787,33 @@ int main(void)
 			al_set_new_display_flags(ALLEGRO_FULLSCREEN_WINDOW);
 		}
 
+		// Deal with pause menu, timer will be stopped! 
+		// Note this is a little bit buggy atm if the user does not press P fast enough as it will exit pause and immediately re-enter
+		// should use diff key to exit pause? or maybe just a delay? 
+		if (keys[PAUSE]){
+			if (timeM == false)
+			{
+				al_start_timer(timer);									//Continue timer (exit pause) 
+				timeM = true;
+			}
+		} //Exit Pause
+		if (keys[BKSPCE]){
+			if (timeM == false)
+			{
+				al_start_timer(timer);									//Continue timer
+				timeM = true;
+			}
+			ChangeState(state, MENU);									// go to the menu!
+		} //Exit Pause, go to menu
+		if (keys[ESC]){
+			done = true;												// EJECT! 
+		} //Exit game on ESC
 
 		// THIS IS WHERE THE MAGIC HAPPENS. 
 		else if (ev.type == ALLEGRO_EVENT_TIMER)
 		{
 			//Start Animation for all images
-			if (++frameCount >= frameDelay) 
+			if (++frameCount >= frameDelay)
 			{
 				if (++curFrame >= maxFrame)
 				{
@@ -811,10 +854,17 @@ int main(void)
 			// PLAYING (the game! that you just lost ;)
 			else if (state == PLAYING)
 			{
-				if (keys[SPACE]){ // space shoot bullies :D 
-					FireBullet(bullets, NUM_BULLETS, player);
-					//al_play_sample(sample[0], 1.0, 0.0, 1.0, ALLEGRO_PLAYMODE_ONCE, NULL); <--What did this do? 
-				}
+				// First check if user wants to pause game
+				if (keys[PAUSE]){
+					if (timeM == true)
+					{
+						al_stop_timer(timer);									//Stop timer for pause menu
+						timeM = false;
+						al_draw_bitmap(scrns[1], scrn_W / 2 - 250, 100, 0);		//Show Pause menu
+						al_flip_display();										//Bring backbuffer forward (bring all set contents to the current frame)
+					}
+				} //Enter Pause. Remeber timer is stopped now! go look for code outside to get back into game... This is bad style, pause should be rethought... #lateNightHacks
+
 
 				int random = rand() % 100;
 				StartProjectile(comets, NUM_COMETS);
@@ -827,19 +877,41 @@ int main(void)
 				}
 				if (bosslevel == true)
 				{
-				StartBoss(bossy, NUM_BOSS);
-				UpdateBoss(bossy, NUM_BOSS);
+					StartBoss(bossy, NUM_BOSS);
+					UpdateBoss(bossy, NUM_BOSS);
 				}
 
 				UpdateExplosions(explosions, NUM_EXPLOSIONS);
 				UpdateBullet(bullets, NUM_BULLETS, direction);
 				CollideBullet(bullets, NUM_BULLETS, comets, NUM_COMETS, player, explosions, NUM_EXPLOSIONS, sample[3]);
 				CollideBullet(bullets, NUM_BULLETS, bossy, NUM_BOSS, player, explosions, NUM_EXPLOSIONS, sample[2]);
-				CollideProjectile(comets, NUM_COMETS, player,0);
+				CollideProjectile(comets, NUM_COMETS, player, 0);
 				CollideProjectile(powerUp, NUM_POWER, player, 1);
 				CollideBoss(bossy, NUM_BOSS, player);
 
-				if (player.lives <= 0) ChangeState(state, LOST);
+				if (player.lives <= 0) ChangeState(state, LOST); // you lost the game... 
+
+				// Deal with movement 
+				if (keys[UP])    MoveCharacterUp(player);			//Move him Upside!
+				if (keys[DOWN])  MoveCharacterDown(player);			//Move him Downside!
+				if (keys[LEFT])  MoveCharacterLeft(player);			//Move him Leftside!
+				if (keys[RIGHT]) MoveCharacterRight(player);		//Move him Rightside!
+
+				// Deal with shooting
+				if (loaded_gun == true){ // make sure the player has reloaded after the last shot. makes sure that they don't just hold the key down... 
+					if (keys[S_UP] || keys[S_DOWN] || keys[S_LEFT] || keys[S_RIGHT]){ // Shots fired.. 
+						loaded_gun = false;
+						FireBullet(bullets, NUM_BULLETS, player);		//Shoot him Someside!
+						//			//al_play_sample(sample[0], 1.0, 0.0, 1.0, ALLEGRO_PLAYMODE_ONCE, NULL); <--What did this do? 					
+					}
+				}
+				else{ // check if they are not pulling the trigger, then reload
+					if (!keys[S_UP] && !keys[S_DOWN] && !keys[S_LEFT] && !keys[S_RIGHT]){
+						loaded_gun = true;
+					}
+				}
+
+
 			} // end playing
 
 
@@ -851,11 +923,17 @@ int main(void)
 				}
 			} // end lost
 
-			redraw = true;
-			if (keys[UP])    MoveCharacterUp(player);
-			if (keys[DOWN])  MoveCharacterDown(player);
-			if (keys[LEFT])  MoveCharacterLeft(player);
-			if (keys[RIGHT]) MoveCharacterRight(player);
+			//HELP
+			else if (state == HELP)
+			{
+				if (keys[SPACE]){
+					ChangeState(state, MENU);					//Help-> Menu if spacebar press
+				}
+			}// end help
+
+			redraw = true;										//Do a redraw
+
+
 		} 
 
 		else if (ev.type == ALLEGRO_EVENT_DISPLAY_CLOSE)
@@ -863,7 +941,7 @@ int main(void)
 			done = true;
 		}
 
-		if (redraw && al_is_event_queue_empty(event_queue)) 
+		if (redraw && al_is_event_queue_empty(event_queue)) // nothing left to do! but the screen had change, do a redraw... 
 		{
 			redraw = false;
 
@@ -879,9 +957,6 @@ int main(void)
 			//HELP
 			else if (state == HELP)
 			{
-				if (keys[SPACE]){
-					ChangeState(state, MENU);					//Help-> Menu if spacebar press
-				}
 				al_draw_bitmap(scrns[3], 0, 0, 0);  //Title Screen
 				//al_draw_bitmap(btns[3], 800, 610, 0);								    //Back		<<fix this maybe?
 				//al_draw_scaled_bitmap(btns[3], 800, 610,150,150,100,100, 10,10, 0);	//Back
@@ -1297,42 +1372,38 @@ int FindDeadBulletIndex(Bullet bullet[], int size)
 	// didn't find an index; maybe delete old bullet or similar?
 	return -1;
 }
+
 void FireBullet(Bullet bullet[], int size, Character &player)
 {
-
 	int index = FindDeadBulletIndex(bullet, size);
 
 	if (index < 0)
-		return; // no "open" bullet positions available
+		return; // no "open" bullet positions available, OUT OF AMO! SHIT! 
 
 	bullet[index].live = true;
-	bullet[index].dir = player.dir;
 
-	// set bullet position to character's position ...
-	bullet[index].x = player.spritex + 25;
-	bullet[index].y = player.spritey + 25;
-
-	// ... or adjust position based on direction, if you want:
-	if (player.dir == NORTH) 
+	// set the direction of the bullet and offset the sprite
+	if (keys[S_UP]) 
 	{
+		bullet[index].dir = NORTH;
 		bullet[index].x = player.spritex +50;
 		bullet[index].y = player.spritey;
 	}
-	else if (player.dir == EAST)
+	else if (keys[S_RIGHT])
 	{
-		
+		bullet[index].dir = EAST;
 		bullet[index].x = player.spritex + 20 + player.boundx;
 		bullet[index].y = player.spritey + 50;
 	}
-	else if (player.dir == SOUTH)
+	else if (keys[S_DOWN])
 	{
-		
+		bullet[index].dir = SOUTH;
 		bullet[index].x = player.spritex + 50;
 		bullet[index].y = player.spritey + 25;
 	}
-	else if (player.dir == WEST)
+	else if (keys[S_LEFT])
 	{
-		
+		bullet[index].dir = WEST;
 		bullet[index].x = player.spritex - 20 ;
 		bullet[index].y = player.spritey + 50;
 	}
