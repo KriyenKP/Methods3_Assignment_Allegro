@@ -104,11 +104,12 @@ int main(void)
 							*mapsmini[6]	= {NULL,NULL,NULL,NULL,NULL},	//Map Thumbnails
 							*mapsel			= NULL,				//Currently selected map
 							*scrns[5]		= { NULL, NULL, NULL, NULL, NULL },		//Box images array (pause, gameover, etc)
-							*btns[5]		= { NULL, NULL, NULL, NULL, NULL };		//Buttons Array
+							*btns[5]		= { NULL, NULL, NULL, NULL, NULL },		//Buttons Array
+							*lockedmap[6]	= { NULL, NULL, NULL, NULL, NULL };		//images if map locked
 
-	//Savegame inits
-	ALLEGRO_CONFIG			*savegame		= al_load_config_file("config.ini");
-
+	ALLEGRO_CONFIG			*savegame		= al_load_config_file("config.ini");	//inits the save game file
+//	const char *unven1 = al_get_config_value(savegame, "venueunlock 1", "unlocked");	<-- test to check if config readable
+//	printf("The first value for venue 1 is %s", unven1);
 
 	if (!al_init())											//initialize and check Allegro
 	{
@@ -222,13 +223,21 @@ int main(void)
 	minilect[4]			= al_load_bitmap("./images/tom1.png");
 	minilect[5]			= al_load_bitmap("./images/viran1.png");
 	
-	//Map Images	
+	//Map Images (unlocked)	
 	maps[0]		= al_load_bitmap("./images/howard.png");		//Howard Building
 	maps[1]		= al_load_bitmap("./images/tbdavis.png");		//TB Davis
 	maps[2]		= al_load_bitmap("./images/park.png");			//The park
 	maps[3]		= al_load_bitmap("./images/science.png");	//Science
 	maps[4]		= al_load_bitmap("./images/cafe.png");		//cafe
 	maps[5]		= al_load_bitmap("./images/amphi.png");	//amphitheatre
+
+	//Map Images (locked)	
+	lockedmap[0] = al_load_bitmap("./images/howard.png");		//Howard Building--always unlocked
+	lockedmap[1] = al_load_bitmap("./images/tbdavisSlock.png");		//TB Davis
+	lockedmap[2] = al_load_bitmap("./images/parkslock.png");			//The park
+	lockedmap[3] = al_load_bitmap("./images/scienceslock.png");	//Science
+	lockedmap[4] = al_load_bitmap("./images/cafeslock.png");		//cafe
+	lockedmap[5] = al_load_bitmap("./images/amphislock.png");	//amphitheatre
 
 	bgImage			= maps[0];								//Default selected map --always unlocked
 
@@ -503,6 +512,7 @@ int main(void)
 			}
 			if (state == SETTINGS)
 			{
+				
 				// Position of Lecturers
 				if (crs_x >= 100 && crs_x <= 224 && crs_y >= 50 && crs_y <= 180)
 				{
@@ -539,15 +549,14 @@ int main(void)
 				// Position of Maps
 				if (crs_x >= 100 && crs_x <= 224 && crs_y >= 250 && crs_y <= 380)
 				{
-					bgImage = maps[0]; // howard
-					//savegame unlockables
+					bgImage = maps[0]; // howard--always unlocked
 					curMap = 0;
 				}
 				if (crs_x >= 240 && crs_x <= 354 && crs_y >= 250 && crs_y <= 380)
 				{
-					bgImage = maps[1]; // tbdavis
-					//savegame unlockables
-					curMap = 1;
+					//call check function on save-file
+						bgImage = maps[1]; // tbdavis unlocked
+						curMap = 1;	
 				}
 				if (crs_x >= 380 && crs_x <= 504 && crs_y >= 250 && crs_y <= 380)
 				{
@@ -770,13 +779,28 @@ int main(void)
 				
 
 				al_draw_textf(fonts[1], white, scrn_W / 2 - 80, 225, 0, "CHOOSE YOUR VENUE : ");
-
+				//draw bitmap based on venue locked/unlocked
 				al_draw_bitmap(mapsmini[0], 100, 250, 0);	//Howard
-				al_draw_bitmap(mapsmini[1], 240, 250, 0);	//TBDavis
-				al_draw_bitmap(mapsmini[2], 380, 250, 0);	//Park
-				al_draw_bitmap(mapsmini[3], 520, 250, 0);	//Science
-				al_draw_bitmap(mapsmini[4], 660, 250, 0);	//Cafe
-				al_draw_bitmap(mapsmini[5], 800, 250, 0);	//Amphi
+				
+				if (strcmp(al_get_config_value(savegame, "venueunlock 2", "unlocked"), "0") == 0)
+				{		al_draw_bitmap(lockedmap[1], 240, 250, 0);	//TBDavis
+				}		else{	al_draw_bitmap(mapsmini[1], 240, 250, 0);}
+				
+				if (strcmp(al_get_config_value(savegame, "venueunlock 3", "unlocked"), "0") == 0)
+				{		al_draw_bitmap(lockedmap[2], 380, 250, 0);
+				}		else{ al_draw_bitmap(mapsmini[2], 380, 250, 0);}//Park
+
+				if (strcmp(al_get_config_value(savegame, "venueunlock 4", "unlocked"), "0") == 0)
+				{		al_draw_bitmap(lockedmap[3], 520, 250, 0);
+				}		else{ al_draw_bitmap(mapsmini[3], 520, 250, 0); }//Science
+
+				if (strcmp(al_get_config_value(savegame, "venueunlock 4", "unlocked"), "0") == 0)
+				{		al_draw_bitmap(lockedmap[4], 660, 250, 0);
+				}		else{ al_draw_bitmap(mapsmini[4], 660, 250, 0); }//Cafe
+
+				if (strcmp(al_get_config_value(savegame, "venueunlock 4", "unlocked"), "0") == 0)
+				{	al_draw_bitmap(lockedmap[5], 800, 250, 0);
+				}		else{ al_draw_bitmap(mapsmini[5], 800, 250, 0); }//Cafe
 
 				switch (curMap)
 				{
@@ -935,7 +959,7 @@ int main(void)
 	al_destroy_display(display);
 	al_destroy_timer(timer);
 
-	al_save_config_file("config.ini", savegame);	//writes default unlocks back if config file removed during gameplay
+	//al_save_config_file("config.ini", savegame);	//writes default unlocks back if config file removed during gameplay
 	
 	//al_destroy_bitmap(select);
 	//end Destruction
@@ -1516,3 +1540,4 @@ void ChangeState(int &state, int newState)
 	{
 	}
 }
+
