@@ -40,3 +40,8 @@ int frameH = 128;					//frame height for animated image
 const int maxFrame = 4;				//number of frames in animated image
 //End animated image var
 
+char const *al_get_first_config_section(ALLEGRO_CONFIG const *savegame,
+	ALLEGRO_CONFIG_SECTION **iterator);
+
+char const *al_get_first_config_entry(ALLEGRO_CONFIG const *savegame,
+	char const *section, ALLEGRO_CONFIG_ENTRY **iterator);
