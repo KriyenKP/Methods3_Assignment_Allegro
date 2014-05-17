@@ -984,29 +984,47 @@ int main(void)
 				char score[10];
 				sprintf_s(score, "%i", ps);
 				al_set_config_value(savegame,"highscore", "playsc",score);	//saves player score
+				al_save_config_file("config.ini", savegame);
 
 				//check for unlocks
-				if (ps > 50)
+				if (ps > 10)
 				{
 					al_set_config_value(savegame, "venueunlock 2", "unlocked", "1"); //unlock TB Davis
+					if (al_get_config_value(savegame, "highscore", "playsc")<score); //only shows if not unlocked before
+					{
+						al_draw_textf(fonts[0], green, scrn_W / 2 - 100, 380, 0, "NEW UNLOCKS: TB Davis!!");
+					}
+					
 				}
-				else if (ps > 150)
+				if (ps > 20)
 				{
 					al_set_config_value(savegame, "venueunlock 3", "unlocked", "1");//unlock Park
+					if (al_get_config_value(savegame, "highscore", "playsc")<score); //only shows if not unlocked before
+					{
+						al_draw_textf(fonts[0], green, scrn_W / 2 - 100, 400, 0, "NEW UNLOCKS: Park!"); }
 				}
-				else if (ps > 250)
+				if (ps > 30)
 				{
-					al_set_config_value(savegame, "venueunlock 3", "unlocked", "1");//unlock Science
+					al_set_config_value(savegame, "venueunlock 4", "unlocked", "1");//unlock Science
 					al_set_config_value(savegame, "weaponunlocks", "unlocked2", "1");//unlock Pencil
+					if (al_get_config_value(savegame, "highscore", "playsc")<score); //only shows if not unlocked before
+					{
+						al_draw_textf(fonts[0], green, scrn_W / 2 - 100, 420, 0, "NEW UNLOCKS: Science & Pencil!"); }
 				}
-				else if (ps > 350)
+				if (ps > 40)
 				{
-					al_set_config_value(savegame, "venueunlock 4", "unlocked", "1");//Unlock Cafe
+					al_set_config_value(savegame, "venueunlock 5", "unlocked", "1");//Unlock Cafe
+					if (al_get_config_value(savegame, "highscore", "playsc")<score); //only shows if not unlocked before
+					{
+						al_draw_textf(fonts[0], green, scrn_W / 2 - 100, 440, 0, "NEW UNLOCKS: Cafe!"); }
 				}
-				else if (ps > 450)
+				if (ps > 50)
 				{
-					al_set_config_value(savegame, "venueunlock 5", "unlocked", "1");//unlock Amphitheatre
-					al_set_config_value(savegame, "weaponunlocks", "unlocked3", "1");//unlock Pencil
+					al_set_config_value(savegame, "venueunlock 6", "unlocked", "1");//unlock Amphitheatre
+					al_set_config_value(savegame, "weaponunlocks", "unlocked3", "1");//unlock C++
+					if (al_get_config_value(savegame, "highscore", "playsc") < score); //only shows if not unlocked before
+					{
+						al_draw_textf(fonts[0], green, scrn_W / 2 - 100, 460, 0, "NEW UNLOCKS: Amphitheatre & C++"); }
 				}
 				al_save_config_file("config.ini", savegame);
 
