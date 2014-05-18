@@ -385,9 +385,15 @@ int main(void)
 			case ALLEGRO_KEY_SPACE:
 				keys[SPACE] = true;
 				if (state == TITLE)
+				{
+					al_rest(0.2);
 					ChangeState(state, MENU);					//Splash->Menu on Spacebar press
+				}
 				else if (state == MENU)
+				{
+					al_rest(0.5);
 					ChangeState(state, PLAYING);				//Menu-> Game if Spacebar press
+				}
 				else if (state == HELP)
 					ChangeState(state, MENU);					//Help-> Menu if spacebar press
 				else if (state == PLAYING)						//Spacebar fires bullets in-game
@@ -529,32 +535,32 @@ int main(void)
 				// Position of Lecturers
 				if (crs_x >= 100 && crs_x <= 224 && crs_y >= 50 && crs_y <= 180)
 				{
-					enemsel = lecturers[0]; //Poole
+					enemsel = lecturers[0]; 
 					curLect = 0;
 				}
 				if (crs_x >= 240 && crs_x <= 354 && crs_y >= 50 && crs_y <= 180)
 				{
-					enemsel = lecturers[1]; //Saha
+					enemsel = lecturers[1];
 				    curLect = 1;
 				}
 				if (crs_x >= 380 && crs_x <= 504 && crs_y >= 50 && crs_y <= 180)
 				{
-					enemsel = lecturers[2]; //Tapamo
+					enemsel = lecturers[2]; 
 					curLect = 2;
 				}
 				if (crs_x >= 520 && crs_x <= 644 && crs_y >= 50 && crs_y <= 180) 
 				{
-					enemsel = lecturers[3]; //Afullo
+					enemsel = lecturers[3]; 
 					curLect = 3;
 				}
 				if (crs_x >= 660 && crs_x <= 784 && crs_y >= 50 && crs_y <= 180)
 				{
-					enemsel = lecturers[4];//Walingo
+					enemsel = lecturers[4];
 					curLect = 4; 
 				}
 				if (crs_x >= 800 && crs_x <= 924 && crs_y >= 50 && crs_y <= 180)
 				{
-					enemsel = lecturers[5]; //Viranjay
+					enemsel = lecturers[5]; 
 					curLect = 5;
 				}
 				// End Position of Lecturers
@@ -971,7 +977,7 @@ int main(void)
 						egg = 0;
 					}
 					boss_sel = lecturers[rand() % 6];											//Default selected enemy/lecturer
-
+					bgImage = maps[rand() % 6];
 					al_draw_textf(fonts[0], white, scrn_W / 2 + 20, scrn_H / 2, ALLEGRO_ALIGN_CENTRE, "PASSED THE YEAR!!");
 					
 					win = false;
@@ -1054,13 +1060,9 @@ int main(void)
 	
 	//Destruction of assets (prevents assert fails)
 	al_destroy_bitmap(atksel);
-	//al_destroy_bitmap(enemsel);
-	al_destroy_bitmap(bgImage);
-	//al_destroy_bitmap(select);
+	//al_destroy_bitmap(bgImage);
 	al_destroy_bitmap(icon1);
-//	al_destroy_bitmap(boss_sel);
 	al_destroy_bitmap(exp);
-	//al_destroy_bitmap(mapsel);
 
 		
 	for (int i = 0; i < 4; i++)
@@ -1082,7 +1084,7 @@ int main(void)
 	for (int i = 0; i < 5; i++)
 	{
 		al_destroy_bitmap(power[i]);
-	//	al_destroy_bitmap(maps[i]);
+	    al_destroy_bitmap(maps[i]);
 		al_destroy_bitmap(mapsmini[i]);
 		al_destroy_bitmap(lockedmap[i]);
 		al_destroy_bitmap(lecturers[i]);
