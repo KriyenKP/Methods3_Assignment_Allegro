@@ -46,13 +46,92 @@ void Bullet::update()
 class Enemy : public SimpleGraphic, public Gameplay
 {
 private: int speed;
-public: Enemy(int, int);
+		 int startX;
+		 int startY;
+public: Enemy();
+		bool start();
+		void attackPlayer(); //formerly update in prev versions
 };
 
-Enemy::Enemy(int bX = 110, int bY = 120)
+Enemy::Enemy()
 {
 	speed = 3 * (1+ rand() % 3);
 	setActive(false);
-	boundX = bX;
-	boundY = bY;
+	boundX = 110;
+	boundY = 120;
+}
+bool Enemy::start() //to be called in a loop, where a true return breaks out of the loop
+{
+	bool flag = false;
+	if (!checkActive())
+	{
+		if (rand() % 500 == 0)
+		{
+			setActive(true);
+			setX(1024);
+		retry:
+			int y = 30 + rand() % (666);
+			if (y < 475)
+			{
+				setY(y);
+				startY = y;
+			}
+			else
+				goto retry;
+			flag = true;
+		}
+	}
+}
+void Enemy::attackPlayer()
+{
+	move(speed, 3); //left = 3
+}
+
+
+class PowerUp : public SimpleGraphic, public Gameplay
+{
+private: int speed;
+		 int startX;
+		 int startY;
+public: PowerUp();
+		bool start();
+		void approach(); //formerly update in prev versions
+};
+
+PowerUp::PowerUp()
+{
+	speed = 3;
+	setActive(false);
+	boundX = 110;
+	boundY = 120;
+}
+bool PowerUp::start() //to be called in a loop, where a true return breaks out of the loop
+{
+	bool flag = false;
+	if (!checkActive())
+	{
+		if (rand() % 500 == 0)
+		{
+			setActive(true);
+			setX(1024);
+		retry:
+			int y = 30 + rand() % (666);
+			if (y < 475)
+			{
+				setY(y);
+				startY = y;
+			}
+			else
+				goto retry;
+			flag = true;
+		}
+	}
+}
+void PowerUp::approach()
+{
+	int sign;
+	if (y >= (startY + 100)) sign = 1;
+	if (y < 0) y = 656;
+	if (y <= (startY - 100) || y > 686) sign = -1;
+	move(speed*sign, 3);
 }
