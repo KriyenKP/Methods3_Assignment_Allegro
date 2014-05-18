@@ -1,15 +1,11 @@
-/*
-*	This class contains code to manage how GameElements interact with each other.
-*/
-
-#include "Graphics_and_Animations.cpp"
+#include <Graphics_and_Animations.h>
 
 class Gameplay{
 public:
-	static void detectCollision(DynamicImg*, DynamicImg*, void (*)());
+	static void detectCollision(DynamicImg*, DynamicImg*, void(*)());
 };
 
-void Gameplay::detectCollision(DynamicImg images1[], DynamicImg images2[], void (*doOnCollision)())
+void Gameplay::detectCollision(DynamicImg images1[], DynamicImg images2[], void(*doOnCollision)())
 {
 	const int images1_max = sizeof(images1) / sizeof(DynamicImg);
 	const int images2_max = sizeof(images2) / sizeof(DynamicImg);
@@ -27,10 +23,10 @@ void Gameplay::detectCollision(DynamicImg images1[], DynamicImg images2[], void 
 					y2_offset = images2[j].getBoundY();
 				/*
 				if (x1 > (x2 - x2_offset) && x1 < (x2 + x2_offset)
-					&& y1 > (y2 - y2_offset) && y1 < (y2 + y2_offset))
+				&& y1 > (y2 - y2_offset) && y1 < (y2 + y2_offset))
 				*/
 
-				if (abs(x1-x2) < x2_offset && abs(y1-y2) < y2_offset)// double check my maths please vs commented stuff above
+				if (abs(x1 - x2) < x2_offset && abs(y1 - y2) < y2_offset)// double check my maths please
 				{
 					doOnCollision();
 				}

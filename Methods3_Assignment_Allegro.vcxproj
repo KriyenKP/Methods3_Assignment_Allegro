@@ -95,6 +95,10 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Gameplay.h">
+      <FileType>CppHeader</FileType>
+    </ClInclude>
+    <ClInclude Include="Graphics_and_Animations.h" />
     <ClInclude Include="lib\init.h" />
     <ClInclude Include="lib\objects.h" />
   </ItemGroup>

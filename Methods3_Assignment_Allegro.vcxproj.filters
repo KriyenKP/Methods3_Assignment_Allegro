@@ -35,5 +35,11 @@
     <ClInclude Include="lib\init.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Graphics_and_Animations.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Gameplay.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

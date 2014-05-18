@@ -1,5 +1,6 @@
-#include <Graphics_and_Animations.cpp>
+#include <Graphics_and_Animations.h>
 #include <allegro5\allegro.h>
+#include <Gameplay.h>
 
 /*
 *	Game comprises of 5 general elements:
@@ -9,3 +10,8 @@
 *		4) Bullet. Thrown by Avatar when attacking Enemy/Boss
 *		5) Explosion. Occurs when Bullet and Enemy/Boss collide
 */
+
+class Avatar : public Animation, public Gameplay
+{
+
+};
