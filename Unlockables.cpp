@@ -16,7 +16,7 @@ public:
 
 		initcheck(savegame);			//makes sure config file exists
 
-		if (strcmp(getHiscore(), "0") == 0)		//only resets values if user hasn't played before
+		if (strcmp(getHiscore(), "0") ==0)		//only resets values if user hasn't played before
 		{
 
 			setUnlocksVenue("unlocked1", 1);		//write config file to default values
@@ -35,6 +35,27 @@ public:
 	};
 	
 	//~Unlocks();
+
+	const char *getUnlocksVenue(int vennum) //queries the venue state, integer easy on game side
+	{
+		switch (vennum){
+		case 1:	return al_get_config_value(savegame, "venueunlocks", "unlocked1"); //gets values of locked venues
+		case 2:	return al_get_config_value(savegame, "venueunlocks", "unlocked2");
+		case 3:	return al_get_config_value(savegame, "venueunlocks", "unlocked3");
+		case 4:	return al_get_config_value(savegame, "venueunlocks", "unlocked4");
+		case 5:	return al_get_config_value(savegame, "venueunlocks", "unlocked5");
+		case 6:	return al_get_config_value(savegame, "venueunlocks", "unlocked6");
+		}
+	}
+
+	const char *getUnlocksWeapons(int vennum) //queries the venue state, integer easy on game side
+	{
+		switch (vennum){
+		case 2:	return al_get_config_value(savegame, "weaponunlocks", "unlocked2"); //checks weapons
+		case 3:	return al_get_config_value(savegame, "weaponunlocks", "unlocked3");
+
+		}
+	}
 
 	const void setUnlocksVenue(const char *vennum,int setval) //game passes CHAR "unlockedX" and INT 1 or 0 , its converted from int to const char and stored in the file
 	{
@@ -92,7 +113,7 @@ private:
 };
 
 
-////check for unlocks
+//check for unlocks
 //if (ps > 10)
 //{
 //	al_set_config_value(savegame, "venueunlock 2", "unlocked", "1"); //unlock TB Davis

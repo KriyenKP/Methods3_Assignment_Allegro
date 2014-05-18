@@ -225,7 +225,7 @@ int main(void)
 	//	printf("The first value for venue 1 is %s", unven1);
 	
 	Unlocks::Unlocks();									//loads up and writes default locked values to the config file
-
+	Unlocks Unlockables;								//new object of the class to work with
 #pragma endregion
 
 		#pragma region LoadResources
@@ -485,7 +485,7 @@ int main(void)
 				
 				if (crs_x >= 240 && crs_x <= 354 && crs_y >= 250 && crs_y <= 380)
 				{
-					if ((strcmp(al_get_config_value(savegame, "venueunlock 2", "unlocked"), "0") == 0))
+					if ((strcmp(Unlockables.getUnlocksVenue(2), "0") == 0))		//use unlockables class to check state of venue
 					{
 						curMap = 6;			//send default state
 					
@@ -498,7 +498,7 @@ int main(void)
 				}
 				if (crs_x >= 380 && crs_x <= 504 && crs_y >= 250 && crs_y <= 380)
 				{
-					if (strcmp(al_get_config_value(savegame, "venueunlock 3", "unlocked"), "0") == 0)
+					if ((strcmp(Unlockables.getUnlocksVenue(3), "0") == 0))
 					{
 						curMap = 6;			//send default state
 
@@ -510,7 +510,7 @@ int main(void)
 				}
 				if (crs_x >= 520 && crs_x <= 644 && crs_y >= 250 && crs_y <= 380) 
 				{
-					if (strcmp(al_get_config_value(savegame, "venueunlock 4", "unlocked"), "0") == 0)
+					if ((strcmp(Unlockables.getUnlocksVenue(4), "0") == 0))
 					{
 						curMap = 6;			//send default state
 
@@ -522,7 +522,7 @@ int main(void)
 				}
 				if (crs_x >= 660 && crs_x <= 784 && crs_y >= 250 && crs_y <= 380)
 				{
-					if (strcmp(al_get_config_value(savegame, "venueunlock 5", "unlocked"), "0") == 0)
+					if ((strcmp(Unlockables.getUnlocksVenue(5), "0") == 0))
 					{
 						curMap = 6;			//send default state
 
@@ -534,7 +534,7 @@ int main(void)
 				}
 				if (crs_x >= 800 && crs_x <= 924 && crs_y >= 250 && crs_y <= 380)
 				{
-					if (strcmp(al_get_config_value(savegame, "venueunlock 6", "unlocked"), "0") == 0)
+					if ((strcmp(Unlockables.getUnlocksVenue(6), "0") == 0))
 					{
 						curMap = 6;			//send default state
 					}
@@ -857,23 +857,23 @@ int main(void)
 				//draw bitmap based on venue locked/unlocked
 				al_draw_bitmap(mapsmini[0], 100, 250, 0);	//Howard
 				
-				if (strcmp(al_get_config_value(savegame, "venueunlock 2", "unlocked"), "0") == 0)
+				if (strcmp(Unlockables.getUnlocksVenue(2), "0") == 0)		//uses the Unlockables class
 				{		al_draw_bitmap(lockedmap[1], 240, 250, 0);	//TBDavis
 				}		else{	al_draw_bitmap(mapsmini[1], 240, 250, 0);}
 				
-				if (strcmp(al_get_config_value(savegame, "venueunlock 3", "unlocked"), "0") == 0)
+				if (strcmp(Unlockables.getUnlocksVenue(3), "0") == 0)
 				{		al_draw_bitmap(lockedmap[2], 380, 250, 0);
 				}		else{ al_draw_bitmap(mapsmini[2], 380, 250, 0);}//Park
 
-				if (strcmp(al_get_config_value(savegame, "venueunlock 4", "unlocked"), "0") == 0)
+				if (strcmp(Unlockables.getUnlocksVenue(4), "0") == 0)
 				{		al_draw_bitmap(lockedmap[3], 520, 250, 0);
 				}		else{ al_draw_bitmap(mapsmini[3], 520, 250, 0); }//Science
 
-				if (strcmp(al_get_config_value(savegame, "venueunlock 5", "unlocked"), "0") == 0)
+				if (strcmp(Unlockables.getUnlocksVenue(5), "0") == 0)
 				{		al_draw_bitmap(lockedmap[4], 660, 250, 0);
 				}		else{ al_draw_bitmap(mapsmini[4], 660, 250, 0); }//Cafe
 
-				if (strcmp(al_get_config_value(savegame, "venueunlock 6", "unlocked"), "0") == 0)
+				if (strcmp(Unlockables.getUnlocksVenue(6), "0") == 0)
 				{	al_draw_bitmap(lockedmap[5], 800, 250, 0);
 				}		else{ al_draw_bitmap(mapsmini[5], 800, 250, 0); }//Cafe
 
@@ -910,13 +910,13 @@ int main(void)
 
 				al_draw_bitmap(atk[0], scrn_W / 2 - 200, 475, 0);	//Calculator
 				
-				if (strcmp(al_get_config_value(savegame, "weaponunlocks", "unlocked2"), "0") == 0)
+				if (strcmp(Unlockables.getUnlocksWeapons(2), "0") == 0)		//uses Unlockables class for checks
 				{
 					al_draw_bitmap(lockatk[1], scrn_W / 2 - 20, 475, 0);	//Pencil locked
 				}
 				else{ al_draw_bitmap(atk[1], scrn_W / 2 - 20, 475, 0); };	//Pencil
 
-				if (strcmp(al_get_config_value(savegame, "weaponunlocks", "unlocked3"), "0") == 0)
+				if (strcmp(Unlockables.getUnlocksWeapons(3), "0") == 0)
 				{
 					al_draw_bitmap(lockatk[2], scrn_W / 2 + 160, 475, 0);	//C++ locked
 				}
