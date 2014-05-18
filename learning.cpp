@@ -88,7 +88,7 @@ int main(void)
 	ALLEGRO_STATE			*state1			= NULL;					//State
 	ALLEGRO_SAMPLE			*sample[5]		= {NULL, NULL, NULL,NULL,NULL};
 	ALLEGRO_BITMAP			*bgImage		= NULL,					//Title Page splash
-							*player_img[5]  = {NULL,NULL, NULL, NULL, NULL},	
+							*player_img[4]  = {NULL,NULL, NULL, NULL},	
 							*select			= NULL,					//Current Selected position of character
 							*icon1			= NULL,					//Current icon -- NOT SET YET
 							*numLives[3]	= { NULL, NULL, NULL},		//Lives array
@@ -98,7 +98,7 @@ int main(void)
 							*lecturers[6]	= {NULL, NULL, NULL, NULL, NULL, NULL},  //Lecturer array
 							*minilect[6]	= { NULL, NULL, NULL, NULL, NULL, NULL },	//Lecturer Thumbnail
 							*enemsel		= NULL,							//Currently selected lecturer
-							*power[2]		= {NULL,NULL},
+							*power[6]		= {NULL,NULL,NULL,NULL,NULL,NULL},
 							*boss_sel		= NULL,
 							*exp			= NULL,							//Explosion image
 							*maps[6]		= {NULL,NULL,NULL,NULL,NULL},	//Maps array
@@ -108,11 +108,7 @@ int main(void)
 							*btns[5]		= { NULL, NULL, NULL, NULL, NULL },		//Buttons Array
 							*lockedmap[6]	= { NULL, NULL, NULL, NULL, NULL };		//images if map locked
 
-	ALLEGRO_CONFIG			*savegame		= al_load_config_file("config.ini");	//inits the save game file
-//	const char *unven1 = al_get_config_value(savegame, "venueunlock 1", "unlocked");	<-- test to check if config readable
-//	printf("The first value for venue 1 is %s", unven1);
-	bool savefile = TRUE;
-	savefile = al_save_config_file("config.ini", savegame);
+	ALLEGRO_CONFIG			*savegame		= NULL;
 
 	if (!al_init())											//initialize and check Allegro
 	{
@@ -149,13 +145,7 @@ int main(void)
 		return -1;
 	}
 
-	if (savegame == NULL || savefile == FALSE)
-	{
-		al_show_native_message_box(display, "Error!", "Savegame File Initialise/Save Failed!", "\n Check directory for config.ini\nClosing Application!", NULL, ALLEGRO_MESSAGEBOX_WARN);
-		al_destroy_display(display);
-		al_destroy_timer(timer);
-		return -1;
-	}
+
 
 
 
@@ -175,6 +165,23 @@ int main(void)
 		return -1;
 	}
 	
+
+	savegame = al_load_config_file("config.ini");	//inits the save game file  <-- YOU CANNOT INIT STUFF BEFORE AL_INIT !
+	//	const char *unven1 = al_get_config_value(savegame, "venueunlock 1", "unlocked");	<-- test to check if config readable
+	//	printf("The first value for venue 1 is %s", unven1);
+	bool savefile = TRUE;
+	savefile = al_save_config_file("config.ini", savegame);
+
+	/*if (savegame == NULL || savefile == FALSE) 
+	{
+		al_show_native_message_box(display, "Error!", "Savegame File Initialise/Save Failed!", "\n Check directory for config.ini\nClosing Application!", NULL, ALLEGRO_MESSAGEBOX_WARN);
+		al_destroy_display(display);
+		al_destroy_timer(timer);
+		return -1;
+	}*/
+
+
+
 	//cursor = al_load_bitmap("./images/target.png");
 	//custom_cursor = al_create_mouse_cursor(cursor, 0, 0);
 	fonts[2] = al_load_ttf_font("arial.ttf", 36, 0);				//
@@ -210,8 +217,8 @@ int main(void)
 	exp			= al_load_bitmap("./images/boom1.png");			//Explosions
 
 	//Lecturer Images
-	lecturers[0]	= al_load_bitmap("./images/poole.png");			//John Poole
-	lecturers[1]	= al_load_bitmap("./images/saha.png");			//Akshay Saha
+	lecturers[0]	= al_load_bitmap("./images/bitPoole.png");			//John Poole
+	lecturers[1]	= al_load_bitmap("./images/bitSaha.png");			//Akshay Saha
 	lecturers[2]	= al_load_bitmap("./images/taps.png");			//Jules Tapamo
 	lecturers[3]	= al_load_bitmap("./images/afullo.png");		//Afullo
 	lecturers[4]	= al_load_bitmap("./images/tom.png");			//Walingo
@@ -224,8 +231,8 @@ int main(void)
 	power[1] = al_load_bitmap("./images/power.png");
 	
 	//Lecturer Thumbnails
-	minilect[0]			= al_load_bitmap("./images/poole1.png");	
-	minilect[1]			= al_load_bitmap("./images/saha1.png");
+	minilect[0]			= al_load_bitmap("./images/bitPoole1.png");	
+	minilect[1]			= al_load_bitmap("./images/bitSaha1.png");
 	minilect[2]			= al_load_bitmap("./images/taps1.png");
 	minilect[3]			= al_load_bitmap("./images/afullo1.png");
 	minilect[4]			= al_load_bitmap("./images/tom1.png");
@@ -798,13 +805,13 @@ int main(void)
 				switch (curLect)
 				{
 				case 0:
-					al_draw_textf(fonts[1], white, scrn_W / 2 - 150, 180, 0, "CURRENT LECTURER : Dr John Poole");
+					al_draw_textf(fonts[1], white, scrn_W / 2 - 150, 180, 0, "CURRENT LECTURER : Dr LL Poole J");
 					break;
 				case 1:
-					al_draw_textf(fonts[1], white, scrn_W / 2 - 150, 180, 0, "CURRENT LECTURER : Dr Akshay Kumar");
+					al_draw_textf(fonts[1], white, scrn_W / 2 - 150, 180, 0, "CURRENT LECTURER : Dr AK-47");
 					break;
 				case 2:
-					al_draw_textf(fonts[1], white, scrn_W / 2 - 150, 180, 0, "CURRENT LECTURER : Professor Jules Tapamo");
+					al_draw_textf(fonts[1], white, scrn_W / 2 - 150, 180, 0, "CURRENT LECTURER : Prof Taps");
 					break;
 				case 3:
 					al_draw_textf(fonts[1], white, scrn_W / 2 - 150, 180, 0, "CURRENT LECTURER : Professor Thomas Afullo");
@@ -991,7 +998,7 @@ int main(void)
 				if (ps > 10)
 				{
 					al_set_config_value(savegame, "venueunlock 2", "unlocked", "1"); //unlock TB Davis
-					if (al_get_config_value(savegame, "highscore", "playsc")<score); //only shows if not unlocked before
+					if (al_get_config_value(savegame, "highscore", "playsc")<score) //only shows if not unlocked before
 					{
 						al_draw_textf(fonts[0], green, scrn_W / 2 - 100, 380, 0, "NEW UNLOCKS: TB Davis!!");
 					}
@@ -1042,35 +1049,40 @@ int main(void)
 		}
 
 	}
-
+	al_save_config_file("config.ini", savegame);	//writes default unlocks back if config file removed during gameplay
 	//Destruction of assets (prevents assert fails)
-	al_destroy_bitmap(player_img[3]);
-	al_destroy_bitmap(player_img[2]);
-	al_destroy_bitmap(player_img[1]);
-	al_destroy_bitmap(player_img[0]);
 	al_destroy_bitmap(atksel);
+	al_destroy_bitmap(enemsel);
+	al_destroy_bitmap(bgImage);
+	al_destroy_bitmap(select);
+	al_destroy_bitmap(icon1);
+	al_destroy_bitmap(boss_sel);
+	al_destroy_bitmap(exp);
+	al_destroy_bitmap(mapsel);
 
+		
+	for (int i = 0; i < 4; i++)
+	{
+//		al_destroy_bitmap(player_img[i]);   // Help : crash on running this line
+	}
 	//this part might be buggy
-	for (int i = 1; i < 4; i++)
+	for (int i = 0; i < 5; i++)
 	{
 //		al_destroy_bitmap(atk[i]);
 		al_destroy_bitmap(lockatk[i]);
+		al_destroy_bitmap(scrns[i]);
+		al_destroy_bitmap(btns[i]);
+		al_destroy_sample(sample[i]);
+		al_destroy_font(fonts[i]);
 	}
 	
 
 	for (int i = 0; i < 5; i++)
 	{
-		al_destroy_font(fonts[i]);
+		al_destroy_bitmap(power[i]);
 		al_destroy_bitmap(maps[i]);
 		al_destroy_bitmap(mapsmini[i]);
 		al_destroy_bitmap(lockedmap[i]);
-		al_destroy_bitmap(btns[i]);
-		al_destroy_bitmap(scrns[i]);
-		al_destroy_sample(sample[i]);
-
-	}
-	for (int i = 0; i < 6; i++)
-	{
 		al_destroy_bitmap(lecturers[i]);
 		al_destroy_bitmap(minilect[i]);
 	}
@@ -1079,7 +1091,7 @@ int main(void)
 	al_destroy_display(display);
 	al_destroy_timer(timer);
 
-	al_save_config_file("config.ini", savegame);	//writes default unlocks back if config file removed during gameplay
+	
 	
 	//al_destroy_bitmap(select);
 	//end Destruction
