@@ -87,13 +87,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="InputManager.cpp" />
-    <ClCompile Include="main.cpp">
+    <ClCompile Include="Graphics_and_Animations.cpp" />
+    <ClCompile Include="learning.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="InputManager.h" />
     <ClInclude Include="lib\init.h" />
     <ClInclude Include="lib\objects.h" />
   </ItemGroup>
