@@ -2,9 +2,8 @@
 
 #include <allegro5\allegro.h>
 #include <allegro5\keyboard.h>
-#include <vector>
 
-//#include "init.h" // used for the constants that make life easier :) 
+enum KEYS { UP, DOWN, LEFT, RIGHT, S_UP, S_DOWN, S_LEFT, S_RIGHT, SPACE, ENTER, PAUSE, ESC, BKSPCE };				//Key press shortcut, defines key constants 
 
 class InputManager
 {

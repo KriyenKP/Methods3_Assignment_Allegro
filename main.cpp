@@ -26,6 +26,8 @@ Boss bossy[NUM_BOSS];
 Explosion explosions[NUM_EXPLOSIONS];
 //End asset init
 
+// really this should move to the Input Manager class, and be managed in there.. but that requires alot of restructuring
+// ENUM to make life easier is included with IncludeManager.h
 bool keys[13] = { false, false, false, false, false, false, false, false, false, false, false, false, false }; // Keystate array, stores the state of keys we are intersted in. True when key is pressed
 
 //Asset Functions
@@ -327,17 +329,16 @@ int main(void)
 		ALLEGRO_EVENT ev;										//Allegro event init
 		al_wait_for_event(event_queue, &ev);					//wait for and accept events 
 
+		#pragma region KeyboardEventProcessing
 
 		// game logic should not be in here? should be in timer ? I've moved it there anyway... 
 		if ((ev.type == ALLEGRO_EVENT_KEY_DOWN) || (ev.type == ALLEGRO_EVENT_KEY_UP))					//If Key event. I.E. A keyboard key has been pressed, we must process and update key array to store the currently pressed keys
 		{
 			input.UpdateKeys(ev, keys);
 		}
-			
-
-
-
+		#pragma endregion			
 		
+		// This should move to input manager
 		#pragma region MouseEventProcessing
 
 
@@ -590,8 +591,8 @@ int main(void)
 			// MENU
 			else if (state == MENU)
 			{
-				if (keys[SPACE]){ // pressing space starts the game
-					ChangeState(state, PLAYING);				//Menu-> Game if Spacebar press
+				if (keys[ENTER]){ // pressing enter starts the game
+					ChangeState(state, PLAYING);				//Menu-> Game if Enter press
 
 				}
 
@@ -689,8 +690,8 @@ int main(void)
 			// LOST... and this does? 
 			else if (state == LOST)
 			{
-				if (keys[SPACE]){ // press space to play again
-					ChangeState(state, PLAYING);
+				if (keys[SPACE]){ // press space to continue
+					ChangeState(state, MENU);
 				}
 			} // end lost
 

@@ -1,7 +1,5 @@
 #include "InputManager.h"
 
-//Bad form!! but I can't use init.h right now because it's a mess... 
-enum KEYS { UP, DOWN, LEFT, RIGHT, S_UP, S_DOWN, S_LEFT, S_RIGHT, SPACE, ENTER, PAUSE, ESC, BKSPCE };				//Key press shortcut, defines key constants 
 
 InputManager::InputManager()
 {
