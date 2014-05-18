@@ -846,6 +846,7 @@ int main(void)
 			{
 				if (keys[SPACE]){ // pressing space starts the game
 					ChangeState(state, PLAYING);				//Menu-> Game if Spacebar press
+
 				}
 
 
