@@ -174,13 +174,13 @@ int main(void)
 	bool savefile = TRUE;
 	savefile = al_save_config_file("config.ini", savegame);
 
-	/*if (savegame == NULL || savefile == FALSE) 
+	if (savegame == NULL || savefile == FALSE) 
 	{
 		al_show_native_message_box(display, "Error!", "Savegame File Initialise/Save Failed!", "\n Check directory for config.ini\nClosing Application!", NULL, ALLEGRO_MESSAGEBOX_WARN);
 		al_destroy_display(display);
 		al_destroy_timer(timer);
 		return -1;
-	}*/
+	}
 
 
 
@@ -1263,9 +1263,9 @@ int main(void)
 
 	
 	//Destruction of assets (prevents assert fails)
-	al_destroy_bitmap(atksel);
+//	al_destroy_bitmap(atksel);
 	//al_destroy_bitmap(enemsel);
-	al_destroy_bitmap(bgImage);
+//	al_destroy_bitmap(bgImage);
 	//al_destroy_bitmap(select);
 	al_destroy_bitmap(icon1);
 //	al_destroy_bitmap(boss_sel);
@@ -1280,7 +1280,7 @@ int main(void)
 	//this part might be buggy
 	for (int i = 0; i < 5; i++)
 	{
-//		al_destroy_bitmap(atk[i]);
+		al_destroy_bitmap(atk[i]);
 		al_destroy_bitmap(lockatk[i]);
 		al_destroy_bitmap(scrns[i]);
 		al_destroy_bitmap(btns[i]);
@@ -1292,7 +1292,7 @@ int main(void)
 	for (int i = 0; i < 5; i++)
 	{
 		al_destroy_bitmap(power[i]);
-	//	al_destroy_bitmap(maps[i]);
+		al_destroy_bitmap(maps[i]);
 		al_destroy_bitmap(mapsmini[i]);
 		al_destroy_bitmap(lockedmap[i]);
 		al_destroy_bitmap(lecturers[i]);
