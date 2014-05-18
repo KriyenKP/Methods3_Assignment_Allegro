@@ -9,6 +9,7 @@
 *		3) Boss. Opponent to be destroyed at end of level.
 *		4) Bullet. Thrown by Avatar when attacking Enemy/Boss
 *		5) Explosion. Occurs when Bullet and Enemy/Boss collide
+*		6) PowerUp
 */
 
 class Bullet : public SimpleGraphic, public Gameplay
@@ -22,7 +23,7 @@ public:	 Bullet();
 
 Bullet::Bullet()
 {
-	setActive(true);
+	setActive(false);
 }
 void Bullet::changeDir(int newDir)
 {
@@ -41,3 +42,17 @@ void Bullet::update()
 //findDeadBullet() would be unchanged
 //updateBullet() to be implemented with loop, changeDir() and update()
 //collideBullet() to be implemented with the collisionDetection stuff from Gameplay
+
+class Enemy : public SimpleGraphic, public Gameplay
+{
+private: int speed;
+public: Enemy(int, int);
+};
+
+Enemy::Enemy(int bX = 110, int bY = 120)
+{
+	speed = 3 * (1+ rand() % 3);
+	setActive(false);
+	boundX = bX;
+	boundY = bY;
+}

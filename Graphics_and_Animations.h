@@ -6,8 +6,8 @@ protected:
 	int x;					//x-coord relative to fixed top-left axis
 	int y;					//y-coord relative to fixed top-left axis
 	bool active;			//indicates whether image is destroyed or not, to prevent memory leaks
-	const int boundX;		//used for determining width
-	const int boundY;		//used for determining height
+	int boundX;		//used for determining width
+	int boundY;		//used for determining height
 public:
 	DynamicImg(bool);
 	DynamicImg(int, int);

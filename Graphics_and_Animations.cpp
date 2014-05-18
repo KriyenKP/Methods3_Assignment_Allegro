@@ -1,5 +1,4 @@
 #include <allegro5\allegro.h>
-#include <init.h> //change to constants.h on merge
 #include <Graphics_and_Animations.h>
 
 /*
@@ -75,21 +74,21 @@ bool DynamicImg::move(int speed, int direction)
 	bool onScreen = true;
 	switch (direction)
 	{
-	case NORTH:
+	case 0:
 		y -= speed;			  //move upwards
 		onScreen = y < 0;	  //check if bullet moved off the screen
 		break;
-	case EAST:
+	case 1:
 		x += speed;			  //move right
-		onScreen = x > scrn_W;//check if bullet moved off the screen
+		onScreen = x > 1024;//check if bullet moved off the screen
 		break;
-	case WEST:
+	case 3:
 		x -= speed;			  //move left
 		onScreen = x < 0;	  //check if bullet moved off the screen
 		break;
-	case SOUTH:
+	case 2:
 		y += speed;			  //move down
-		onScreen = y > scrn_H;//check if bullet moved off the screen
+		onScreen = y > 686;//check if bullet moved off the screen
 		break;
 	default:				  //invalid direction entered
 		onScreen = false;	  //deactivate bullet
@@ -101,6 +100,11 @@ bool DynamicImg::move(int speed, int direction)
 //SimpleGraphic Methods
 
 SimpleGraphic::SimpleGraphic(){}
+SimpleGraphic::SimpleGraphic(int bX, int bY)
+{
+	boundX = bX;
+	boundY = bY;
+}
 void SimpleGraphic::toggleActive()
 {
 	active = !active;
