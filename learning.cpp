@@ -760,6 +760,7 @@ int main(void)
 				boss_sel = lecturers[rand()%6];
 				bosslevel = false;
 				player.score = 0;
+				level = 1;
 			//end menu
 			}
 			else if (state == HELP)
@@ -991,7 +992,7 @@ int main(void)
 				if (ps > 10)
 				{
 					al_set_config_value(savegame, "venueunlock 2", "unlocked", "1"); //unlock TB Davis
-					if (al_get_config_value(savegame, "highscore", "playsc")<score); //only shows if not unlocked before
+					if (al_get_config_value(savegame, "highscore", "playsc")<score) //only shows if not unlocked before
 					{
 						al_draw_textf(fonts[0], green, scrn_W / 2 - 100, 380, 0, "NEW UNLOCKS: TB Davis!!");
 					}

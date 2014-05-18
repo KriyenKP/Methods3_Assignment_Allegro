@@ -30,7 +30,7 @@ void Gameplay::detectCollision(DynamicImg images1[], DynamicImg images2[], void 
 					&& y1 > (y2 - y2_offset) && y1 < (y2 + y2_offset))
 				*/
 
-				if (abs(x1-x2) < x2_offset && abs(y1-y2) < y2_offset)// double check my maths please
+				if (abs(x1-x2) < x2_offset && abs(y1-y2) < y2_offset)// double check my maths please vs commented stuff above
 				{
 					doOnCollision();
 				}

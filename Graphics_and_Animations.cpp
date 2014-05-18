@@ -36,20 +36,22 @@ protected:
 	const int boundX;		//used for determining width
 	const int boundY;		//used for determining height
 public:
+	DynamicImg(bool);
 	DynamicImg(int, int);
 	~DynamicImg();
 	virtual void draw();
 	void setX(int);
 	void setY(int);
-	int getX();
-	int getY();
+	void setActive(bool);
+	int getX() const;
+	int getY() const;
 	int getBoundX() const;
 	int getBoundY() const;
 	bool checkActive() const;
 };
 
 class Animation : public DynamicImg{
-public: Animation(){};			
+public: Animation(int, int);
 		int maxFrame;
 		int curFrame;
 		int frameCount;
@@ -63,11 +65,11 @@ public: Animation(){};
 
 class SimpleGraphic : public DynamicImg{
 public: 
-	SimpleGraphic(bool);
+	SimpleGraphic(int, int);
 	virtual void draw(ALLEGRO_BITMAP *);
 	virtual void draw(ALLEGRO_BITMAP *, int, int, int);
 private:
-	void setActive(bool);
+	void toggleActive();
 };
 
 //DynamicImg
@@ -85,20 +87,36 @@ void DynamicImg::setY(int yVal)
 {
 	y = yVal;
 }
+void DynamicImg::setActive(bool isActive)
+{
+	active = isActive;
+}
 bool DynamicImg::checkActive() const
 {
 	return active;
 }
+int DynamicImg::getX() const
+{
+	return x;
+}
+int DynamicImg::getY() const
+{
+	return y;
+}
+int DynamicImg::getBoundX() const
+{
+	return boundX;
+}
+int DynamicImg::getBoundY() const
+{
+	return boundY;
+}
 
 //SimpleGraphic Methods
 
-SimpleGraphic::SimpleGraphic(bool isActive)
+void SimpleGraphic::toggleActive()
 {
-	setActive(isActive);
-}
-void SimpleGraphic::setActive(bool isActive)
-{
-	active = isActive;
+	active = !active;
 }
 void SimpleGraphic::draw(ALLEGRO_BITMAP *bitmap)
 {
