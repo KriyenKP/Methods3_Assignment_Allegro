@@ -219,10 +219,10 @@ int main(void)
 	//Lecturer Images
 	lecturers[0]	= al_load_bitmap("./images/bitPoole.png");			//John Poole
 	lecturers[1]	= al_load_bitmap("./images/bitSaha.png");			//Akshay Saha
-	lecturers[2]	= al_load_bitmap("./images/taps.png");			//Jules Tapamo
-	lecturers[3]	= al_load_bitmap("./images/afullo.png");		//Afullo
-	lecturers[4]	= al_load_bitmap("./images/tom.png");			//Walingo
-	lecturers[5]	= al_load_bitmap("./images/viran.png");			//Viranjay
+	lecturers[2]	= al_load_bitmap("./images/bitTaps.png");			//Jules Tapamo
+	lecturers[3]	= al_load_bitmap("./images/bitAfullo.png");		//Afullo
+	lecturers[4]	= al_load_bitmap("./images/bitTom.png");			//Walingo
+	lecturers[5]	= al_load_bitmap("./images/bitViran.png");			//Viranjay
 
 	enemsel	 = lecturers[0];										//Default selected enemy/
 	boss_sel = lecturers[rand()%6];											//Default selected enemy/lecturer
@@ -233,10 +233,10 @@ int main(void)
 	//Lecturer Thumbnails
 	minilect[0]			= al_load_bitmap("./images/bitPoole1.png");	
 	minilect[1]			= al_load_bitmap("./images/bitSaha1.png");
-	minilect[2]			= al_load_bitmap("./images/taps1.png");
-	minilect[3]			= al_load_bitmap("./images/afullo1.png");
-	minilect[4]			= al_load_bitmap("./images/tom1.png");
-	minilect[5]			= al_load_bitmap("./images/viran1.png");
+	minilect[2]			= al_load_bitmap("./images/bitTaps1.png");
+	minilect[3]			= al_load_bitmap("./images/bitAfullo1.png");
+	minilect[4]			= al_load_bitmap("./images/bitTom1.png");
+	minilect[5]			= al_load_bitmap("./images/bitViran1.png");
 	
 	//Map Images (unlocked)	
 	maps[0]		= al_load_bitmap("./images/howard.png");		//Howard Building
@@ -814,13 +814,13 @@ int main(void)
 					al_draw_textf(fonts[1], white, scrn_W / 2 - 150, 180, 0, "CURRENT LECTURER : Prof Taps");
 					break;
 				case 3:
-					al_draw_textf(fonts[1], white, scrn_W / 2 - 150, 180, 0, "CURRENT LECTURER : Professor Thomas Afullo");
+					al_draw_textf(fonts[1], white, scrn_W / 2 - 150, 180, 0, "CURRENT LECTURER : Prof 2ManyNames Fullo");
 					break;
 				case 4:
-					al_draw_textf(fonts[1], white, scrn_W / 2 - 150, 180, 0, "CURRENT LECTURER : Dr Tom Walingo");
+					al_draw_textf(fonts[1], white, scrn_W / 2 - 150, 180, 0, "CURRENT LECTURER : Dr  Weh-da-fuk'd-it-go ");
 					break;
 				case 5:
-					al_draw_textf(fonts[1], white, scrn_W / 2 - 150, 180, 0, "CURRENT LECTURER : Dr Viranjay Srivastava");
+					al_draw_textf(fonts[1], white, scrn_W / 2 - 150, 180, 0, "CURRENT LECTURER : Dr V=IR");
 					break;
 				}
 				
@@ -1046,24 +1046,26 @@ int main(void)
 			al_flip_display();
 			al_clear_to_color(black);
 			al_draw_scaled_bitmap(bgImage, 0, 0, al_get_bitmap_width(bgImage), al_get_bitmap_height(bgImage),0,0,scrn_W,scrn_H, 0);
+			al_save_config_file("config.ini", savegame);	//writes default unlocks back if config file removed during gameplay
 		}
 
 	}
-	al_save_config_file("config.ini", savegame);	//writes default unlocks back if config file removed during gameplay
+
+	
 	//Destruction of assets (prevents assert fails)
 	al_destroy_bitmap(atksel);
-	al_destroy_bitmap(enemsel);
+	//al_destroy_bitmap(enemsel);
 	al_destroy_bitmap(bgImage);
-	al_destroy_bitmap(select);
+	//al_destroy_bitmap(select);
 	al_destroy_bitmap(icon1);
-	al_destroy_bitmap(boss_sel);
+//	al_destroy_bitmap(boss_sel);
 	al_destroy_bitmap(exp);
-	al_destroy_bitmap(mapsel);
+	//al_destroy_bitmap(mapsel);
 
 		
 	for (int i = 0; i < 4; i++)
 	{
-//		al_destroy_bitmap(player_img[i]);   // Help : crash on running this line
+		al_destroy_bitmap(player_img[i]);   // Help : crash on running this line
 	}
 	//this part might be buggy
 	for (int i = 0; i < 5; i++)
@@ -1080,7 +1082,7 @@ int main(void)
 	for (int i = 0; i < 5; i++)
 	{
 		al_destroy_bitmap(power[i]);
-		al_destroy_bitmap(maps[i]);
+	//	al_destroy_bitmap(maps[i]);
 		al_destroy_bitmap(mapsmini[i]);
 		al_destroy_bitmap(lockedmap[i]);
 		al_destroy_bitmap(lecturers[i]);
