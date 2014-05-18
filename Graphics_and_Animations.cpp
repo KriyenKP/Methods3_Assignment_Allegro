@@ -1,3 +1,6 @@
+#include <allegro5\allegro.h>
+#include <Graphics_and_Animations.h>
+
 /*
 *	Abstract Base Class DynamicImg used as a template for images in the game which move across the screen.
 *
@@ -21,26 +24,98 @@
 *				       {Gameplay class structure not designed yet, but this way we're being good OOP programmers
 *				        Keep graphics management and gameplay management separated and then write a class that incorporates both}
 *
-*	^ a $ indicates Sulaiman-style explanation talk, to be modified prior to submission
+*	^ a $ indicates Sulaiman-style explanation talk, to be modified prior to submission << lol. xD
 */
 
-class DynamicImg{
-public: int x;			//x-coord relative to fixed top-left axis
-		int y;			//y-coord relative to fixed top-left axis
-		int live;		//indicates whether image is destroyed or not, to prevent memory leaks
-						//$ may be able to make this a protected variable
-		DynamicImg() {};
-};
+//DynamicImg
+DynamicImg::DynamicImg(int bX, int bY)
+: boundX(bX),
+  boundY(bY)
+{
 
-class Animation : public DynamicImg{
-public: Animation(){};
-		int maxFrame;
-		int curFrame;
-		int frameCount;
-		int frameDelay;
-		int frameWidth;
-		int frameHeight;
-		int animationColumns;
-		int animationDirection;
-		ALLEGRO_BITMAP *image;
-};
+}
+DynamicImg::DynamicImg():boundX(0), boundY(0){}
+DynamicImg::~DynamicImg(){}
+void DynamicImg::draw(){}
+void DynamicImg::setX(int xVal)
+{
+	x = xVal;
+}
+void DynamicImg::setY(int yVal)
+{
+	y = yVal;
+}
+void DynamicImg::setActive(bool isActive)
+{
+	active = isActive;
+}
+bool DynamicImg::checkActive() const
+{
+	return active;
+}
+int DynamicImg::getX() const
+{
+	return x;
+}
+int DynamicImg::getY() const
+{
+	return y;
+}
+int DynamicImg::getBoundX() const
+{
+	return boundX;
+}
+int DynamicImg::getBoundY() const
+{
+	return boundY;
+}
+bool DynamicImg::move(int speed, int direction)
+{
+	bool onScreen = true;
+	switch (direction)
+	{
+	case 0:
+		y -= speed;			  //move upwards
+		onScreen = y < 0;	  //check if bullet moved off the screen
+		break;
+	case 1:
+		x += speed;			  //move right
+		onScreen = x > 1024;//check if bullet moved off the screen
+		break;
+	case 3:
+		x -= speed;			  //move left
+		onScreen = x < 0;	  //check if bullet moved off the screen
+		break;
+	case 2:
+		y += speed;			  //move down
+		onScreen = y > 686;//check if bullet moved off the screen
+		break;
+	default:				  //invalid direction entered
+		onScreen = false;	  //deactivate bullet
+		break;
+	}
+	return onScreen;
+}
+
+//SimpleGraphic Methods
+
+SimpleGraphic::SimpleGraphic(){}
+SimpleGraphic::SimpleGraphic(int bX, int bY)
+{
+	boundX = bX;
+	boundY = bY;
+}
+void SimpleGraphic::toggleActive()
+{
+	active = !active;
+}
+void SimpleGraphic::draw(ALLEGRO_BITMAP *bitmap)
+{
+	if (active)
+		al_draw_bitmap(bitmap, x, y, 0);
+}
+void SimpleGraphic::draw(ALLEGRO_BITMAP *bitmap, int cur, int fW, int fH)
+{
+	if (active)
+		al_draw_bitmap_region(bitmap, cur * fW, 0, fW, fH, x, y, 0);
+}
