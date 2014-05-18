@@ -1,0 +1,125 @@
+[General]
+Program name = UKZN-Lecturer-Defense
+Program version = 1.0 Beta
+Windows 2000 = 1
+Windows XP = 1
+Windows Server 2003 = 1
+Windows Vista = 1
+Windows Server 2008 = 1
+Windows 7 = 1
+Windows 8 = 1
+Windows Server 2012 = 1
+Company name = InHub
+Website = http://inhub.co.za
+SFA = 1
+DFA = 1
+Comp = 1
+[Graphics]
+Wizard image = C:\Program Files (x86)\solicus\InstallForge\Images\Wizard_1.bmp
+Header image = C:\Program Files (x86)\solicus\InstallForge\Images\icon1.BMP
+Install-icon image = C:\Users\Kriyen\Source\Repos\Methods3_Assignment_Allegro\Release\images\favicon.ico
+Show Label = 1
+Windows style = 1
+XpStyle = 1
+[Files]
+Include Zipfile = 0
+Zipfile = 
+Installation path = <programfiles>\<company>\<appname>\
+Autcip = 1
+[Uninstall]
+Vwau = 1
+Website = www.inhub.co.za
+Include uninstaller = 1
+Uninstaller filename = Uninstall
+[Licence]
+Licence dialog = 0
+[Finish]
+Sart program = 1
+Reboot computer = 0
+Execute DLL: = 0
+Program = <installpath>\Methods3_Assignment_Allegro.exe
+Dll = 
+[Shortcuts]
+Allowtc = 0
+Shortcut path = <company>\<appname>\
+[Serialoptions]
+Allows = 0
+Number = 20
+[SplashScreen]
+Image = 
+Sound = 
+Time = 2
+PlaySound = 0
+Allow = 0
+[Build]
+File = C:\Users\Kriyen\Source\Repos\Methods3_Assignment_Allegro\UKZN_LD_Installer.exe
+[Updater]
+Allow = 0
+1 = UKZN-Lecturer-Defense
+2 = <appversion>
+3 = http://
+4 = http://
+5 = http://
+6 = Update
+Language = 0
+RunProg = 
+RunProgs = 0
+Execdlls = 0
+[Languages]
+1
+[Files/Dirs]
+C:\Users\Kriyen\Source\Repos\Methods3_Assignment_Allegro\Release\Methods3_Assignment_Allegro.exe
+192 KB
+exe
+C:\Users\Kriyen\Source\Repos\Methods3_Assignment_Allegro\Release\allegro-5.0.10-monolith-md.dll
+2.1 MB
+dll
+C:\Users\Kriyen\Source\Repos\Methods3_Assignment_Allegro\Release\allegro-5.0.10-monolith-mt.dll
+2.3 MB
+dll
+C:\Users\Kriyen\Source\Repos\Methods3_Assignment_Allegro\Release\Methods3_Assignment_Allegro.Build.CppClean.log
+1.8 KB
+log
+C:\Users\Kriyen\Source\Repos\Methods3_Assignment_Allegro\Release\Methods3_Assignment_Allegro.log
+1.8 KB
+log
+C:\Users\Kriyen\Source\Repos\Methods3_Assignment_Allegro\Release\learning.obj
+298.7 KB
+obj
+C:\Users\Kriyen\Source\Repos\Methods3_Assignment_Allegro\Release\main.obj
+89.7 KB
+obj
+C:\Users\Kriyen\Source\Repos\Methods3_Assignment_Allegro\Release\Methods3_Assignment_Allegro.pdb
+1.5 MB
+pdb
+C:\Users\Kriyen\Source\Repos\Methods3_Assignment_Allegro\Release\vc120.pdb
+180 KB
+pdb
+C:\Users\Kriyen\Source\Repos\Methods3_Assignment_Allegro\Release\arial.ttf
+870.6 KB
+ttf
+C:\Users\Kriyen\Source\Repos\Methods3_Assignment_Allegro\Release\vc120.idb
+867 KB
+idb
+C:\Users\Kriyen\Source\Repos\Methods3_Assignment_Allegro\Release\images\
+n/a
+[Folder]
+C:\Users\Kriyen\Source\Repos\Methods3_Assignment_Allegro\Release\lib\
+n/a
+[Folder]
+C:\Users\Kriyen\Source\Repos\Methods3_Assignment_Allegro\Release\sounds\
+n/a
+[Folder]
+[Licence_Begin]
+[Licence_End]
+[Registry]
+[Variables]
+[SCs]
+Desktop
+UKZN_Lecturer Defense
+<installpath>\Methods3_Assignment_Allegro.exe
+
+[IFP_End]
+[Serials]
+[Serials_End]
+[Commands]
