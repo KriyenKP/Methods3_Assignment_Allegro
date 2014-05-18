@@ -14,6 +14,8 @@
 #include "constants.h"
 #include "lib/objects.h"						//Structures for Enemies/Characters/Projectiles
 #include "InputManager.h"						// Class that processes inputs (Keyboard only ATM) 
+#include "Unlockables.cpp"						//Class for dealing with game unlocks
+
 using namespace std;
 
 //REMEMBER TO EDIT Linker -> System -> SubSystem -> WINDOW to hide console!
@@ -218,19 +220,11 @@ int main(void)
 	}
 
 
-	savegame = al_load_config_file("config.ini");	//inits the save game file  <-- YOU CANNOT INIT STUFF BEFORE AL_INIT !
+	//savegame = al_load_config_file("config.ini");	//inits the save game file  <-- YOU CANNOT INIT STUFF BEFORE AL_INIT !
 	//	const char *unven1 = al_get_config_value(savegame, "venueunlock 1", "unlocked");	<-- test to check if config readable
 	//	printf("The first value for venue 1 is %s", unven1);
-	bool savefile = TRUE;
-	savefile = al_save_config_file("config.ini", savegame);
-
-	if (savegame == NULL || savefile == FALSE) 
-	{
-		al_show_native_message_box(display, "Error!", "Savegame File Initialise/Save Failed!", "\n Check directory for config.ini\nClosing Application!", NULL, ALLEGRO_MESSAGEBOX_WARN);
-		al_destroy_display(display);
-		al_destroy_timer(timer);
-		return -1;
-	}
+	
+	Unlocks::Unlocks();									//loads up and writes default locked values to the config file
 
 #pragma endregion
 
@@ -379,7 +373,7 @@ int main(void)
 	{
 		#pragma region GeneralAdmin
 
-
+	
 
 		ALLEGRO_EVENT ev;										//Allegro event init
 		al_wait_for_event(event_queue, &ev);					//wait for and accept events 
@@ -1080,7 +1074,7 @@ int main(void)
 			al_flip_display();
 			al_clear_to_color(black);
 			al_draw_scaled_bitmap(bgImage, 0, 0, al_get_bitmap_width(bgImage), al_get_bitmap_height(bgImage),0,0,scrn_W,scrn_H, 0);
-			al_save_config_file("config.ini", savegame);	//writes default unlocks back if config file removed during gameplay
+//			al_save_config_file("config.ini", savegame);	//writes default unlocks back if config file removed during gameplay
 		}
 #pragma endregion
 	}
