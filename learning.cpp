@@ -4,13 +4,16 @@
 #include <allegro5/allegro_native_dialog.h>		//Message Dialog
 #include <allegro5/allegro_font.h>				//Needed for fonts 
 #include <allegro5/allegro_ttf.h>				//Needed for fonts
-#include <lib/objects.h>						//Structures for Enemies/Characters/Projectiles
-#include <lib/init.h>
+
 #include <allegro5/allegro_acodec.h>
 #include <allegro5/allegro_audio.h>				//Audio yet to be used	
 #include <cstdio>								//Input/output - Used for displaying mouse pos atm
 #include <sstream>
 #include <allegro5/allegro_primitives.h>		//Used for drawing Shapes
+
+#include "constants.h"
+#include "lib/objects.h"						//Structures for Enemies/Characters/Projectiles
+#include "InputManager.h"						// Class that processes inputs (Keyboard only ATM) 
 using namespace std;
 
 //REMEMBER TO EDIT Linker -> System -> SubSystem -> WINDOW to hide console!
@@ -24,7 +27,10 @@ Boss bossy[NUM_BOSS];
 Explosion explosions[NUM_EXPLOSIONS];
 //End asset init
 
+// really this should move to the Input Manager class, and be managed in there.. but that requires alot of restructuring
+// ENUM to make life easier is included with IncludeManager.h
 bool keys[13] = { false, false, false, false, false, false, false, false, false, false, false, false, false }; // Keystate array, stores the state of keys we are intersted in. True when key is pressed
+
 
 //Asset Functions
 void InitCharacter(Character &player);
@@ -66,49 +72,93 @@ void UpdateExplosions(Explosion explosions[], int size);
 
 void ChangeState(int &state, int newState);   //Change State function
 
+
+//Global Variables. used to be in init.h... bad. Possible some of these can move to constants.h but I'm not sure which ones. 
+float crs_x = scrn_W / 2.0;										//default x location for mouse position detection
+float crs_y = scrn_H / 2.0;										//default y location for mouse position detection
+
+
+
+int playone = 1;												//restrict sound to play only once
+int sign = 1;													//direction for boss movement
+bool bosslevel = false;											//only let boss come after certain score
+bool win = 0;
+bool SecLife = false;
+int poweredNum = 0;
+int level = 0;
+
+int bossCheck = 0;
+
+int egg = 0;
+
+//animated image var
+int curFrame = 0;					//Current frame of animated image
+int frameCount = 0;					//frame counter for animated image
+int frameDelay = 20;				//rate at which animate image changes
+int frameW = 128;					//frame width for animated image
+int frameH = 128;					//frame height for animated image
+
+
+const int maxFrame = 4;				//number of frames in animated image
+//End animated image var
+
 int main(void)
-{	
+{
+		#pragma region SetupLocalVars
+
+
+
 	int state = -1;						//default state
 
-	bool done	= false,				//Game over
-		 fired	= false,				//Power is fired
-		 redraw = true,					//Redraw frame
-	     timeM	= true;					//Pause Timer  -- NEEDS TO BE FIXED
+	bool done = false,				//Game over
+		fired = false,				//Power is fired
+		redraw = true,					//Redraw frame
+		timeM = true;					//Pause Timer  -- NEEDS TO BE FIXED
 
 
 	int curLect = 0,		//current lecture identifier
 		curMap = 0,			//current map identifier
 		curAtk = 0;			//current attack identifier
 
-	//Initialisers
-	ALLEGRO_DISPLAY			*display		= NULL;					//Screen display
-	ALLEGRO_EVENT_QUEUE		*event_queue	= NULL;					//Event Queue
-	ALLEGRO_TIMER			*timer			= NULL;					//System timer
-	ALLEGRO_FONT			*fonts[5]		= { NULL, NULL, NULL, NULL, NULL };	//fonts array
-	ALLEGRO_STATE			*state1			= NULL;					//State
-	ALLEGRO_SAMPLE			*sample[5]		= {NULL, NULL, NULL,NULL,NULL};
-	ALLEGRO_BITMAP			*bgImage		= NULL,					//Title Page splash
-							*player_img[4]  = {NULL,NULL, NULL, NULL},	
-							*select			= NULL,					//Current Selected position of character
-							*icon1			= NULL,					//Current icon -- NOT SET YET
-							*numLives[3]	= { NULL, NULL, NULL},		//Lives array
-							*atk[5]			= { NULL, NULL, NULL, NULL, NULL },		//Attack array
-							*lockatk[5]		= { NULL, NULL, NULL, NULL, NULL },		//locked weapons
-							*atksel			= NULL,
-							*lecturers[6]	= {NULL, NULL, NULL, NULL, NULL, NULL},  //Lecturer array
-							*minilect[6]	= { NULL, NULL, NULL, NULL, NULL, NULL },	//Lecturer Thumbnail
-							*enemsel		= NULL,							//Currently selected lecturer
-							*power[6]		= {NULL,NULL,NULL,NULL,NULL,NULL},
-							*boss_sel		= NULL,
-							*exp			= NULL,							//Explosion image
-							*maps[6]		= {NULL,NULL,NULL,NULL,NULL},	//Maps array
-							*mapsmini[6]	= {NULL,NULL,NULL,NULL,NULL},	//Map Thumbnails
-							*mapsel			= NULL,				//Currently selected map
-							*scrns[5]		= { NULL, NULL, NULL, NULL, NULL },		//Box images array (pause, gameover, etc)
-							*btns[5]		= { NULL, NULL, NULL, NULL, NULL },		//Buttons Array
-							*lockedmap[6]	= { NULL, NULL, NULL, NULL, NULL };		//images if map locked
+	int direction = 1;						//Default direction identifier init
+	bool loaded_gun = true;					// Has the player just fired a shot and need to reload or not? 
 
-	ALLEGRO_CONFIG			*savegame		= NULL;
+	//Initialisers
+	ALLEGRO_DISPLAY			*display = NULL;					//Screen display
+	ALLEGRO_EVENT_QUEUE		*event_queue = NULL;					//Event Queue
+	ALLEGRO_TIMER			*timer = NULL;					//System timer
+	ALLEGRO_FONT			*fonts[5] = { NULL, NULL, NULL, NULL, NULL };	//fonts array
+	ALLEGRO_STATE			*state1 = NULL;					//State
+	ALLEGRO_SAMPLE			*sample[5] = { NULL, NULL, NULL, NULL, NULL };
+	ALLEGRO_BITMAP			*bgImage = NULL,					//Title Page splash
+		*player_img[4] = { NULL, NULL, NULL, NULL },
+		*select = NULL,					//Current Selected position of character
+		*icon1 = NULL,					//Current icon -- NOT SET YET
+		*numLives[3] = { NULL, NULL, NULL },		//Lives array
+		*atk[5] = { NULL, NULL, NULL, NULL, NULL },		//Attack array
+		*lockatk[5] = { NULL, NULL, NULL, NULL, NULL },		//locked weapons
+		*atksel = NULL,
+		*lecturers[6] = { NULL, NULL, NULL, NULL, NULL, NULL },  //Lecturer array
+		*minilect[6] = { NULL, NULL, NULL, NULL, NULL, NULL },	//Lecturer Thumbnail
+		*enemsel = NULL,							//Currently selected lecturer
+		*power[6] = { NULL, NULL, NULL, NULL, NULL, NULL },
+		*boss_sel = NULL,
+		*exp = NULL,							//Explosion image
+		*maps[6] = { NULL, NULL, NULL, NULL, NULL },	//Maps array
+		*mapsmini[6] = { NULL, NULL, NULL, NULL, NULL },	//Map Thumbnails
+		*mapsel = NULL,				//Currently selected map
+		*scrns[5] = { NULL, NULL, NULL, NULL, NULL },		//Box images array (pause, gameover, etc)
+		*btns[5] = { NULL, NULL, NULL, NULL, NULL },		//Buttons Array
+		*lockedmap[6] = { NULL, NULL, NULL, NULL, NULL };		//images if map locked
+
+	ALLEGRO_CONFIG			*savegame = NULL;
+
+#pragma endregion
+
+		#pragma region InitAllegro
+
+
+
 
 	if (!al_init())											//initialize and check Allegro
 	{
@@ -129,7 +179,7 @@ int main(void)
 
 	timer = al_create_timer(1.0 / FPS);							//Create Timer
 	if (!timer)													//Check timer creation
-	{				
+	{
 		al_show_native_message_box(display, "Error!", "Warning!", "Failed to initialise timer! \n Closing Application!", NULL, ALLEGRO_MESSAGEBOX_WARN);
 		al_destroy_display(display);
 		al_destroy_timer(timer);
@@ -138,7 +188,7 @@ int main(void)
 
 	event_queue = al_create_event_queue();						//Create event queue
 	if (!event_queue)											//Check event queue creation
-	{											
+	{
 		al_show_native_message_box(display, "Error!", "Warning!", "Failed to initialise event queue! \n Closing Application!", NULL, ALLEGRO_MESSAGEBOX_WARN);
 		al_destroy_display(display);
 		al_destroy_timer(timer);
@@ -156,17 +206,17 @@ int main(void)
 	al_init_acodec_addon();
 	al_init_ttf_addon();									//load truetype font addon	
 	al_init_image_addon();									//load image processing addon
-// Should we not have error checking here? Ref http://wiki.allegro.cc/index.php?title=Basic_Keyboard_Example
+	// Should we not have error checking here? Ref http://wiki.allegro.cc/index.php?title=Basic_Keyboard_Example
 	//KRI - We should...i got lazy ^_^
 	al_install_keyboard();									//install keyboard
 	al_install_mouse();										//install mouse
 	//end addon innit
-	
+
 	if (!al_reserve_samples(5)){
 		al_show_native_message_box(display, "Error!", "Warning!", "Failed to initialise Sound samples! \n Closing Application!", NULL, ALLEGRO_MESSAGEBOX_WARN);
 		return -1;
 	}
-	
+
 
 	savegame = al_load_config_file("config.ini");	//inits the save game file  <-- YOU CANNOT INIT STUFF BEFORE AL_INIT !
 	//	const char *unven1 = al_get_config_value(savegame, "venueunlock 1", "unlocked");	<-- test to check if config readable
@@ -174,13 +224,17 @@ int main(void)
 	bool savefile = TRUE;
 	savefile = al_save_config_file("config.ini", savegame);
 
-	/*if (savegame == NULL || savefile == FALSE) 
+	if (savegame == NULL || savefile == FALSE) 
 	{
 		al_show_native_message_box(display, "Error!", "Savegame File Initialise/Save Failed!", "\n Check directory for config.ini\nClosing Application!", NULL, ALLEGRO_MESSAGEBOX_WARN);
 		al_destroy_display(display);
 		al_destroy_timer(timer);
 		return -1;
-	}*/
+	}
+
+#pragma endregion
+
+		#pragma region LoadResources
 
 
 
@@ -193,18 +247,18 @@ int main(void)
 	//Init images
 
 	//Character Images
-	player_img[0] = al_load_bitmap("./images/KriR.png");		
+	player_img[0] = al_load_bitmap("./images/KriR.png");
 	player_img[1] = al_load_bitmap("./images/KriL.png");
 	player_img[2] = al_load_bitmap("./images/KriWalkR.png");
-	player_img[3] = al_load_bitmap("./images/KriWalkL.png");	
+	player_img[3] = al_load_bitmap("./images/KriWalkL.png");
 
-	select		= player_img[0];
-	
+	select = player_img[0];
+
 	//Attack images (unlocked)
-	atk[0]	= al_load_bitmap("./images/calc.png");
-	atk[1]	= al_load_bitmap("./images/pencil.png");
-	atk[2]	= al_load_bitmap("./images/c.png");
-	atk[3]  = al_load_bitmap("./images/light.png");
+	atk[0] = al_load_bitmap("./images/calc.png");
+	atk[1] = al_load_bitmap("./images/pencil.png");
+	atk[2] = al_load_bitmap("./images/c.png");
+	atk[3] = al_load_bitmap("./images/light.png");
 	atksel = atk[0];
 
 	//Attack images (locked)
@@ -212,41 +266,41 @@ int main(void)
 	lockatk[1] = al_load_bitmap("./images/pencillock.png");
 	lockatk[2] = al_load_bitmap("./images/clock.png");
 
-	numLives[0]		= al_load_bitmap("./images/1.png");			//Number of Lives
-	numLives[1]		= al_load_bitmap("./images/2.png");
-	numLives[2]		= al_load_bitmap("./images/3.png");
+	numLives[0] = al_load_bitmap("./images/1.png");			//Number of Lives
+	numLives[1] = al_load_bitmap("./images/2.png");
+	numLives[2] = al_load_bitmap("./images/3.png");
 
-	exp			= al_load_bitmap("./images/boom1.png");			//Explosions
+	exp = al_load_bitmap("./images/boom1.png");			//Explosions
 
 	//Lecturer Images
-	lecturers[0]	= al_load_bitmap("./images/bitPoole.png");			//Pool
-	lecturers[1]	= al_load_bitmap("./images/bitSaha.png");			//Ak47
-	lecturers[2]	= al_load_bitmap("./images/bitTaps.png");			//taps
-	lecturers[3]	= al_load_bitmap("./images/bitAfullo.png");		//2many names
-	lecturers[4]	= al_load_bitmap("./images/bitTom.png");			//Wer-dafuq
-	lecturers[5]	= al_load_bitmap("./images/bitViran.png");			//V=ir
+	lecturers[0] = al_load_bitmap("./images/bitPoole.png");			//Pool
+	lecturers[1] = al_load_bitmap("./images/bitSaha.png");			//Ak47
+	lecturers[2] = al_load_bitmap("./images/bitTaps.png");			//taps
+	lecturers[3] = al_load_bitmap("./images/bitAfullo.png");		//2many names
+	lecturers[4] = al_load_bitmap("./images/bitTom.png");			//Wer-dafuq
+	lecturers[5] = al_load_bitmap("./images/bitViran.png");			//V=ir
 
-	enemsel	 = lecturers[0];										//Default selected enemy/
-	boss_sel = lecturers[rand()%6];											//Default selected enemy/lecturer
+	enemsel = lecturers[0];										//Default selected enemy/
+	boss_sel = lecturers[rand() % 6];											//Default selected enemy/lecturer
 
 	power[0] = al_load_bitmap("./images/dp.png");
 	power[1] = al_load_bitmap("./images/power.png");
-	
+
 	//Lecturer Thumbnails
-	minilect[0]			= al_load_bitmap("./images/bitPoole1.png");	
-	minilect[1]			= al_load_bitmap("./images/bitSaha1.png");
-	minilect[2]			= al_load_bitmap("./images/bitTaps1.png");
-	minilect[3]			= al_load_bitmap("./images/bitAfullo1.png");
-	minilect[4]			= al_load_bitmap("./images/bitTom1.png");
-	minilect[5]			= al_load_bitmap("./images/bitViran1.png");
-	
+	minilect[0] = al_load_bitmap("./images/bitPoole1.png");
+	minilect[1] = al_load_bitmap("./images/bitSaha1.png");
+	minilect[2] = al_load_bitmap("./images/bitTaps1.png");
+	minilect[3] = al_load_bitmap("./images/bitAfullo1.png");
+	minilect[4] = al_load_bitmap("./images/bitTom1.png");
+	minilect[5] = al_load_bitmap("./images/bitViran1.png");
+
 	//Map Images (unlocked)	
-	maps[0]		= al_load_bitmap("./images/howard.png");		//Howard Building
-	maps[1]		= al_load_bitmap("./images/tbdavis.png");		//TB Davis
-	maps[2]		= al_load_bitmap("./images/park.png");			//The park
-	maps[3]		= al_load_bitmap("./images/science.png");	//Science
-	maps[4]		= al_load_bitmap("./images/cafe.png");		//cafe
-	maps[5]		= al_load_bitmap("./images/amphi.png");	//amphitheatre
+	maps[0] = al_load_bitmap("./images/howard.png");		//Howard Building
+	maps[1] = al_load_bitmap("./images/tbdavis.png");		//TB Davis
+	maps[2] = al_load_bitmap("./images/park.png");			//The park
+	maps[3] = al_load_bitmap("./images/science.png");	//Science
+	maps[4] = al_load_bitmap("./images/cafe.png");		//cafe
+	maps[5] = al_load_bitmap("./images/amphi.png");	//amphitheatre
 
 	//Map Images (locked)	
 	lockedmap[0] = al_load_bitmap("./images/howard.png");		//Howard Building--always unlocked
@@ -256,49 +310,49 @@ int main(void)
 	lockedmap[4] = al_load_bitmap("./images/cafeslock.png");		//cafe
 	lockedmap[5] = al_load_bitmap("./images/amphislock.png");	//amphitheatre
 
-	bgImage			= maps[0];								//Default selected map --always unlocked
+	bgImage = maps[0];								//Default selected map --always unlocked
 
 	//Map thumbnail
-	mapsmini[0]		= al_load_bitmap("./images/howards.png");		//Howard Building
-	mapsmini[1]		= al_load_bitmap("./images/tbdaviss.png");		//TB Davis 
-	mapsmini[2]		= al_load_bitmap("./images/parks.png");			//The park
-	mapsmini[3]		= al_load_bitmap("./images/sciences.png");	//science
-	mapsmini[4]		= al_load_bitmap("./images/cafes.png");			//cafe
-	mapsmini[5]		= al_load_bitmap("./images/amphis.png");		//Amphitheatre
+	mapsmini[0] = al_load_bitmap("./images/howards.png");		//Howard Building
+	mapsmini[1] = al_load_bitmap("./images/tbdaviss.png");		//TB Davis 
+	mapsmini[2] = al_load_bitmap("./images/parks.png");			//The park
+	mapsmini[3] = al_load_bitmap("./images/sciences.png");	//science
+	mapsmini[4] = al_load_bitmap("./images/cafes.png");			//cafe
+	mapsmini[5] = al_load_bitmap("./images/amphis.png");		//Amphitheatre
 
 	//Button Images
-	btns[0]			= al_load_bitmap("./images/startbtn.png");		//start
-	btns[1]			= al_load_bitmap("./images/sttngbtn.png");		//settings
-	btns[2]			= al_load_bitmap("./images/stpbtn.png");		//stop
-	btns[3]			= al_load_bitmap("./images/back.png");			//back
-	btns[4]			= al_load_bitmap("./images/help.png");			//png
+	btns[0] = al_load_bitmap("./images/startbtn.png");		//start
+	btns[1] = al_load_bitmap("./images/sttngbtn.png");		//settings
+	btns[2] = al_load_bitmap("./images/stpbtn.png");		//stop
+	btns[3] = al_load_bitmap("./images/back.png");			//back
+	btns[4] = al_load_bitmap("./images/help.png");			//png
 
 	//Menu Images
-	scrns[0]		= al_load_bitmap("./images/BG1.png");		//Title Background
-	scrns[1]		= al_load_bitmap("./images/pause.png");
-	scrns[2]		= al_load_bitmap("./images/gameover.png");
-	scrns[3]		= al_load_bitmap("./images/config.png");
-	scrns[4]		= al_load_bitmap("./images/ukzn_msc.png");
-			
-	sample[0]		= al_load_sample("./sounds/Pew_Pew.wav");
-	sample[1]		= al_load_sample("./sounds/Evil_Laugh.wav");
-	sample[2]		= al_load_sample("./sounds/victory_fanfare.wav");
-	sample[3]		= al_load_sample("./sounds/boom.wav");
+	scrns[0] = al_load_bitmap("./images/BG1.png");		//Title Background
+	scrns[1] = al_load_bitmap("./images/pause.png");
+	scrns[2] = al_load_bitmap("./images/gameover.png");
+	scrns[3] = al_load_bitmap("./images/config.png");
+	scrns[4] = al_load_bitmap("./images/ukzn_msc.png");
 
-	icon1			= al_load_bitmap("./images/icon.png");
+	sample[0] = al_load_sample("./sounds/Pew_Pew.wav");
+	sample[1] = al_load_sample("./sounds/Evil_Laugh.wav");
+	sample[2] = al_load_sample("./sounds/victory_fanfare.wav");
+	sample[3] = al_load_sample("./sounds/boom.wav");
 
-	int direction = 1;						//Default direction identifier init
-	bool loaded_gun = true;					// Has the player just fired a shot and need to reload or not? 
+	icon1 = al_load_bitmap("./images/icon.png");
+#pragma endregion
+
+		#pragma region SetupMoreAllegro
 
 	//Event queue - register listeners
-	al_register_event_source(event_queue, al_get_timer_event_source(timer)); 
+	al_register_event_source(event_queue, al_get_timer_event_source(timer));
 	al_register_event_source(event_queue, al_get_keyboard_event_source());				// get keyboard presses
 	al_register_event_source(event_queue, al_get_mouse_event_source());
 	al_register_event_source(event_queue, al_get_display_event_source(display));
 	//end event queue
 
 	//Colours
-	black = al_map_rgb(0,0,0);
+	black = al_map_rgb(0, 0, 0);
 	white = al_map_rgb(255, 255, 255);
 	red = al_map_rgb(255, 0, 0);
 	green = al_map_rgb(0, 255, 0);
@@ -311,293 +365,56 @@ int main(void)
 	//end Asset variables
 
 	//End initialisers
-	al_set_display_icon(display, icon1);  
+	al_set_display_icon(display, icon1);
 	al_set_window_title(display, "UKZN - LECTURE DEFENCE - HOWARD EDITION");   //set window title 
 	al_start_timer(timer);											//Start event timer (program clock)
 	al_clear_to_color(black);										//Clear and set Background black
 	al_set_target_bitmap(al_get_backbuffer(display));				//Backbuffer--next frame to write to display
 	al_flip_display();												//Allows manual switch between current disp & backbuffer
+#pragma endregion
 
-	while (!done)
+	InputManager input;							// create new instance of input manager class. Deals with Keyboard
+
+	while (!done) //loop forever... 
 	{
+		#pragma region GeneralAdmin
+
+
+
 		ALLEGRO_EVENT ev;										//Allegro event init
 		al_wait_for_event(event_queue, &ev);					//wait for and accept events 
 
+		if (ev.type == ALLEGRO_EVENT_DISPLAY_CLOSE)
+		{
+			done = true;
+		}
+
+		if (ev.type == ALLEGRO_EVENT_DISPLAY_RESIZE)
+		{
+			al_set_new_display_flags(ALLEGRO_FULLSCREEN_WINDOW);
+		}
+
+		// This means game will allways exit on ESC
+		if (keys[ESC]){
+			done = true;												// EJECT! 
+		} //Exit game on ESC
+
+#pragma endregion
+
+		#pragma region KeyboardEventProcessing
+
 		// game logic should not be in here? should be in timer ? I've moved it there anyway... 
-		if (ev.type == ALLEGRO_EVENT_KEY_DOWN)					//If Key down event. I.E. A keyboard key has been pressed, we must process and update key array
+		if ((ev.type == ALLEGRO_EVENT_KEY_DOWN) || (ev.type == ALLEGRO_EVENT_KEY_UP))					//If Key event. I.E. A keyboard key has been pressed, we must process and update key array to store the currently pressed keys
 		{
-			switch (ev.keyboard.keycode)						//Switch keyboard code returned. 
-			{
-				// Movement
-				case ALLEGRO_KEY_W:
-					keys[UP] = true;
-					break;
-				case ALLEGRO_KEY_A:
-					keys[LEFT] = true;
-					break;
-				case ALLEGRO_KEY_S:
-					keys[DOWN] = true;
-					break;
-				case ALLEGRO_KEY_D:
-					keys[RIGHT] = true;
-					break;
-
-				// shoot keys
-				case ALLEGRO_KEY_UP:
-					keys[S_UP] = true;
-					break;
-				case ALLEGRO_KEY_DOWN:
-					keys[S_DOWN] = true;
-					break;
-				case ALLEGRO_KEY_RIGHT:
-					keys[S_RIGHT] = true;
-					break;
-				case ALLEGRO_KEY_LEFT:
-					keys[S_LEFT] = true;
-					break;
-				case ALLEGRO_KEY_SPACE:
-					keys[SPACE] = true;
-					break;
-
-				// control
-				case ALLEGRO_KEY_ENTER:
-					keys[ENTER] = true;
-					break;
-				case ALLEGRO_KEY_P:
-					keys[PAUSE] = true;
-					break;
-				case ALLEGRO_KEY_ESCAPE:
-					keys[ESC] = true;
-					break;
-				case ALLEGRO_KEY_BACKSPACE:
-					keys[BKSPCE] = true;
-					break;
-				
-			} // Keydown detect
+			input.UpdateKeys(ev, keys);
 		}
-
-		else if (ev.type == ALLEGRO_EVENT_KEY_UP)					//If Key up event
-		{
-			switch (ev.keyboard.keycode)
-			{
-					// Movement
-				case ALLEGRO_KEY_W:
-					keys[UP] = false;
-					break;
-				case ALLEGRO_KEY_A:
-					keys[LEFT] = false;
-					break;
-				case ALLEGRO_KEY_S:
-					keys[DOWN] = false;
-					break;
-				case ALLEGRO_KEY_D:
-					keys[RIGHT] = false;
-					break;
-
-					// shoot keys
-				case ALLEGRO_KEY_UP:
-					keys[S_UP] = false;
-					break;
-				case ALLEGRO_KEY_DOWN:
-					keys[S_DOWN] = false;
-					break;
-				case ALLEGRO_KEY_RIGHT:
-					keys[S_RIGHT] = false;
-					break;
-				case ALLEGRO_KEY_LEFT:
-					keys[S_LEFT] = false;
-					break;
-				case ALLEGRO_KEY_SPACE:
-					keys[SPACE] = false;
-					break;
-
-					// control
-				case ALLEGRO_KEY_ENTER:
-					keys[ENTER] = false;
-					break;
-				case ALLEGRO_KEY_P:
-					keys[PAUSE] = false;
-					break;
-				case ALLEGRO_KEY_ESCAPE:
-					keys[ESC] = false;
-					break;
-				case ALLEGRO_KEY_BACKSPACE:
-					keys[BKSPCE] = false;
-					break;
-
-			} // keyup detect
-
-
-		//	fired = false;										//Bullet Fired False. 
-		//	switch (ev.keyboard.keycode)						//Switch keyboard code returned. 
-		//	{
-		//	case ALLEGRO_KEY_UP:				
-		//		keys[UP] = true;
-		//		if (direction == 1) select = player_img[2];			//set character sprite to ____
-		//		else select = player_img[3];
-		//		break;
-		//	case ALLEGRO_KEY_W:										//button press actions for sprite dir
-		//		keys[UP] = true;
-		//		if (direction == 1) select = player_img[2];
-		//		else select = player_img[3];
-		//		break;
-		//	case ALLEGRO_KEY_DOWN:
-		//		keys[DOWN] = true;
-		//		if (direction == 1) select = player_img[2];
-		//		else select = player_img[3];
-		//		break;
-		//	case ALLEGRO_KEY_S:
-		//		keys[DOWN] = true;
-		//		if (direction == 1) select = player_img[2];
-		//		else select = player_img[3];
-		//		break;
-		//	case ALLEGRO_KEY_RIGHT:
-		//		keys[RIGHT] = true;
-		//		select = player_img[2];
-		//		direction = 1;
-		//		break;
-		//	case ALLEGRO_KEY_N:
-		//		if (egg < 1 && state == SETTINGS)
-		//		{
-		//			egg++;
-		//		}
-		//		break;
-		//	case ALLEGRO_KEY_M:
-		//		if (egg < 2 && state == SETTINGS)
-		//		{
-		//			egg++;
-		//		}
-		//		break;
-		//	case ALLEGRO_KEY_K:
-		//		egg = 0;
-		//		break;
-		//	case ALLEGRO_KEY_D:
-		//		keys[RIGHT] = true;
-		//		select = player_img[2];
-		//		direction = 1;
-		//		break;
-		//	case ALLEGRO_KEY_LEFT:
-		//		keys[LEFT] = true;
-		//		select = player_img[3];
-		//		direction = 0;
-		//		break;
-		//	case ALLEGRO_KEY_A:
-		//		keys[LEFT] = true;
-		//		select = player_img[3];
-		//		direction = 0;
-		//		break;
-		//	case ALLEGRO_KEY_ENTER:
-		//		break;
-		//	case ALLEGRO_KEY_SPACE:
-		//		keys[SPACE] = true;
-		//		if (state == TITLE)
-		//			ChangeState(state, MENU);					//Splash->Menu on Spacebar press
-		//		else if (state == MENU)
-		//			ChangeState(state, PLAYING);				//Menu-> Game if Spacebar press
-		//		else if (state == HELP)
-		//			ChangeState(state, MENU);					//Help-> Menu if spacebar press
-		//		else if (state == PLAYING)						//Spacebar fires bullets in-game
-		//		{	
-		//			FireBullet(bullets, NUM_BULLETS, player);
-		//			//al_play_sample(sample[0], 1.0, 0.0, 1.0, ALLEGRO_PLAYMODE_ONCE, NULL); <--What did this do? 
-		//		}
-		//		else if (state == LOST)
-		//			ChangeState(state, PLAYING);				
-		//		break;
-		//	}
-		//}
-
-		//else if (ev.type == ALLEGRO_EVENT_KEY_UP)					//If Key up event
-		//{
-		//	switch (ev.keyboard.keycode)
-		//	{
-		//	case ALLEGRO_KEY_UP:									//Keypress sprite and dir updates
-		//		keys[UP] = false;
-		//		if (direction == 1) select = player_img[0];
-		//		else select = player_img[1];
-		//		break;
-		//	case ALLEGRO_KEY_W:
-		//		keys[UP] = false;
-		//		if (direction == 1) select = player_img[0];
-		//		else select = player_img[1];
-		//		break;
-		//	case ALLEGRO_KEY_DOWN:
-		//		keys[DOWN] = false;
-		//		if (direction == 1) select = player_img[0];
-		//		else select = player_img[1];
-		//		break;
-		//	case ALLEGRO_KEY_S:
-		//		keys[DOWN] = false;
-		//		if (direction == 1) select = player_img[0];
-		//		else select = player_img[1];
-		//		break;
-		//	case ALLEGRO_KEY_RIGHT:
-		//		keys[RIGHT] = false;
-		//		select = player_img[0];
-		//		break;
-		//	case ALLEGRO_KEY_D:
-		//		keys[RIGHT] = false;
-		//		select = player_img[0];
-		//		break;
-		//	case ALLEGRO_KEY_LEFT:
-		//		keys[LEFT] = false;
-		//		select = player_img[1];
-		//		break;
-		//	case ALLEGRO_KEY_A:
-		//		select = player_img[1];
-		//		break;
-		//	case ALLEGRO_KEY_P:
-		//		if (state == PLAYING)					//Check state		-- THIS FUNCTION NEEDS REPAIRS	
-		//		{
-		//			if (timeM == true)
-		//			{
-		//				al_stop_timer(timer);									//Stop timer for pause menu
-		//				timeM = false;
-		//				al_draw_bitmap(scrns[1], scrn_W / 2 - 250, 100, 0);		//Show Pause menu
-		//				al_flip_display();										//Bring backbuffer forward (bring all set contents to the current frame)
-		//			}
-		//			else
-		//			{
-		//				al_start_timer(timer);									//Continue timer
-		//				timeM = true;
-		//			}
-		//		}
-		//		break;
-		//	case ALLEGRO_KEY_BACKSPACE:
-		//		if (timeM == false)										//if game on pause, BKSP to menu
-		//		{
-		//			timeM = true;
-		//			al_start_timer(timer);
-		//		}
-		//			ChangeState(state, MENU);
-		//		break;
-		//	case ALLEGRO_KEY_ENTER:
-		//		if (state == WIN)
-		//			boss_sel = lecturers[rand() % 6];				//Random Boss character selected
-		//			ChangeState(state, PLAYING);
-		//		break;
-		//	case ALLEGRO_KEY_ESCAPE:								
-		//		if (state==TITLE || state == MENU || state == HELP)
-		//			done = true;
-		//		else 
-		//			ChangeState(state, MENU);
-		//		break;
-		//	case ALLEGRO_KEY_SPACE:
-		//		keys[SPACE] = false;
-		//		break;
-		//	case ALLEGRO_KEY_K:
-		//			egg = 0;
-		//		break;
-		//	case ALLEGRO_KEY_M:
-		//		//	egg = 0;
-		//		break;
-		//	case ALLEGRO_KEY_N:
-		//		//	egg = 0;
-		//		break;
-		//	}
-		}
+		#pragma endregion			
 		
-	
+		// This should move to input manager
+		#pragma region MouseEventProcessing
+
+
+
 		else if (ev.type == ALLEGRO_EVENT_MOUSE_AXES || ev.type == ALLEGRO_EVENT_MOUSE_ENTER_DISPLAY)    // deal with mouse
 		{
 			crs_x = ev.mouse.x;									//get x co-ord of mouse
@@ -761,12 +578,16 @@ int main(void)
 				}
 				// End Position of Powers
 			}
-			FireBullet(bullets, NUM_BULLETS, player);   //Fire Bullets
+			//FireBullet(bullets, NUM_BULLETS, player);   //Fire Bullets
 		}
-		if (ev.type == ALLEGRO_EVENT_DISPLAY_CLOSE)
-		{
-			done = true;
-		}
+#pragma endregion
+
+		#pragma region PauseLogic
+
+
+
+
+
 		if (ev.type == ALLEGRO_EVENT_DISPLAY_SWITCH_OUT)
 		{
 			if (state == PLAYING)
@@ -790,32 +611,33 @@ int main(void)
 			}
 		}
 		
-		if (ev.type == ALLEGRO_EVENT_DISPLAY_RESIZE)
-		{
-			al_set_new_display_flags(ALLEGRO_FULLSCREEN_WINDOW);
-		}
+
+
 
 		// Deal with pause menu, timer will be stopped! 
 		// Note this is a little bit buggy atm if the user does not press P fast enough as it will exit pause and immediately re-enter
 		// should use diff key to exit pause? or maybe just a delay? 
 		if (keys[PAUSE]){
-			if (timeM == false)
+			if (timeM == false)		// are we currently paused? 
 			{
 				al_start_timer(timer);									//Continue timer (exit pause) 
 				timeM = true;
 			}
 		} //Exit Pause
 		if (keys[BKSPCE]){
-			if (timeM == false)
+			if (timeM == false)		// are we currently paused? 
 			{
 				al_start_timer(timer);									//Continue timer
 				timeM = true;
 			}
 			ChangeState(state, MENU);									// go to the menu!
 		} //Exit Pause, go to menu
-		if (keys[ESC]){
-			done = true;												// EJECT! 
-		} //Exit game on ESC
+
+#pragma endregion
+
+		#pragma region TimerLogic
+
+
 
 		// THIS IS WHERE THE MAGIC HAPPENS. 
 		else if (ev.type == ALLEGRO_EVENT_TIMER)
@@ -844,8 +666,8 @@ int main(void)
 			// MENU
 			else if (state == MENU)
 			{
-				if (keys[SPACE]){ // pressing space starts the game
-					ChangeState(state, PLAYING);				//Menu-> Game if Spacebar press
+				if (keys[ENTER]){ // pressing enter starts the game
+					ChangeState(state, PLAYING);				//Menu-> Game if Enter press
 
 				}
 
@@ -943,8 +765,8 @@ int main(void)
 			// LOST... and this does? 
 			else if (state == LOST)
 			{
-				if (keys[SPACE]){ // press space to play again
-					ChangeState(state, PLAYING);
+				if (keys[SPACE]){ // press space to continue
+					ChangeState(state, MENU);
 				}
 			} // end lost
 
@@ -960,11 +782,13 @@ int main(void)
 
 
 		} 
+#pragma endregion
 
-		else if (ev.type == ALLEGRO_EVENT_DISPLAY_CLOSE)
-		{
-			done = true;
-		}
+		#pragma region Redraw Logic
+
+
+
+
 
 		if (redraw && al_is_event_queue_empty(event_queue)) // nothing left to do! but the screen had change, do a redraw... 
 		{
@@ -1258,14 +1082,17 @@ int main(void)
 			al_draw_scaled_bitmap(bgImage, 0, 0, al_get_bitmap_width(bgImage), al_get_bitmap_height(bgImage),0,0,scrn_W,scrn_H, 0);
 			al_save_config_file("config.ini", savegame);	//writes default unlocks back if config file removed during gameplay
 		}
-
+#pragma endregion
 	}
 
-	
+		#pragma region RandomDestruction
+
+
+
 	//Destruction of assets (prevents assert fails)
-	al_destroy_bitmap(atksel);
+//	al_destroy_bitmap(atksel);
 	//al_destroy_bitmap(enemsel);
-	al_destroy_bitmap(bgImage);
+//	al_destroy_bitmap(bgImage);
 	//al_destroy_bitmap(select);
 	al_destroy_bitmap(icon1);
 //	al_destroy_bitmap(boss_sel);
@@ -1280,7 +1107,7 @@ int main(void)
 	//this part might be buggy
 	for (int i = 0; i < 5; i++)
 	{
-//		al_destroy_bitmap(atk[i]);
+		al_destroy_bitmap(atk[i]);
 		al_destroy_bitmap(lockatk[i]);
 		al_destroy_bitmap(scrns[i]);
 		al_destroy_bitmap(btns[i]);
@@ -1292,7 +1119,7 @@ int main(void)
 	for (int i = 0; i < 5; i++)
 	{
 		al_destroy_bitmap(power[i]);
-	//	al_destroy_bitmap(maps[i]);
+		al_destroy_bitmap(maps[i]);
 		al_destroy_bitmap(mapsmini[i]);
 		al_destroy_bitmap(lockedmap[i]);
 		al_destroy_bitmap(lecturers[i]);
@@ -1307,8 +1134,10 @@ int main(void)
 	
 	//al_destroy_bitmap(select);
 	//end Destruction
+
+#pragma endregion
 	return 0;
-}
+} // end main (I think.) 
 
 
 void InitCharacter(Character &player)

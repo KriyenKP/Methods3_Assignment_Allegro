@@ -87,15 +87,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="GameElements.cpp" />
-    <ClCompile Include="Gameplay.cpp" />
-    <ClCompile Include="Graphics_and_Animations.cpp" />
-    <ClCompile Include="learning.cpp">
+    <ClCompile Include="InputManager.cpp" />
+    <ClCompile Include="main.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="lib\init.h" />
+    <ClInclude Include="constants.h" />
+    <ClInclude Include="InputManager.h" />
     <ClInclude Include="lib\objects.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
