@@ -22,6 +22,7 @@ public:
 	int getBoundX() const;
 	int getBoundY() const;
 	bool checkActive() const;
+	bool move(int, int);	//returns false if graphic moves off the screen
 };
 
 class Animation : public DynamicImg{

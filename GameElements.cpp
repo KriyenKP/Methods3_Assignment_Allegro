@@ -17,6 +17,7 @@ private: const int speed = 10;
 		 int direction;
 public:	 Bullet();
 		 void changeDir(int);
+		 void update();
 };
 
 Bullet::Bullet()
@@ -27,3 +28,16 @@ void Bullet::changeDir(int newDir)
 {
 	direction = newDir;
 }
+void Bullet::update()
+{
+	bool remainActive = move(speed, direction);
+	if (!remainActive)
+		setActive(false);
+}
+
+//NB for implementation
+//initBullet incorporated into constructor
+//DrawBullet() in old code should be largely the same, calling .draw()
+//findDeadBullet() would be unchanged
+//updateBullet() to be implemented with loop, changeDir() and update()
+//collideBullet() to be implemented with the collisionDetection stuff from Gameplay

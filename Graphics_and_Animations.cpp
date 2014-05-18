@@ -1,4 +1,5 @@
 #include <allegro5\allegro.h>
+#include <init.h> //change to constants.h on merge
 #include <Graphics_and_Animations.h>
 
 /*
@@ -68,6 +69,33 @@ int DynamicImg::getBoundX() const
 int DynamicImg::getBoundY() const
 {
 	return boundY;
+}
+bool DynamicImg::move(int speed, int direction)
+{
+	bool onScreen = true;
+	switch (direction)
+	{
+	case NORTH:
+		y -= speed;			  //move upwards
+		onScreen = y < 0;	  //check if bullet moved off the screen
+		break;
+	case EAST:
+		x += speed;			  //move right
+		onScreen = x > scrn_W;//check if bullet moved off the screen
+		break;
+	case WEST:
+		x -= speed;			  //move left
+		onScreen = x < 0;	  //check if bullet moved off the screen
+		break;
+	case SOUTH:
+		y += speed;			  //move down
+		onScreen = y > scrn_H;//check if bullet moved off the screen
+		break;
+	default:				  //invalid direction entered
+		onScreen = false;	  //deactivate bullet
+		break;
+	}
+	return onScreen;
 }
 
 //SimpleGraphic Methods
