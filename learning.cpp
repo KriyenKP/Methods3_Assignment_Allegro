@@ -217,12 +217,12 @@ int main(void)
 	exp			= al_load_bitmap("./images/boom1.png");			//Explosions
 
 	//Lecturer Images
-	lecturers[0]	= al_load_bitmap("./images/bitPoole.png");			//John Poole
-	lecturers[1]	= al_load_bitmap("./images/bitSaha.png");			//Akshay Saha
-	lecturers[2]	= al_load_bitmap("./images/bitTaps.png");			//Jules Tapamo
-	lecturers[3]	= al_load_bitmap("./images/bitAfullo.png");		//Afullo
-	lecturers[4]	= al_load_bitmap("./images/bitTom.png");			//Walingo
-	lecturers[5]	= al_load_bitmap("./images/bitViran.png");			//Viranjay
+	lecturers[0]	= al_load_bitmap("./images/bitPoole.png");			//Pool
+	lecturers[1]	= al_load_bitmap("./images/bitSaha.png");			//Ak47
+	lecturers[2]	= al_load_bitmap("./images/bitTaps.png");			//taps
+	lecturers[3]	= al_load_bitmap("./images/bitAfullo.png");		//2many names
+	lecturers[4]	= al_load_bitmap("./images/bitTom.png");			//Wer-dafuq
+	lecturers[5]	= al_load_bitmap("./images/bitViran.png");			//V=ir
 
 	enemsel	 = lecturers[0];										//Default selected enemy/
 	boss_sel = lecturers[rand()%6];											//Default selected enemy/lecturer
@@ -795,17 +795,17 @@ int main(void)
 				al_clear_to_color(black);
 				al_draw_textf(fonts[1], white,scrn_W/2-100, 20, 0, "CHOOSE YOUR LECTURER : ");
 
-				al_draw_bitmap(minilect[0], 100, 50, 0);	//Poole
-				al_draw_bitmap(minilect[1], 240, 50, 0);	//Saha
-				al_draw_bitmap(minilect[2], 380, 50, 0);	//Tapamo
-				al_draw_bitmap(minilect[3], 520, 50, 0);	//Afullo
-				al_draw_bitmap(minilect[4], 660, 50, 0);	//Walingo
-				al_draw_bitmap(minilect[5], 800, 50, 0);	//Viranjay
+				al_draw_bitmap(minilect[0], 100, 50, 0);	//pool J
+				al_draw_bitmap(minilect[1], 240, 50, 0);	//ak-47
+				al_draw_bitmap(minilect[2], 380, 50, 0);	//Taps
+				al_draw_bitmap(minilect[3], 520, 50, 0);	//2manynames
+				al_draw_bitmap(minilect[4], 660, 50, 0);	//Wer-dafuq
+				al_draw_bitmap(minilect[5], 800, 50, 0);	//V=ir
 
 				switch (curLect)
 				{
 				case 0:
-					al_draw_textf(fonts[1], white, scrn_W / 2 - 150, 180, 0, "CURRENT LECTURER : Dr LL Poole J");
+					al_draw_textf(fonts[1], white, scrn_W / 2 - 150, 180, 0, "CURRENT LECTURER : Dr LL Pool J");
 					break;
 				case 1:
 					al_draw_textf(fonts[1], white, scrn_W / 2 - 150, 180, 0, "CURRENT LECTURER : Dr AK-47");
