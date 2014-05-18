@@ -167,6 +167,7 @@ int main(void)
 	al_init_ttf_addon();									//load truetype font addon	
 	al_init_image_addon();									//load image processing addon
 // Should we not have error checking here? Ref http://wiki.allegro.cc/index.php?title=Basic_Keyboard_Example
+	//KRI - We should...i got lazy ^_^
 	al_install_keyboard();									//install keyboard
 	al_install_mouse();										//install mouse
 	//end addon innit
