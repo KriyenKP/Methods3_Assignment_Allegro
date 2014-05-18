@@ -45,6 +45,7 @@ public:
 	int getY();
 	int getBoundX() const;
 	int getBoundY() const;
+	bool checkActive() const;
 };
 
 class Animation : public DynamicImg{
@@ -62,7 +63,6 @@ public: Animation(){};
 
 class SimpleGraphic : public DynamicImg{
 public: 
-	SimpleGraphic();
 	SimpleGraphic(bool);
 	virtual void draw(ALLEGRO_BITMAP *);
 	virtual void draw(ALLEGRO_BITMAP *, int, int, int);
@@ -84,6 +84,10 @@ void DynamicImg::setX(int xVal)
 void DynamicImg::setY(int yVal)
 {
 	y = yVal;
+}
+bool DynamicImg::checkActive() const
+{
+	return active;
 }
 
 //SimpleGraphic Methods
