@@ -1,3 +1,5 @@
+#include <allegro5\allegro.h>
+
 /*
 *	Abstract Base Class DynamicImg used as a template for images in the game which move across the screen.
 *
@@ -25,15 +27,20 @@
 */
 
 class DynamicImg{
-public: int x;			//x-coord relative to fixed top-left axis
-		int y;			//y-coord relative to fixed top-left axis
-		int live;		//indicates whether image is destroyed or not, to prevent memory leaks
-						//$ may be able to make this a protected variable
-		DynamicImg() {};
+protected: 
+	int x;					//x-coord relative to fixed top-left axis
+	int y;					//y-coord relative to fixed top-left axis
+	int active;				//indicates whether image is destroyed or not, to prevent memory leaks
+							//previously variable 'live'
+							//$ may be able to make this a protected variable
+public:
+	virtual void draw() = 0;
+	void setX(int);
+	void setY(int);
 };
 
 class Animation : public DynamicImg{
-public: Animation(){};
+public: Animation(){};			
 		int maxFrame;
 		int curFrame;
 		int frameCount;
@@ -44,3 +51,49 @@ public: Animation(){};
 		int animationDirection;
 		ALLEGRO_BITMAP *image;
 };
+
+class SimpleGraphic : public DynamicImg{
+public: 
+	SimpleGraphic();
+	SimpleGraphic(bool);
+	virtual void draw(ALLEGRO_BITMAP *);
+	virtual void draw(ALLEGRO_BITMAP *, int, int, int);
+private:
+	void setActive(bool isActive);
+};
+
+//DynamicImg Methods
+
+void DynamicImg::setX(int xVal)
+{
+	x = xVal;
+}
+
+void DynamicImg::setY(int yVal)
+{
+	y = yVal;
+}
+
+//SimpleGraphic Methods
+
+SimpleGraphic::SimpleGraphic(bool isActive)
+{
+	setActive(isActive);
+}
+
+void SimpleGraphic::setActive(bool isActive)
+{
+	active = isActive;
+}
+
+void SimpleGraphic::draw(ALLEGRO_BITMAP *bitmap)
+{
+	if (active)
+		al_draw_bitmap(bitmap, x, y, 0);
+}
+
+void SimpleGraphic::draw(ALLEGRO_BITMAP *bitmap, int cur, int fW, int fH)
+{
+	if (active)
+		al_draw_bitmap_region(bitmap, cur * fW, 0, fW, fH, x, y, 0);
+}
