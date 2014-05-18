@@ -892,10 +892,26 @@ int main(void)
 				if (player.lives <= 0) ChangeState(state, LOST); // you lost the game... 
 
 				// Deal with movement 
-				if (keys[UP])    MoveCharacterUp(player);			//Move him Upside!
-				if (keys[DOWN])  MoveCharacterDown(player);			//Move him Downside!
-				if (keys[LEFT])  MoveCharacterLeft(player);			//Move him Leftside!
-				if (keys[RIGHT]) MoveCharacterRight(player);		//Move him Rightside!
+				
+				// first select the correct sprite,
+				if (keys[UP] || keys[DOWN] || keys[RIGHT]){
+					select = player_img[2]; // walking right
+				}
+				else if (keys[LEFT]){
+					select = player_img[3]; // walking left
+				}
+				else if (player.dir == WEST){
+					select = player_img[1]; // stand facing left
+				}
+				else {
+					select = player_img[0]; // stand facing right
+				}
+
+				// then call the method to update location details 
+				if (keys[UP])    MoveCharacterUp(player);					//Move him Upside!
+				else if (keys[DOWN])  MoveCharacterDown(player);			//Move him Downside!
+				else if (keys[LEFT])  MoveCharacterLeft(player);			//Move him Leftside!
+				else if (keys[RIGHT]) MoveCharacterRight(player);			//Move him Rightside!
 
 				// Deal with shooting
 				if (loaded_gun == true){ // make sure the player has reloaded after the last shot. makes sure that they don't just hold the key down... 
@@ -1183,7 +1199,7 @@ int main(void)
 				if (ps > 10)
 				{
 					al_set_config_value(savegame, "venueunlock 2", "unlocked", "1"); //unlock TB Davis
-					if (al_get_config_value(savegame, "highscore", "playsc")<score); //only shows if not unlocked before
+					if (al_get_config_value(savegame, "highscore", "playsc")<score) //only shows if not unlocked before
 					{
 						al_draw_textf(fonts[0], green, scrn_W / 2 - 100, 380, 0, "NEW UNLOCKS: TB Davis!!");
 					}
