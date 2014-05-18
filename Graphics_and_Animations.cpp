@@ -30,13 +30,21 @@ class DynamicImg{
 protected: 
 	int x;					//x-coord relative to fixed top-left axis
 	int y;					//y-coord relative to fixed top-left axis
-	int active;				//indicates whether image is destroyed or not, to prevent memory leaks
+	bool active;			//indicates whether image is destroyed or not, to prevent memory leaks
 							//previously variable 'live'
 							//$ may be able to make this a protected variable
+	int bounds[2];			//used for determining height and width of image
+							//bounds[0] = width		bounds[1] = height
 public:
 	virtual void draw() = 0;
 	void setX(int);
 	void setY(int);
+	int getX();
+	int getY();
+	int getBound(int);
+	
+	static int X_BOUND_INDEX;
+	static int Y_BOUND_INDEX;
 };
 
 class Animation : public DynamicImg{
@@ -62,7 +70,7 @@ private:
 	void setActive(bool isActive);
 };
 
-//DynamicImg Methods
+//DynamicImg
 
 void DynamicImg::setX(int xVal)
 {
@@ -73,6 +81,9 @@ void DynamicImg::setY(int yVal)
 {
 	y = yVal;
 }
+
+int DynamicImg::X_BOUND_INDEX = 0;
+int DynamicImg::Y_BOUND_INDEX = 1;
 
 //SimpleGraphic Methods
 
