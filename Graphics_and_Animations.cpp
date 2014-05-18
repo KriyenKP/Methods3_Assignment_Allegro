@@ -33,18 +33,18 @@ protected:
 	bool active;			//indicates whether image is destroyed or not, to prevent memory leaks
 							//previously variable 'live'
 							//$ may be able to make this a protected variable
-	int bounds[2];			//used for determining height and width of image
-							//bounds[0] = width		bounds[1] = height
+	const int boundX;		//used for determining width
+	const int boundY;		//used for determining height
 public:
-	virtual void draw() = 0;
+	DynamicImg(int, int);
+	~DynamicImg();
+	virtual void draw();
 	void setX(int);
 	void setY(int);
 	int getX();
 	int getY();
-	int getBound(int);
-	
-	static int X_BOUND_INDEX;
-	static int Y_BOUND_INDEX;
+	int getBoundX() const;
+	int getBoundY() const;
 };
 
 class Animation : public DynamicImg{
@@ -67,23 +67,24 @@ public:
 	virtual void draw(ALLEGRO_BITMAP *);
 	virtual void draw(ALLEGRO_BITMAP *, int, int, int);
 private:
-	void setActive(bool isActive);
+	void setActive(bool);
 };
 
 //DynamicImg
+DynamicImg::DynamicImg(int bX = 0, int bY = 0)
+: boundX(bX),
+  boundY(bY)
+{
 
+}
 void DynamicImg::setX(int xVal)
 {
 	x = xVal;
 }
-
 void DynamicImg::setY(int yVal)
 {
 	y = yVal;
 }
-
-int DynamicImg::X_BOUND_INDEX = 0;
-int DynamicImg::Y_BOUND_INDEX = 1;
 
 //SimpleGraphic Methods
 
@@ -91,18 +92,15 @@ SimpleGraphic::SimpleGraphic(bool isActive)
 {
 	setActive(isActive);
 }
-
 void SimpleGraphic::setActive(bool isActive)
 {
 	active = isActive;
 }
-
 void SimpleGraphic::draw(ALLEGRO_BITMAP *bitmap)
 {
 	if (active)
 		al_draw_bitmap(bitmap, x, y, 0);
 }
-
 void SimpleGraphic::draw(ALLEGRO_BITMAP *bitmap, int cur, int fW, int fH)
 {
 	if (active)

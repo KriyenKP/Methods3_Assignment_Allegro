@@ -87,6 +87,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="GameElements.cpp" />
+    <ClCompile Include="Gameplay.cpp" />
     <ClCompile Include="Graphics_and_Animations.cpp" />
     <ClCompile Include="learning.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
