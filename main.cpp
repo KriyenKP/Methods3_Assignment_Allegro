@@ -13,7 +13,6 @@
 
 #include "constants.h"
 #include "lib/objects.h"						//Structures for Enemies/Characters/Projectiles
-#include "lib/init.h"
 #include "InputManager.h"						// Class that processes inputs (Keyboard only ATM) 
 using namespace std;
 
@@ -31,6 +30,7 @@ Explosion explosions[NUM_EXPLOSIONS];
 // really this should move to the Input Manager class, and be managed in there.. but that requires alot of restructuring
 // ENUM to make life easier is included with IncludeManager.h
 bool keys[13] = { false, false, false, false, false, false, false, false, false, false, false, false, false }; // Keystate array, stores the state of keys we are intersted in. True when key is pressed
+
 
 //Asset Functions
 void InitCharacter(Character &player);
@@ -72,8 +72,42 @@ void UpdateExplosions(Explosion explosions[], int size);
 
 void ChangeState(int &state, int newState);   //Change State function
 
+
+//Global Variables. used to be in init.h... bad. Possible some of these can move to constants.h but I'm not sure which ones. 
+float crs_x = scrn_W / 2.0;										//default x location for mouse position detection
+float crs_y = scrn_H / 2.0;										//default y location for mouse position detection
+
+
+
+int playone = 1;												//restrict sound to play only once
+int sign = 1;													//direction for boss movement
+bool bosslevel = false;											//only let boss come after certain score
+bool win = 0;
+bool SecLife = false;
+int poweredNum = 0;
+int level = 0;
+
+int bossCheck = 0;
+
+int egg = 0;
+
+//animated image var
+int curFrame = 0;					//Current frame of animated image
+int frameCount = 0;					//frame counter for animated image
+int frameDelay = 20;				//rate at which animate image changes
+int frameW = 128;					//frame width for animated image
+int frameH = 128;					//frame height for animated image
+
+
+const int maxFrame = 4;				//number of frames in animated image
+//End animated image var
+
 int main(void)
 {
+		#pragma region SetupLocalVars
+
+
+
 	int state = -1;						//default state
 
 	bool done = false,				//Game over
@@ -85,6 +119,9 @@ int main(void)
 	int curLect = 0,		//current lecture identifier
 		curMap = 0,			//current map identifier
 		curAtk = 0;			//current attack identifier
+
+	int direction = 1;						//Default direction identifier init
+	bool loaded_gun = true;					// Has the player just fired a shot and need to reload or not? 
 
 	//Initialisers
 	ALLEGRO_DISPLAY			*display = NULL;					//Screen display
@@ -115,6 +152,13 @@ int main(void)
 		*lockedmap[6] = { NULL, NULL, NULL, NULL, NULL };		//images if map locked
 
 	ALLEGRO_CONFIG			*savegame = NULL;
+
+#pragma endregion
+
+		#pragma region InitAllegro
+
+
+
 
 	if (!al_init())											//initialize and check Allegro
 	{
@@ -187,6 +231,10 @@ int main(void)
 		al_destroy_timer(timer);
 		return -1;
 	}
+
+#pragma endregion
+
+		#pragma region LoadResources
 
 
 
@@ -292,9 +340,9 @@ int main(void)
 	sample[3] = al_load_sample("./sounds/boom.wav");
 
 	icon1 = al_load_bitmap("./images/icon.png");
+#pragma endregion
 
-	int direction = 1;						//Default direction identifier init
-	bool loaded_gun = true;					// Has the player just fired a shot and need to reload or not? 
+		#pragma region SetupMoreAllegro
 
 	//Event queue - register listeners
 	al_register_event_source(event_queue, al_get_timer_event_source(timer));
@@ -323,13 +371,35 @@ int main(void)
 	al_clear_to_color(black);										//Clear and set Background black
 	al_set_target_bitmap(al_get_backbuffer(display));				//Backbuffer--next frame to write to display
 	al_flip_display();												//Allows manual switch between current disp & backbuffer
+#pragma endregion
 
-	InputManager input;											// create new instance of input manager class
+	InputManager input;							// create new instance of input manager class. Deals with Keyboard
 
 	while (!done) //loop forever... 
 	{
+		#pragma region GeneralAdmin
+
+
+
 		ALLEGRO_EVENT ev;										//Allegro event init
 		al_wait_for_event(event_queue, &ev);					//wait for and accept events 
+
+		if (ev.type == ALLEGRO_EVENT_DISPLAY_CLOSE)
+		{
+			done = true;
+		}
+
+		if (ev.type == ALLEGRO_EVENT_DISPLAY_RESIZE)
+		{
+			al_set_new_display_flags(ALLEGRO_FULLSCREEN_WINDOW);
+		}
+
+		// This means game will allways exit on ESC
+		if (keys[ESC]){
+			done = true;												// EJECT! 
+		} //Exit game on ESC
+
+#pragma endregion
 
 		#pragma region KeyboardEventProcessing
 
@@ -512,10 +582,12 @@ int main(void)
 		}
 #pragma endregion
 
-		if (ev.type == ALLEGRO_EVENT_DISPLAY_CLOSE)
-		{
-			done = true;
-		}
+		#pragma region PauseLogic
+
+
+
+
+
 		if (ev.type == ALLEGRO_EVENT_DISPLAY_SWITCH_OUT)
 		{
 			if (state == PLAYING)
@@ -539,32 +611,33 @@ int main(void)
 			}
 		}
 		
-		if (ev.type == ALLEGRO_EVENT_DISPLAY_RESIZE)
-		{
-			al_set_new_display_flags(ALLEGRO_FULLSCREEN_WINDOW);
-		}
+
+
 
 		// Deal with pause menu, timer will be stopped! 
 		// Note this is a little bit buggy atm if the user does not press P fast enough as it will exit pause and immediately re-enter
 		// should use diff key to exit pause? or maybe just a delay? 
 		if (keys[PAUSE]){
-			if (timeM == false)
+			if (timeM == false)		// are we currently paused? 
 			{
 				al_start_timer(timer);									//Continue timer (exit pause) 
 				timeM = true;
 			}
 		} //Exit Pause
 		if (keys[BKSPCE]){
-			if (timeM == false)
+			if (timeM == false)		// are we currently paused? 
 			{
 				al_start_timer(timer);									//Continue timer
 				timeM = true;
 			}
 			ChangeState(state, MENU);									// go to the menu!
 		} //Exit Pause, go to menu
-		if (keys[ESC]){
-			done = true;												// EJECT! 
-		} //Exit game on ESC
+
+#pragma endregion
+
+		#pragma region TimerLogic
+
+
 
 		// THIS IS WHERE THE MAGIC HAPPENS. 
 		else if (ev.type == ALLEGRO_EVENT_TIMER)
@@ -709,11 +782,13 @@ int main(void)
 
 
 		} 
+#pragma endregion
 
-		else if (ev.type == ALLEGRO_EVENT_DISPLAY_CLOSE)
-		{
-			done = true;
-		}
+		#pragma region Redraw Logic
+
+
+
+
 
 		if (redraw && al_is_event_queue_empty(event_queue)) // nothing left to do! but the screen had change, do a redraw... 
 		{
@@ -1007,10 +1082,13 @@ int main(void)
 			al_draw_scaled_bitmap(bgImage, 0, 0, al_get_bitmap_width(bgImage), al_get_bitmap_height(bgImage),0,0,scrn_W,scrn_H, 0);
 			al_save_config_file("config.ini", savegame);	//writes default unlocks back if config file removed during gameplay
 		}
-
+#pragma endregion
 	}
 
-	
+		#pragma region RandomDestruction
+
+
+
 	//Destruction of assets (prevents assert fails)
 //	al_destroy_bitmap(atksel);
 	//al_destroy_bitmap(enemsel);
@@ -1056,8 +1134,10 @@ int main(void)
 	
 	//al_destroy_bitmap(select);
 	//end Destruction
+
+#pragma endregion
 	return 0;
-}
+} // end main (I think.) 
 
 
 void InitCharacter(Character &player)
