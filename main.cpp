@@ -1289,7 +1289,7 @@ int main(void)
 	}
 	
 
-	for (int i = 0; i < 5; i++)
+	for (int i = 0; i < 6; i++)
 	{
 		al_destroy_bitmap(power[i]);
 		al_destroy_bitmap(maps[i]);
