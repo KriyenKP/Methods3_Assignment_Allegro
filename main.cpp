@@ -4,14 +4,16 @@
 #include <allegro5/allegro_native_dialog.h>		//Message Dialog
 #include <allegro5/allegro_font.h>				//Needed for fonts 
 #include <allegro5/allegro_ttf.h>				//Needed for fonts
-#include <lib/objects.h>						//Structures for Enemies/Characters/Projectiles
-#include <lib/init.h>
+
 #include <allegro5/allegro_acodec.h>
 #include <allegro5/allegro_audio.h>				//Audio yet to be used	
 #include <cstdio>								//Input/output - Used for displaying mouse pos atm
 #include <sstream>
 #include <allegro5/allegro_primitives.h>		//Used for drawing Shapes
 
+#include "constants.h"
+#include "lib/objects.h"						//Structures for Enemies/Characters/Projectiles
+#include "lib/init.h"
 #include "InputManager.h"						// Class that processes inputs (Keyboard only ATM) 
 using namespace std;
 
