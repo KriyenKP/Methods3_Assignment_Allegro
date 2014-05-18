@@ -11,7 +11,19 @@
 *		5) Explosion. Occurs when Bullet and Enemy/Boss collide
 */
 
-class Avatar : public Animation, public Gameplay
+class Bullet : public SimpleGraphic, public Gameplay
 {
-
+private: const int speed = 10;
+		 int direction;
+public:	 Bullet();
+		 void changeDir(int);
 };
+
+Bullet::Bullet()
+{
+	setActive(true);
+}
+void Bullet::changeDir(int newDir)
+{
+	direction = newDir;
+}

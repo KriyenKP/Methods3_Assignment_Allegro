@@ -11,6 +11,7 @@ protected:
 public:
 	DynamicImg(bool);
 	DynamicImg(int, int);
+	DynamicImg();
 	~DynamicImg();
 	virtual void draw();
 	void setX(int);
@@ -39,6 +40,7 @@ public: Animation(int, int);
 class SimpleGraphic : public DynamicImg{
 public:
 	SimpleGraphic(int, int);
+	SimpleGraphic();
 	virtual void draw(ALLEGRO_BITMAP *);
 	virtual void draw(ALLEGRO_BITMAP *, int, int, int);
 private:
