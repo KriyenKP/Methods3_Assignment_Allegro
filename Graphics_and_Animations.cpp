@@ -23,7 +23,7 @@
 *				       {Gameplay class structure not designed yet, but this way we're being good OOP programmers
 *				        Keep graphics management and gameplay management separated and then write a class that incorporates both}
 *
-*	^ a $ indicates Sulaiman-style explanation talk, to be modified prior to submission
+*	^ a $ indicates Sulaiman-style explanation talk, to be modified prior to submission << lol. xD
 */
 
 class DynamicImg{
