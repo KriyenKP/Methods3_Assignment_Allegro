@@ -1,4 +1,5 @@
 #include <allegro5\allegro.h>
+#include <Graphics_and_Animations.h>
 
 /*
 *	Abstract Base Class DynamicImg used as a template for images in the game which move across the screen.
@@ -26,57 +27,16 @@
 *	^ a $ indicates Sulaiman-style explanation talk, to be modified prior to submission << lol. xD
 */
 
-class DynamicImg{
-protected: 
-	int x;					//x-coord relative to fixed top-left axis
-	int y;					//y-coord relative to fixed top-left axis
-	bool active;			//indicates whether image is destroyed or not, to prevent memory leaks
-							//previously variable 'live'
-							//$ may be able to make this a protected variable
-	const int boundX;		//used for determining width
-	const int boundY;		//used for determining height
-public:
-	DynamicImg(int, int);
-	~DynamicImg();
-	virtual void draw();
-	void setX(int);
-	void setY(int);
-	int getX();
-	int getY();
-	int getBoundX() const;
-	int getBoundY() const;
-};
-
-class Animation : public DynamicImg{
-public: Animation(){};			
-		int maxFrame;
-		int curFrame;
-		int frameCount;
-		int frameDelay;
-		int frameWidth;
-		int frameHeight;
-		int animationColumns;
-		int animationDirection;
-		ALLEGRO_BITMAP *image;
-};
-
-class SimpleGraphic : public DynamicImg{
-public: 
-	SimpleGraphic();
-	SimpleGraphic(bool);
-	virtual void draw(ALLEGRO_BITMAP *);
-	virtual void draw(ALLEGRO_BITMAP *, int, int, int);
-private:
-	void setActive(bool);
-};
-
 //DynamicImg
-DynamicImg::DynamicImg(int bX = 0, int bY = 0)
+DynamicImg::DynamicImg(int bX, int bY)
 : boundX(bX),
   boundY(bY)
 {
 
 }
+DynamicImg::DynamicImg():boundX(0), boundY(0){}
+DynamicImg::~DynamicImg(){}
+void DynamicImg::draw(){}
 void DynamicImg::setX(int xVal)
 {
 	x = xVal;
@@ -85,16 +45,37 @@ void DynamicImg::setY(int yVal)
 {
 	y = yVal;
 }
+void DynamicImg::setActive(bool isActive)
+{
+	active = isActive;
+}
+bool DynamicImg::checkActive() const
+{
+	return active;
+}
+int DynamicImg::getX() const
+{
+	return x;
+}
+int DynamicImg::getY() const
+{
+	return y;
+}
+int DynamicImg::getBoundX() const
+{
+	return boundX;
+}
+int DynamicImg::getBoundY() const
+{
+	return boundY;
+}
 
 //SimpleGraphic Methods
 
-SimpleGraphic::SimpleGraphic(bool isActive)
+SimpleGraphic::SimpleGraphic(){}
+void SimpleGraphic::toggleActive()
 {
-	setActive(isActive);
-}
-void SimpleGraphic::setActive(bool isActive)
-{
-	active = isActive;
+	active = !active;
 }
 void SimpleGraphic::draw(ALLEGRO_BITMAP *bitmap)
 {
