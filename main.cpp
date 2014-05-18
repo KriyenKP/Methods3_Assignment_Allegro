@@ -675,11 +675,9 @@ int main(void)
 				if (crs_x >= 240 && crs_x <= 354 && crs_y >= 250 && crs_y <= 380)
 				{
 					if ((strcmp(al_get_config_value(savegame, "venueunlock 2", "unlocked"), "0") == 0))
-					{
 						curMap = 6;			//send default state
-					
-					}
-					else {
+					else 
+					{
 						bgImage = maps[1]; // tbdavis unlocked
 						curMap = 1;
 					}
@@ -688,11 +686,10 @@ int main(void)
 				if (crs_x >= 380 && crs_x <= 504 && crs_y >= 250 && crs_y <= 380)
 				{
 					if (strcmp(al_get_config_value(savegame, "venueunlock 3", "unlocked"), "0") == 0)
-					{
-						curMap = 6;			//send default state
+					curMap = 6;			//send default state
 
-					}
-					else {
+					else 
+					{
 						bgImage = maps[2]; // Park unlocked
 						curMap = 2;
 					}
@@ -700,11 +697,9 @@ int main(void)
 				if (crs_x >= 520 && crs_x <= 644 && crs_y >= 250 && crs_y <= 380) 
 				{
 					if (strcmp(al_get_config_value(savegame, "venueunlock 4", "unlocked"), "0") == 0)
-					{
 						curMap = 6;			//send default state
-
-					}
-					else {
+					else 
+					{
 						bgImage = maps[3]; // Science unlocked
 						curMap = 3;
 					}
@@ -712,11 +707,9 @@ int main(void)
 				if (crs_x >= 660 && crs_x <= 784 && crs_y >= 250 && crs_y <= 380)
 				{
 					if (strcmp(al_get_config_value(savegame, "venueunlock 5", "unlocked"), "0") == 0)
-					{
 						curMap = 6;			//send default state
-
-					}
-					else {
+					else 
+					{
 						bgImage = maps[4]; // Science unlocked
 						curMap = 4;
 					}
@@ -724,10 +717,9 @@ int main(void)
 				if (crs_x >= 800 && crs_x <= 924 && crs_y >= 250 && crs_y <= 380)
 				{
 					if (strcmp(al_get_config_value(savegame, "venueunlock 6", "unlocked"), "0") == 0)
+					curMap = 6;			//send default state
+					else 
 					{
-						curMap = 6;			//send default state
-					}
-					else {
 						bgImage = maps[5]; // Science unlocked
 						curMap = 5;
 					}
@@ -745,19 +737,15 @@ int main(void)
 				if (crs_x >= 500 && crs_x <= 615 && crs_y >= 470 && crs_y <= 560)
 				{
 					if (strcmp(al_get_config_value(savegame, "weaponunlocks", "unlocked2"), "0") == 0)
-					{
-						curAtk = 3; //Pencil locked, revert to calc
-					}
-					else { atksel = atk[1]; curAtk = 1; } //Pencil unlocked
+					curAtk = 3; //Pencil locked, revert to calc
+					else atksel = atk[1]; curAtk = 1;  //Pencil unlocked
 				}
 
 				if (crs_x >= 670 && crs_x <= 800 && crs_y >= 470 && crs_y <= 560)
 				{
 					if (strcmp(al_get_config_value(savegame, "weaponunlocks", "unlocked3"), "0") == 0)
-					{
-						curAtk = 3; //C++ locked, revert to calc
-					}
-					else { atksel = atk[2]; curAtk = 2; } //C++ unlocked
+					curAtk = 3; //C++ locked, revert to calc
+					else atksel = atk[2]; curAtk = 2;  //C++ unlocked
 				}
 				// End Position of Powers
 			}
@@ -788,11 +776,6 @@ int main(void)
 				al_draw_bitmap(scrns[1], scrn_W / 2 - 250, 100, 0);		//show pause menu
 				al_flip_display();
 			}
-		}
-		
-		if (ev.type == ALLEGRO_EVENT_DISPLAY_RESIZE)
-		{
-			al_set_new_display_flags(ALLEGRO_FULLSCREEN_WINDOW);
 		}
 
 		// Deal with pause menu, timer will be stopped! 
@@ -844,11 +827,10 @@ int main(void)
 			// MENU
 			else if (state == MENU)
 			{
-				if (keys[SPACE]){ // pressing space starts the game
+				if (keys[SPACE])// pressing space starts the game
+				{ 
 					ChangeState(state, PLAYING);				//Menu-> Game if Spacebar press
-
 				}
-
 
 				al_clear_to_color(black);
 				al_draw_bitmap(btns[0], scrn_W / 2 - 130, scrn_H / 2 - 180, 0);			//Start
