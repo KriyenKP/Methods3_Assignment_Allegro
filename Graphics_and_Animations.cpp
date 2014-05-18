@@ -1,5 +1,9 @@
 #include <allegro5\allegro.h>
 #include <init.h> //change to constants.h on merge
+// !!!!
+// you can't include init here and in learning. you can only include it once.. thats why shit is getting messy, not enough structure and stuff all over the place, I mean tbh, what is the point of init? I don't know.
+// constants.h makes some sort of sense, easy place to configure game constants, but again this shouldnt be used all over the place! only included by the 'game' class and derived classes ( or whatever class is doing game stuff) 
+// over and above that constants particular to a certain class should be in that classes header or .cpp (I'm not sure which is best practice tbh. ) 
 #include <Graphics_and_Animations.h>
 
 /*
