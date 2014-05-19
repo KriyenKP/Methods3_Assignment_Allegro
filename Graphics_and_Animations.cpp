@@ -75,19 +75,19 @@ bool DynamicImg::move(int speed, int direction)
 	{
 	case 0:
 		y -= speed;			  //move upwards
-		onScreen = y < 0;	  //check if bullet moved off the screen
+		onScreen = y > 0;	  //check if bullet moved off the screen
 		break;
 	case 1:
 		x += speed;			  //move right
-		onScreen = x > 1024;//check if bullet moved off the screen
+		onScreen = x < 1024;//check if bullet moved off the screen
 		break;
 	case 3:
 		x -= speed;			  //move left
-		onScreen = x < 0;	  //check if bullet moved off the screen
+		onScreen = x > 0;	  //check if bullet moved off the screen
 		break;
 	case 2:
 		y += speed;			  //move down
-		onScreen = y > 686;//check if bullet moved off the screen
+		onScreen = y < 686;//check if bullet moved off the screen
 		break;
 	default:				  //invalid direction entered
 		onScreen = false;	  //deactivate bullet
