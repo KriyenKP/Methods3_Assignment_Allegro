@@ -14,12 +14,13 @@
 #include "constants.h"
 #include "lib/objects.h"						//Structures for Enemies/Characters/Projectiles
 #include "InputManager.h"						// Class that processes inputs (Keyboard only ATM) 
+#include "Character.h"							// Character class
 using namespace std;
 
 //REMEMBER TO EDIT Linker -> System -> SubSystem -> WINDOW to hide console!
 
 //asset Init
-Character player;	
+
 Bullet bullets[NUM_BULLETS];
 Projectile comets[NUM_COMETS];
 Projectile powerUp[NUM_POWER];
@@ -33,35 +34,31 @@ bool keys[13] = { false, false, false, false, false, false, false, false, false,
 
 
 //Asset Functions
-void InitCharacter(Character &player);
-void DrawCharacter(Character &player, ALLEGRO_BITMAP *select, int cur, int fW, int fH);
+void DrawCharacter(ALLEGRO_BITMAP *select, int cur, int fW, int fH);
 
-void MoveCharacterLeft(Character &player);
-void MoveCharacterUp(Character &player);
-void MoveCharacterDown(Character &player);
-void MoveCharacterRight(Character &player);
+// moved player to class
 
-void InitBullet(Character &player, Bullet bullet[], int size);
+void InitBullet(Bullet bullet[], int size);
 void DrawBullet(Bullet bullet[], int size, ALLEGRO_BITMAP *bit);
-void FireBullet(Bullet bullet[], int size, Character &player);
+void FireBullet(Bullet bullet[], int size);
 void UpdateBullet(Bullet bullet[], int size, int dir);
-void CollideBullet(Bullet bullet[], int bSize, Projectile thrown[], int cSize, Character &ship, Explosion explosions[], int eSize, ALLEGRO_SAMPLE *sample);
+void CollideBullet(Bullet bullet[], int bSize, Projectile thrown[], int cSize, Explosion explosions[], int eSize, ALLEGRO_SAMPLE *sample);
 void CollideBullet(Bullet bullet[], int bSize, Projectile thrown[], int cSize);
-void CollideBullet(Bullet bullet[], int bSize, Boss bossy[], int cSize, Character &player, Explosion explosions[], int eSize, ALLEGRO_SAMPLE * sample);
+void CollideBullet(Bullet bullet[], int bSize, Boss bossy[], int cSize, Explosion explosions[], int eSize, ALLEGRO_SAMPLE * sample);
 
 void InitProjectile(Projectile thrown[], int size, bool s);
 void DrawProjectile(Projectile thrown[], int size);
 void DrawProjectile(Projectile thrown[], int size, ALLEGRO_BITMAP *bit, int cur, int fW, int fH);
 void StartProjectile(Projectile thrown[], int size);
 void UpdateProjectile(Projectile thrown[], int size, int bouncer);
-void CollideProjectile(Projectile thrown[], int cSize, Character &player, int type);
+void CollideProjectile(Projectile thrown[], int cSize, int type);
 
 void InitBoss(Boss bossy[], int size);
 void DrawBoss(Boss bossy[], int size);
 void DrawBoss(Boss bossy[], int size, ALLEGRO_BITMAP *bit, int cur, int fW, int fH);
 void StartBoss(Boss bossy[], int size);
 void UpdateBoss(Boss bossy[], int size);
-void CollideBoss(Boss bossy[], int cSize, Character &player);
+void CollideBoss(Boss bossy[], int cSize);
 
 void InitExplosions(Explosion explosions[], int size, ALLEGRO_BITMAP *image);
 void DrawExplosions(Explosion explosions[], int size);
@@ -76,6 +73,15 @@ void ChangeState(int &state, int newState);   //Change State function
 //Global Variables. used to be in init.h... bad. Possible some of these can move to constants.h but I'm not sure which ones. 
 float crs_x = scrn_W / 2.0;										//default x location for mouse position detection
 float crs_y = scrn_H / 2.0;										//default y location for mouse position detection
+
+//Used to create quick access to colours (versus al_map_rgb(0,0,0)
+//Colours
+const ALLEGRO_COLOR black = al_map_rgb(0, 0, 0);
+const ALLEGRO_COLOR white = al_map_rgb(255, 255, 255);
+const ALLEGRO_COLOR red = al_map_rgb(255, 0, 0);
+const ALLEGRO_COLOR green = al_map_rgb(0, 255, 0);
+const ALLEGRO_COLOR blue = al_map_rgb(0, 0, 255);
+//End Colours
 
 
 
@@ -101,6 +107,8 @@ int frameH = 128;					//frame height for animated image
 
 const int maxFrame = 4;				//number of frames in animated image
 //End animated image var
+
+Character player;
 
 int main(void)
 {
@@ -351,13 +359,9 @@ int main(void)
 	al_register_event_source(event_queue, al_get_display_event_source(display));
 	//end event queue
 
-	//Colours
-	black = al_map_rgb(0, 0, 0);
-	white = al_map_rgb(255, 255, 255);
-	red = al_map_rgb(255, 0, 0);
-	green = al_map_rgb(0, 255, 0);
-	blue = al_map_rgb(0, 0, 255);
-	//End Colours
+
+
+
 
 	//Asset variables
 	ChangeState(state, TITLE);					//game state function
@@ -374,6 +378,7 @@ int main(void)
 #pragma endregion
 
 	InputManager input;							// create new instance of input manager class. Deals with Keyboard
+
 
 	while (!done) //loop forever... 
 	{
@@ -714,11 +719,11 @@ int main(void)
 
 				UpdateExplosions(explosions, NUM_EXPLOSIONS);
 				UpdateBullet(bullets, NUM_BULLETS, direction);
-				CollideBullet(bullets, NUM_BULLETS, comets, NUM_COMETS, player, explosions, NUM_EXPLOSIONS, sample[3]);
-				CollideBullet(bullets, NUM_BULLETS, bossy, NUM_BOSS, player, explosions, NUM_EXPLOSIONS, sample[2]);
-				CollideProjectile(comets, NUM_COMETS, player, 0);
-				CollideProjectile(powerUp, NUM_POWER, player, 1);
-				CollideBoss(bossy, NUM_BOSS, player);
+				CollideBullet(bullets, NUM_BULLETS, comets, NUM_COMETS, explosions, NUM_EXPLOSIONS, sample[3]);
+				CollideBullet(bullets, NUM_BULLETS, bossy, NUM_BOSS,  explosions, NUM_EXPLOSIONS, sample[2]);
+				CollideProjectile(comets, NUM_COMETS,  0);
+				CollideProjectile(powerUp, NUM_POWER,  1);
+				CollideBoss(bossy, NUM_BOSS );
 
 				if (player.lives <= 0) ChangeState(state, LOST); // you lost the game... 
 
@@ -739,16 +744,16 @@ int main(void)
 				}
 
 				// then call the method to update location details 
-				if (keys[UP])    MoveCharacterUp(player);					//Move him Upside!
-				else if (keys[DOWN])  MoveCharacterDown(player);			//Move him Downside!
-				else if (keys[LEFT])  MoveCharacterLeft(player);			//Move him Leftside!
-				else if (keys[RIGHT]) MoveCharacterRight(player);			//Move him Rightside!
+				if (keys[UP])    player.MoveCharacterUp();					//Move him Upside!
+				else if (keys[DOWN])  player.MoveCharacterDown();			//Move him Downside!
+				else if (keys[LEFT])  player.MoveCharacterLeft();			//Move him Leftside!
+				else if (keys[RIGHT]) player.MoveCharacterRight();			//Move him Rightside!
 
 				// Deal with shooting
 				if (loaded_gun == true){ // make sure the player has reloaded after the last shot. makes sure that they don't just hold the key down... 
 					if (keys[S_UP] || keys[S_DOWN] || keys[S_LEFT] || keys[S_RIGHT]){ // Shots fired.. 
 						loaded_gun = false;
-						FireBullet(bullets, NUM_BULLETS, player);		//Shoot him Someside!
+						FireBullet(bullets, NUM_BULLETS);		//Shoot him Someside!
 						//			//al_play_sample(sample[0], 1.0, 0.0, 1.0, ALLEGRO_PLAYMODE_ONCE, NULL); <--What did this do? 					
 					}
 				}
@@ -973,7 +978,7 @@ int main(void)
 				//fprintf(stderr, "\negg = %d", egg);
 
 				//playing
-				DrawCharacter(player, select, curFrame, frameW, frameH);
+				DrawCharacter(select, curFrame, frameW, frameH);
 				DrawBullet(bullets, NUM_BULLETS, atksel);
 				DrawProjectile(comets, NUM_COMETS, enemsel, curFrame, frameW, frameH);
 				DrawProjectile(powerUp, NUM_POWER, power[0], curFrame, frameW, frameH);
@@ -1140,18 +1145,9 @@ int main(void)
 } // end main (I think.) 
 
 
-void InitCharacter(Character &player)
+
+void DrawCharacter(ALLEGRO_BITMAP *select, int cur, int fW, int fH)
 {
-	player.spritex = scrn_W / 2;
-	player.spritey = scrn_H / 2;
-	player.ID = PLAYER;
-	player.lives = 3;
-	player.speed = 5;
-	player.boundx = 65;
-	player.boundy = 160;
-}
-void DrawCharacter(Character &player, ALLEGRO_BITMAP *select, int cur, int fW, int fH)
-{	
 	//can we remove the below?
 	//al_draw_filled_rectangle(player.spritex + 75, player.spritey + 25, player.spritex + 75 + player.boundx , player.spritey + 25 + player.boundy, green);  << test purposes - check collision area
 	//al_draw_bitmap_region(select, cur * fW, 0, fW, fH, player.spritex, player.spritey, 0);
@@ -1162,52 +1158,9 @@ void DrawCharacter(Character &player, ALLEGRO_BITMAP *select, int cur, int fW, i
 	}
 	al_draw_scaled_bitmap(select, cur * fW, 0, fW, fH, player.spritex, player.spritey, shrinkx, shrinky, 0); //character
 }
-void MoveCharacterUp(Character &player)
-{
-	player.spritey -= player.speed;
-	if (player.spritey < 0) player.spritey = 0;
-	player.dir = 0;
-/*
-	if (shrinkx >= 200 && shrinky >= 200)
-	{
-		shrinky -= 5;
-		shrinkx -= 5;
-		player.boundy -= 2;
-	}
-*/
-}
-void MoveCharacterRight(Character &player)
-{
-	player.spritex += player.speed;
-	if (player.spritex > scrn_W - 80)
-		player.spritex = scrn_W - 80;
-	player.dir = 1;
-}
-void MoveCharacterDown(Character &player)
-{
-	player.spritey += player.speed;
-	//player.y = player.spritey + 100;
-	if (player.spritey > scrn_H-200)
-		player.spritey = scrn_H-200;
-	player.dir = 2;
-/*	if (shrinkx <= 350 && shrinky <= 350)
-	{
-		shrinky += 5;
-		shrinkx += 5;
-		player.boundy += 2;
-	}
-*/
-}
-void MoveCharacterLeft(Character &player)
-{
-	player.spritex -= player.speed;
-	if (player.spritex < 0)
-		player.spritex = 0;
-	player.dir = 3;
 
-}
 
-void InitBullet(Character &player, Bullet bullet[], int size)
+void InitBullet(Bullet bullet[], int size)
 {
 	for (int i = 0; i < size; i++)
 	{
@@ -1234,7 +1187,7 @@ int FindDeadBulletIndex(Bullet bullet[], int size)
 	return -1;
 }
 
-void FireBullet(Bullet bullet[], int size, Character &player)
+void FireBullet(Bullet bullet[], int size)
 {
 	int index = FindDeadBulletIndex(bullet, size);
 
@@ -1325,7 +1278,7 @@ void UpdateBullet(Bullet bullet[], int size, int dir)
 	
 }
 
-void CollideBullet(Bullet bullet[], int bSize, Projectile thrown[], int cSize, Character &player , Explosion explosions[], int eSize, ALLEGRO_SAMPLE *sample)
+void CollideBullet(Bullet bullet[], int bSize, Projectile thrown[], int cSize, Explosion explosions[], int eSize, ALLEGRO_SAMPLE *sample)
 {
 	for (int i = 0; i < bSize; i++)
 	{
@@ -1353,7 +1306,7 @@ void CollideBullet(Bullet bullet[], int bSize, Projectile thrown[], int cSize, C
 		}
 	}
 }
-void CollideBullet(Bullet bullet[], int bSize, Boss bossy[], int cSize, Character &player, Explosion explosions[], int eSize, ALLEGRO_SAMPLE * sample)
+void CollideBullet(Bullet bullet[], int bSize, Boss bossy[], int cSize, Explosion explosions[], int eSize, ALLEGRO_SAMPLE * sample)
 {
 	for (int i = 0; i < bSize; i++)
 	{
@@ -1468,7 +1421,7 @@ void UpdateProjectile(Projectile thrown[], int size, int bouncer)
 		}
 	}
 }
-void CollideProjectile(Projectile thrown[], int cSize, Character &player, int type)
+void CollideProjectile(Projectile thrown[], int cSize, int type)
 {
 
 	for (int i = 0; i < cSize; i++)
@@ -1566,7 +1519,7 @@ void UpdateBoss(Boss bossy[], int size)
 		}
 	}
 }
-void CollideBoss(Boss bossy[], int cSize, Character &player)
+void CollideBoss(Boss bossy[], int cSize)
 {
 	for (int i = 0; i < cSize; i++)
 	{
@@ -1689,8 +1642,8 @@ void ChangeState(int &state, int newState)
 	}
 	else if (state == PLAYING)
 	{
-		InitCharacter(player);
-		InitBullet(player, bullets, NUM_BULLETS);
+		player.InitCharacter();
+		InitBullet(bullets, NUM_BULLETS);
 		InitProjectile(comets, NUM_COMETS,1);
 		InitProjectile(powerUp, NUM_POWER, 0);
 		InitBoss(bossy, NUM_BOSS);

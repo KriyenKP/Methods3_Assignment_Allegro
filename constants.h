@@ -13,9 +13,9 @@ const int NUM_POWER = 1;
 const int shrinkx = 200;												//x value used to adjust player size for depth 
 const int shrinky = 200;												//x value used to adjust player size for depth 
 
+enum IDS { PLAYER, BULLET, PROJECTILE, BOSS };
 
 
-static ALLEGRO_COLOR red, blue, black, white, green;			//Used to create quick access to colours (versus al_map_rgb(0,0,0)
 
 enum STATE{ TITLE, PLAYING, LOST, MENU, SETTINGS, HELP, WIN };		//Game state identification
 enum Direction { NORTH = 0, EAST = 1, SOUTH = 2, WEST = 3 };	//Direction of player identification
