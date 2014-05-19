@@ -1,7 +1,7 @@
-#include <allegro5/allegro.h>
-#include <allegro5/allegro_native_dialog.h>
-#include <string>
-#include <sstream>
+#include <allegro5/allegro.h>					//Allegro libraries
+#include <allegro5/allegro_native_dialog.h>		//Error message dialog library
+#include <string>								//String manipulation 
+#include <sstream>								//for int-> string 
 
 
 using namespace std;
@@ -9,10 +9,10 @@ using namespace std;
 class Unlocks
 {
 public:
-	ALLEGRO_DISPLAY			*display = NULL;	//message display feature
+	ALLEGRO_DISPLAY			*display = NULL;	//message display feature object
 	ALLEGRO_CONFIG *savegame = al_load_config_file("config.ini");	//name of config file for this game
 
-	Unlocks()
+	Unlocks()	//default constructor inits config file
 	{
 
 		initcheck(savegame);			//makes sure config file exists
@@ -52,7 +52,7 @@ public:
 	const char *getUnlocksWeapons(int vennum) //queries the venue state, integer easy on game side
 	{
 		switch (vennum){
-		case 2:	return al_get_config_value(savegame, "weaponunlocks", "unlocked2"); //checks weapons
+		case 2:	return al_get_config_value(savegame, "weaponunlocks", "unlocked2"); //checks weapons if unlocked
 		case 3:	return al_get_config_value(savegame, "weaponunlocks", "unlocked3");
 
 		}
@@ -60,7 +60,7 @@ public:
 
 	const void setUnlocksVenue(const char *vennum,int setval) //game passes CHAR "unlockedX" and INT 1 or 0 , its converted from int to const char and stored in the file
 	{
-		if (setval == 1)
+		if (setval == 1)		//if the value is a SET, write "1" to the venue key
 		{
 			isunlocked = "1";
 			al_set_config_value(savegame, "venueunlocks", vennum, isunlocked); //sets values on the the venues only
@@ -92,9 +92,9 @@ public:
 
 		str << hiscore;
 
-		double intscore;
+		double intscore;		//convert int value sent to a char
 		str >> intscore;
-		return intscore; 
+		return intscore;		//returns a char fr highscore
 	}
 
 	int setHiscore(int ps) //set the high score from char form , returns int for conditionals
@@ -115,13 +115,13 @@ public:
 		}
 	}; 
 
-	void Unlocks::saveconfig(ALLEGRO_CONFIG *savefile)
+	void Unlocks::saveconfig(ALLEGRO_CONFIG *savefile)//run this to save the config file
 	{
-		al_save_config_file("config.ini", savefile);
-	}//run this to save the config file
+		al_save_config_file("config.ini", savegame);
+	}
 
 private:
-	const char mutable *isunlocked ="0";
+	const char mutable *isunlocked ="0";	//flag for unlocks
 	const char mutable *hiscore = "0";
 	ALLEGRO_CONFIG *section;
 };

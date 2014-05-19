@@ -1,13 +1,13 @@
 #include <math.h>								//Nothing yet - put in for mouse cursor check if we use it
-#include <allegro5/allegro.h>					//Allegro
+#include <allegro5/allegro.h>					//Allegro library
 #include <allegro5/allegro_image.h>				//Allegro bitmaps
 #include <allegro5/allegro_native_dialog.h>		//Message Dialog
 #include <allegro5/allegro_font.h>				//Needed for fonts 
 #include <allegro5/allegro_ttf.h>				//Needed for fonts
 
 #include <allegro5/allegro_acodec.h>
-#include <allegro5/allegro_audio.h>				//Audio yet to be used	
-#include <cstdio>								//Input/output - Used for displaying mouse pos atm
+#include <allegro5/allegro_audio.h>				//Audio and codecs for sound effects
+#include <cstdio>								//Input/output - Used for displaying mouse in console for debug
 #include <sstream>
 #include <allegro5/allegro_primitives.h>		//Used for drawing Shapes
 
@@ -19,9 +19,7 @@
 #include "Graphics_and_Animations.h"
 using namespace std;
 
-//REMEMBER TO EDIT Linker . System . SubSystem . WINDOW to hide console!
-
-//asset Init
+//asset Initialisation
 
 Bullet bullets[NUM_BULLETS];
 Projectile comets[NUM_COMETS];
@@ -29,20 +27,16 @@ Projectile powerUp[NUM_POWER];
 Boss bossy[NUM_BOSS];
 Explosion explosions[NUM_EXPLOSIONS];
 
-Character player; // the player! this doesnt need to be global if we just sort out init in change state func. 
+Character player; // player object from Character class in init.h
 //End asset init
 
 
-
-// really this should move to the Input Manager class, and be managed in there.. but that requires alot of restructuring
 // ENUM to make life easier is included with IncludeManager.h
 bool keys[13] = { false, false, false, false, false, false, false, false, false, false, false, false, false }; // Keystate array, stores the state of keys we are intersted in. True when key is pressed
 
 
 //Asset Functions
 void DrawCharacter(ALLEGRO_BITMAP *select, int cur, int fW, int fH);
-
-// moved player to class
 
 void InitBullet(int size);
 void DrawBullet(int size, ALLEGRO_BITMAP *bit);
@@ -76,7 +70,7 @@ void UpdateExplosions(Explosion explosions[], int size);
 void ChangeState(int &state, int newState);   //Change State function
 
 
-//Global Variables. used to be in init.h... bad. Possible some of these can move to constants.h but I'm not sure which ones. 
+//Global Variables. 
 float crs_x = scrn_W / 2.0;										//default x location for mouse position detection
 float crs_y = scrn_H / 2.0;										//default y location for mouse position detection
 
@@ -125,7 +119,7 @@ int main(void)
 	bool done = false,				//Game over
 		fired = false,				//Power is fired
 		redraw = true,					//Redraw frame
-		timeM = true;					//Pause Timer  -- NEEDS TO BE FIXED
+		timeM = true;					//Pause Timer 
 
 
 	int curLect = 0,		//current lecture identifier
@@ -163,8 +157,7 @@ int main(void)
 		*btns[5] = { NULL, NULL, NULL, NULL, NULL },		//Buttons Array
 		*lockedmap[6] = { NULL, NULL, NULL, NULL, NULL };		//images if map locked
 
-	ALLEGRO_CONFIG			*savegame = NULL;
-
+	ALLEGRO_CONFIG *savegame = al_load_config_file("config.ini");	//load up the savegame file to be used (MUST be 'config.ini' in game dir)
 #pragma endregion
 
 		#pragma region InitAllegro
@@ -218,8 +211,8 @@ int main(void)
 	al_init_acodec_addon();
 	al_init_ttf_addon();									//load truetype font addon	
 	al_init_image_addon();									//load image processing addon
-	// Should we not have error checking here? Ref http://wiki.allegro.cc/index.php?title=Basic_Keyboard_Example
-	//KRI - We should...i got lazy ^_^
+	// Future error checking Ref http://wiki.allegro.cc/index.php?title=Basic_Keyboard_Example
+
 	al_install_keyboard();									//install keyboard
 	al_install_mouse();										//install mouse
 	//end addon innit
@@ -228,11 +221,6 @@ int main(void)
 		al_show_native_message_box(display, "Error!", "Warning!", "Failed to initialise Sound samples! \n Closing Application!", NULL, ALLEGRO_MESSAGEBOX_WARN);
 		return -1;
 	}
-
-
-	//savegame = al_load_config_file("config.ini");	//inits the save game file  <-- YOU CANNOT INIT STUFF BEFORE AL_INIT !
-	//	const char *unven1 = al_get_config_value(savegame, "venueunlock 1", "unlocked");	<-- test to check if config readable
-	//	printf("The first value for venue 1 is %s", unven1);
 	
 	Unlocks::Unlocks();									//loads up and writes default locked values to the config file
 	Unlocks Unlockables;								//new object of the class to work with
@@ -240,10 +228,6 @@ int main(void)
 
 		#pragma region LoadResources
 
-
-
-	//cursor = al_load_bitmap("./images/target.png");
-	//custom_cursor = al_create_mouse_cursor(cursor, 0, 0);
 	fonts[2] = al_load_ttf_font("arial.ttf", 36, 0);				//
 	fonts[1] = al_load_ttf_font("arial.ttf", 20, 0);				//Load custom font
 	fonts[0] = al_load_ttf_font("arial.ttf", 18, 0);				//
@@ -259,24 +243,25 @@ int main(void)
 	select = player_img[0];
 
 	//Attack images (unlocked)
-	atk[0] = al_load_bitmap("./images/calc.png");
+	//separate image sets for locked and unlocked weapons
+	atk[0] = al_load_bitmap("./images/calc.png");		
 	atk[1] = al_load_bitmap("./images/pencil.png");
 	atk[2] = al_load_bitmap("./images/c.png");
 	atk[3] = al_load_bitmap("./images/light.png");
 	atksel = atk[0];
 
-	//Attack images (locked)
+	//Weapon images (locked)
 	lockatk[0] = NULL;
 	lockatk[1] = al_load_bitmap("./images/pencillock.png");
 	lockatk[2] = al_load_bitmap("./images/clock.png");
 
-	numLives[0] = al_load_bitmap("./images/1.png");			//Number of Lives
+	numLives[0] = al_load_bitmap("./images/1.png");			//Number of Lives display
 	numLives[1] = al_load_bitmap("./images/2.png");
 	numLives[2] = al_load_bitmap("./images/3.png");
 
 	exp = al_load_bitmap("./images/boom1.png");			//Explosions
 
-	//Lecturer Images
+	//Lecturer Images												//Character names
 	lecturers[0] = al_load_bitmap("./images/bitPoole.png");			//Pool
 	lecturers[1] = al_load_bitmap("./images/bitSaha.png");			//Ak47
 	lecturers[2] = al_load_bitmap("./images/bitTaps.png");			//taps
@@ -306,7 +291,7 @@ int main(void)
 	maps[4] = al_load_bitmap("./images/cafe.png");		//cafe
 	maps[5] = al_load_bitmap("./images/amphi.png");	//amphitheatre
 
-	//Map Images (locked)	
+	//Map Images (locked)	- shows lock symbol for locked maps
 	lockedmap[0] = al_load_bitmap("./images/howard.png");		//Howard Building--always unlocked
 	lockedmap[1] = al_load_bitmap("./images/tbdavisSlock.png");		//TB Davis
 	lockedmap[2] = al_load_bitmap("./images/parkslock.png");			//The park
@@ -338,7 +323,7 @@ int main(void)
 	scrns[3] = al_load_bitmap("./images/config.png");
 	scrns[4] = al_load_bitmap("./images/ukzn_msc.png");
 
-	sample[0] = al_load_sample("./sounds/Pew_Pew.wav");
+	sample[0] = al_load_sample("./sounds/Pew_Pew.wav");		//sound assets for the game
 	sample[1] = al_load_sample("./sounds/Evil_Laugh.wav");
 	sample[2] = al_load_sample("./sounds/victory_fanfare.wav");
 	sample[3] = al_load_sample("./sounds/boom.wav");
@@ -408,14 +393,12 @@ int main(void)
 
 		#pragma region KeyboardEventProcessing
 
-		// game logic should not be in here? should be in timer ? I've moved it there anyway... 
 		if ((ev.type == ALLEGRO_EVENT_KEY_DOWN) || (ev.type == ALLEGRO_EVENT_KEY_UP))					//If Key event. I.E. A keyboard key has been pressed, we must process and update key array to store the currently pressed keys
 		{
 			input.UpdateKeys(ev, keys);
 		}
 		#pragma endregion			
 		
-		// This should move to input manager
 		#pragma region MouseEventProcessing
 
 
@@ -424,8 +407,6 @@ int main(void)
 		{
 			crs_x = ev.mouse.x;									//get x co-ord of mouse
 			crs_y = ev.mouse.y;									//get y co-ord of mouse
-
-			//fprintf(stderr, "\nposition = x %f  y %f", crs_x,crs_y);
 
 			if ((ev.mouse.x >= 0) && (ev.mouse.y >= 2))
 			{
@@ -440,7 +421,6 @@ int main(void)
 
 		else if (ev.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN)
 		{
-		//	fprintf(stderr, "\nHERE !position = x %f  y %f", crs_x - (player.x), crs_y-(player.y));  //Prints mouse postion to console - used to identify position for clicks
 
 			crs_x = ev.mouse.x;
 			crs_y = ev.mouse.y;
@@ -457,32 +437,32 @@ int main(void)
 				// Position of Lecturers
 				if (crs_x >= 100 && crs_x <= 224 && crs_y >= 50 && crs_y <= 180)
 				{
-					enemsel = lecturers[0]; //Poole
+					enemsel = lecturers[0]; //LL Pool J
 					curLect = 0;
 				}
 				if (crs_x >= 240 && crs_x <= 354 && crs_y >= 50 && crs_y <= 180)
 				{
-					enemsel = lecturers[1]; //Saha
+					enemsel = lecturers[1]; //AK47
 				    curLect = 1;
 				}
 				if (crs_x >= 380 && crs_x <= 504 && crs_y >= 50 && crs_y <= 180)
 				{
-					enemsel = lecturers[2]; //Tapamo
+					enemsel = lecturers[2]; //Taps
 					curLect = 2;
 				}
 				if (crs_x >= 520 && crs_x <= 644 && crs_y >= 50 && crs_y <= 180) 
 				{
-					enemsel = lecturers[3]; //Afullo
+					enemsel = lecturers[3]; //2manyNames
 					curLect = 3;
 				}
 				if (crs_x >= 660 && crs_x <= 784 && crs_y >= 50 && crs_y <= 180)
 				{
-					enemsel = lecturers[4];//Walingo
+					enemsel = lecturers[4];//We'dfitgo
 					curLect = 4; 
 				}
 				if (crs_x >= 800 && crs_x <= 924 && crs_y >= 50 && crs_y <= 180)
 				{
-					enemsel = lecturers[5]; //Viranjay
+					enemsel = lecturers[5]; //V=IR
 					curLect = 5;
 				}
 				// End Position of Lecturers
@@ -498,7 +478,7 @@ int main(void)
 				{
 					if ((strcmp(Unlockables.getUnlocksVenue(2), "0") == 0))		//use unlockables class to check state of venue
 					{
-						curMap = 6;			//send default state
+						curMap = 6;			//send state for "Venue locked" message
 					
 					}
 					else {
@@ -511,7 +491,7 @@ int main(void)
 				{
 					if ((strcmp(Unlockables.getUnlocksVenue(3), "0") == 0))
 					{
-						curMap = 6;			//send default state
+						curMap = 6;			//send state for "Venue locked" message
 
 					}
 					else {
@@ -523,7 +503,7 @@ int main(void)
 				{
 					if ((strcmp(Unlockables.getUnlocksVenue(4), "0") == 0))
 					{
-						curMap = 6;			//send default state
+						curMap = 6;			//send state for "Venue locked" message
 
 					}
 					else {
@@ -535,7 +515,7 @@ int main(void)
 				{
 					if ((strcmp(Unlockables.getUnlocksVenue(5), "0") == 0))
 					{
-						curMap = 6;			//send default state
+						curMap = 6;			//send state for "Venue locked" message
 
 					}
 					else {
@@ -547,7 +527,7 @@ int main(void)
 				{
 					if ((strcmp(Unlockables.getUnlocksVenue(6), "0") == 0))
 					{
-						curMap = 6;			//send default state
+						curMap = 6;			//send state for "Venue locked" message
 					}
 					else {
 						bgImage = maps[5]; // Science unlocked
@@ -583,7 +563,7 @@ int main(void)
 				}
 				// End Position of Powers
 			}
-			//FireBullet(bullets, NUM_BULLETS, player);   //Fire Bullets
+
 		}
 #pragma endregion
 
@@ -620,8 +600,6 @@ int main(void)
 
 
 		// Deal with pause menu, timer will be stopped! 
-		// Note this is a little bit buggy atm if the user does not press P fast enough as it will exit pause and immediately re-enter
-		// should use diff key to exit pause? or maybe just a delay? 
 		if (keys[PAUSE]){
 			if (timeM == false)		// are we currently paused? 
 			{
@@ -687,7 +665,7 @@ int main(void)
 				player.score = 0;
 			} 	//end menu
 
-			// PLAYING (the game! that you just lost ;)
+			// PLAYING 
 			else if (state == PLAYING)
 			{
 				// First check if user wants to pause game
@@ -699,7 +677,7 @@ int main(void)
 						al_draw_bitmap(scrns[1], scrn_W / 2 - 250, 100, 0);		//Show Pause menu
 						al_flip_display();										//Bring backbuffer forward (bring all set contents to the current frame)
 					}
-				} //Enter Pause. Remeber timer is stopped now! go look for code outside to get back into game... This is bad style, pause should be rethought... #lateNightHacks
+				} //Enter Pause. Remeber timer is stopped now! go look for code outside to get back into game...
 
 
 				int random = rand() % 100;
@@ -754,7 +732,7 @@ int main(void)
 					if (keys[S_UP] || keys[S_DOWN] || keys[S_LEFT] || keys[S_RIGHT]){ // Shots fired.. 
 						loaded_gun = false;
 						FireBullet(NUM_BULLETS);		//Shoot him Someside!
-						//			//al_play_sample(sample[0], 1.0, 0.0, 1.0, ALLEGRO_PLAYMODE_ONCE, NULL); <--What did this do? 					
+			
 					}
 				}
 				else{ // check if they are not pulling the trigger, then reload
@@ -767,7 +745,7 @@ int main(void)
 			} // end playing
 
 
-			// LOST... and this does? 
+			// LOST
 			else if (state == LOST)
 			{
 				if (keys[SPACE]){ // press space to continue
@@ -812,8 +790,6 @@ int main(void)
 			else if (state == HELP)
 			{
 				al_draw_bitmap(scrns[3], 0, 0, 0);  //Title Screen
-				//al_draw_bitmap(btns[3], 800, 610, 0);								    //Back		<<fix this maybe?
-				//al_draw_scaled_bitmap(btns[3], 800, 610,150,150,100,100, 10,10, 0);	//Back
 				al_draw_textf(fonts[0], white, scrn_W - 300, scrn_H - 50, 0, "PRESS BACKSPACE TO RETURN");
 			} // end help
 			else if (state == WIN)
@@ -869,27 +845,27 @@ int main(void)
 				al_draw_bitmap(mapsmini[0], 100, 250, 0);	//Howard
 				
 				if (strcmp(Unlockables.getUnlocksVenue(2), "0") == 0)		//uses the Unlockables class
-				{		al_draw_bitmap(lockedmap[1], 240, 250, 0);	//TBDavis
-				}		else{	al_draw_bitmap(mapsmini[1], 240, 250, 0);}
+				{		al_draw_bitmap(lockedmap[1], 240, 250, 0);	//TBDavis is locked
+				}		else{	al_draw_bitmap(mapsmini[1], 240, 250, 0);} //TBDavis is unlocked
 				
 				if (strcmp(Unlockables.getUnlocksVenue(3), "0") == 0)
-				{		al_draw_bitmap(lockedmap[2], 380, 250, 0);
-				}		else{ al_draw_bitmap(mapsmini[2], 380, 250, 0);}//Park
+				{		al_draw_bitmap(lockedmap[2], 380, 250, 0); //Park is locked
+				}		else{ al_draw_bitmap(mapsmini[2], 380, 250, 0);}//Park is unlocked
 
 				if (strcmp(Unlockables.getUnlocksVenue(4), "0") == 0)
-				{		al_draw_bitmap(lockedmap[3], 520, 250, 0);
-				}		else{ al_draw_bitmap(mapsmini[3], 520, 250, 0); }//Science
+				{		al_draw_bitmap(lockedmap[3], 520, 250, 0); //Science is Locked
+				}		else{ al_draw_bitmap(mapsmini[3], 520, 250, 0); }//Science is unlocked
 
 				if (strcmp(Unlockables.getUnlocksVenue(5), "0") == 0)
-				{		al_draw_bitmap(lockedmap[4], 660, 250, 0);
-				}		else{ al_draw_bitmap(mapsmini[4], 660, 250, 0); }//Cafe
+				{		al_draw_bitmap(lockedmap[4], 660, 250, 0); // Cafe is locked
+				}		else{ al_draw_bitmap(mapsmini[4], 660, 250, 0); }//Cafe is unlocked
 
 				if (strcmp(Unlockables.getUnlocksVenue(6), "0") == 0)
-				{	al_draw_bitmap(lockedmap[5], 800, 250, 0);
-				}		else{ al_draw_bitmap(mapsmini[5], 800, 250, 0); }//Cafe
+				{	al_draw_bitmap(lockedmap[5], 800, 250, 0); //Amphitheatre is locked
+				}		else{ al_draw_bitmap(mapsmini[5], 800, 250, 0); }//Amphitheatre is unlocked
 
 
-				switch (curMap)
+				switch (curMap) //Text to display currently selected venue (Allegro methods)
 				{
 
 				case 0:
@@ -912,8 +888,7 @@ int main(void)
 					break;
 				case 6:
 					al_draw_textf(fonts[1], red, scrn_W / 2 - 190, 380, 0, "This is a locked venue. Keep playing to unlock it.");
-					//curMap = 0;
-					bgImage = maps[0]; // Default to Howard
+					bgImage = maps[0]; // Default to Howard if a locked venue selected
 					break;
 				}
 
@@ -925,16 +900,16 @@ int main(void)
 				{
 					al_draw_bitmap(lockatk[1], scrn_W / 2 - 20, 475, 0);	//Pencil locked
 				}
-				else{ al_draw_bitmap(atk[1], scrn_W / 2 - 20, 475, 0); };	//Pencil
+				else{ al_draw_bitmap(atk[1], scrn_W / 2 - 20, 475, 0); };	//Pencil unlocked
 
 				if (strcmp(Unlockables.getUnlocksWeapons(3), "0") == 0)
 				{
 					al_draw_bitmap(lockatk[2], scrn_W / 2 + 160, 475, 0);	//C++ locked
 				}
-				else{al_draw_bitmap(atk[2], scrn_W / 2 + 160, 475, 0);};	//C++
+				else{al_draw_bitmap(atk[2], scrn_W / 2 + 160, 475, 0);};	//C++ unlocked
 				
 
-				switch (curAtk)
+				switch (curAtk) //Text to display currently selected weapon
 				{
 				case 0:
 					al_draw_textf(fonts[1], white, scrn_W / 2 - 150, 575, 0, "CURRENT POWER : Calculator");
@@ -947,7 +922,7 @@ int main(void)
 					break;
 				case 3:
 					al_draw_textf(fonts[1], red, scrn_W / 2 - 150, 575, 0, "This weapon is locked. Keep playing to unlock!");
-					atksel = atk[0]; //revert to calc
+					atksel = atk[0]; //revert to calc (default)
 				}
 
 				al_draw_textf(fonts[0], white, scrn_W - 300, scrn_H-50, 0, "PRESS BACKSPACE TO RETURN");
@@ -975,9 +950,8 @@ int main(void)
 			}
 			else if (state == PLAYING)
 			{
-				//fprintf(stderr, "\negg = %d", egg);
 
-				//playing
+				//playing (Draw all assets on-screen)
 				DrawCharacter(select, curFrame, frameW, frameH);
 				DrawBullet(NUM_BULLETS, atksel);
 				DrawProjectile(comets, NUM_COMETS, enemsel, curFrame, frameW, frameH);
@@ -1056,7 +1030,7 @@ int main(void)
 					{
 						al_draw_textf(fonts[0], green, scrn_W / 2 - 100, 420, 0, "NEW UNLOCKS: Science & Pencil!"); }
 				}
-				if (player.score > 300)
+				if (player.score > 250)
 				{
 					Unlockables.setUnlocksVenue("unlocked5", 1);//Unlock Cafe
 					
@@ -1065,7 +1039,7 @@ int main(void)
 						al_draw_textf(fonts[0], green, scrn_W / 2 - 100, 440, 0, "NEW UNLOCKS: Cafe!"); }
 				}
 
-				if (player.score > 400)
+				if (player.score > 300)
 				{
 					Unlockables.setUnlocksVenue("unlocked6", 1);;//unlock Amphitheatre
 					Unlockables.setUnlocksWeapon("unlocked3", 1);//unlock C++
@@ -1083,7 +1057,7 @@ int main(void)
 			al_flip_display();
 			al_clear_to_color(black);
 			al_draw_scaled_bitmap(bgImage, 0, 0, al_get_bitmap_width(bgImage), al_get_bitmap_height(bgImage),0,0,scrn_W,scrn_H, 0);
-//			al_save_config_file("config.ini", savegame);	//writes default unlocks back if config file removed during gameplay
+
 		}
 #pragma endregion
 	}
@@ -1093,21 +1067,14 @@ int main(void)
 
 
 	//Destruction of assets (prevents assert fails)
-//	al_destroy_bitmap(atksel);
-	//al_destroy_bitmap(enemsel);
-//	al_destroy_bitmap(bgImage);
-	//al_destroy_bitmap(select);
 	al_destroy_bitmap(icon1);
-//	al_destroy_bitmap(boss_sel);
 	al_destroy_bitmap(exp);
-	//al_destroy_bitmap(mapsel);
-
 		
 	for (int i = 0; i < 4; i++)
 	{
-		al_destroy_bitmap(player_img[i]);   // Help : crash on running this line
+		al_destroy_bitmap(player_img[i]);   
 	}
-	//this part might be buggy
+	
 	for (int i = 0; i < 5; i++)
 	{
 		al_destroy_bitmap(atk[i]);
@@ -1140,15 +1107,12 @@ int main(void)
 
 #pragma endregion
 	return 0;
-} // end main (I think.) 
+} // end main 
 
 
 
 void DrawCharacter(ALLEGRO_BITMAP *select, int cur, int fW, int fH)
 {
-	//can we remove the below?
-	//al_draw_filled_rectangle(player.spritex + 75, player.spritey + 25, player.spritex + 75 + player.boundx , player.spritey + 25 + player.boundy, green);  << test purposes - check collision area
-	//al_draw_bitmap_region(select, cur * fW, 0, fW, fH, player.spritex, player.spritey, 0);
 	if (poweredNum < 60 && poweredNum > 0)
 	{
 		al_draw_scaled_bitmap(al_load_bitmap("./images/power.png"), cur * fW, 0, fW, fH, player.spritex, player.spritey, shrinkx, shrinky, 0);
@@ -1190,7 +1154,7 @@ void FireBullet(int size)
 	int index = FindDeadBulletIndex( size);
 
 	if (index < 0)
-		return; // no "open" bullet positions available, OUT OF AMO! SHIT! 
+		return; // no "open" bullet positions available, OUT OF AMMO!
 
 	bullets[index].setActive(true);
 
@@ -1229,58 +1193,6 @@ void UpdateBullet(int size, int dir)
 	for (int i = -1; i < size; i++){
 		bullets[i].update();
 	}
-
-
-	// depricated
-
-	//	switch (bullet[i].dir)
-	//{
-	//	case 0: //up
-	//		//for (int i = 0; i < size; i++)
-	//		{
-	//			if (bullet[i].live)
-	//			{
-	//				bullet[i].y -= bullet[i].speed;
-	//				if (bullet[i].y < 0)
-	//					bullet[i].live = false;
-	//			}
-	//		}
-	//		break;
-	//	case 1: //right
-	//		//for (int i = 0; i < size; i++)
-	//		{
-	//			if (bullet[i].live)
-	//			{
-	//				bullet[i].x += bullet[i].speed;
-	//				if (bullet[i].x > scrn_W)
-	//					bullet[i].live = false;
-	//			}
-	//		}
-	//		break;
-	//	case 2: //down
-	//		//for (int i = 0; i < size; i++)
-	//		{
-	//			if (bullet[i].live)
-	//			{
-	//				bullet[i].y += bullet[i].speed;
-	//				if (bullet[i].y > scrn_H)
-	//					bullet[i].live = false;
-	//			}
-	//		}
-	//		break;
-	//	case 3: //left
-	//		//for (int i = 0; i < size; i++)
-	//		{
-	//			if (bullet[i].live)
-	//			{
-	//				bullet[i].x -= bullet[i].speed;
-	//				if (bullet[i].x < 0)
-	//					bullet[i].live = false;
-	//			}
-	//		}
-	//		break;
-	//}
-	
 }
 
 void CollideBullet( int bSize, Projectile thrown[], int cSize, Explosion explosions[], int eSize, ALLEGRO_SAMPLE *sample)
