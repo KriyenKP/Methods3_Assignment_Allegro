@@ -122,7 +122,6 @@ void SimpleGraphic::draw(ALLEGRO_BITMAP *bitmap, int cur, int fW, int fH)
 }
 void SimpleGraphic::drawHealthBar(int x, int y, int healthScalar )
 {
-	ALLEGRO_COLOR red, black;
-	al_draw_filled_rectangle(x + 30, y - 5, x + 300 + 40, y + 15, black);
-	al_draw_filled_rectangle(x + 35, y, x + (healthScalar * 10) + 35, y + 10, red);
+	al_draw_filled_rectangle(x + 30, y - 5, x + 300 + 40, y + 15, al_map_rgb(0,0,0));
+	al_draw_filled_rectangle(x + 35, y, x + (healthScalar * 10) + 35, y + 10, al_map_rgb(255,0,0));
 }
