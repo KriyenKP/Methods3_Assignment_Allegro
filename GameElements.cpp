@@ -84,7 +84,8 @@ bool Enemy::start() //to be called in a loop, where a true return breaks out of 
 }
 void Enemy::attackPlayer()
 {
-	move(speed, 3); //left = 3
+	if (checkActive())
+		move(speed, 3); //left = 3
 }
 
 
@@ -134,4 +135,51 @@ void PowerUp::approach()
 	if (y < 0) y = 656;
 	if (y <= (startY - 100) || y > 686) sign = -1;
 	move(speed*sign, 3);
+}
+
+class Boss : public SimpleGraphic, public Gameplay
+{
+private: int speed;
+		 int health;
+		 int startX;
+		 int startY;
+public: Boss();
+		void start();
+		void attackPlayer(); //formerly update in prev versions
+		void drawBoss(ALLEGRO_BITMAP *, int, int, int);
+};
+
+Boss::Boss()
+{
+	speed = 1;
+	setActive(false);
+	boundX = 50;
+	boundY = 50;
+	health = 30;
+}
+void Boss::drawBoss(ALLEGRO_BITMAP *pic, int cur, int fW, int fH)
+{
+	draw(pic, cur, fW, fH);
+	drawHealthBar(x, y, health);
+}
+void Boss::start()
+{
+	if (!checkActive())
+	{
+		setActive(true);
+		x = 1024;
+		y = 1024 / 2 - 150;
+	}
+}
+void Boss::attackPlayer()
+{
+	if (checkActive())
+	{
+		if (x > 1024 / 2 - 50)
+			move(speed, 3);//move left
+		else
+		{
+			move(y <= 0 ? -speed : speed, 0);//move up or down
+		}
+	}
 }

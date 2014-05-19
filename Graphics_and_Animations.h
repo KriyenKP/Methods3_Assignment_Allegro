@@ -44,6 +44,7 @@ public:
 	SimpleGraphic();
 	virtual void draw(ALLEGRO_BITMAP *);
 	virtual void draw(ALLEGRO_BITMAP *, int, int, int);
+	static void drawHealthBar(int, int, int);
 private:
 	void toggleActive();
 };

@@ -1,4 +1,5 @@
 #include <allegro5\allegro.h>
+#include <allegro5\allegro_primitives.h>
 #include <Graphics_and_Animations.h>
 
 /*
@@ -118,4 +119,10 @@ void SimpleGraphic::draw(ALLEGRO_BITMAP *bitmap, int cur, int fW, int fH)
 {
 	if (active)
 		al_draw_bitmap_region(bitmap, cur * fW, 0, fW, fH, x, y, 0);
+}
+void SimpleGraphic::drawHealthBar(int x, int y, int healthScalar )
+{
+	ALLEGRO_COLOR red, black;
+	al_draw_filled_rectangle(x + 30, y - 5, x + 300 + 40, y + 15, black);
+	al_draw_filled_rectangle(x + 35, y, x + (healthScalar * 10) + 35, y + 10, red);
 }
