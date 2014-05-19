@@ -146,3 +146,38 @@ void Boss::attackPlayer()
 		}
 	}
 }
+
+Explosions::Explosions()
+{
+	setActive(false);
+	maxFrame = 4;
+	curFrame = 0;
+	frameCount = 0;
+	frameDelay = 1;
+	frameWidth = 128;
+	frameHeight = 128;
+	animationColumns = 8;
+	animationDirection = 1;
+}
+Explosions::Explosions(ALLEGRO_BITMAP *img)
+{
+	Explosions();
+	if (img != NULL)
+		image = img;
+}
+void Explosions::update()
+{
+	if (checkActive())
+	{
+		if (++frameCount >= frameDelay)
+		{
+			curFrame += animationDirection;
+			if (curFrame >= maxFrame)
+			{
+				curFrame = 0;
+				setActive(false);
+			}
+			frameCount = 0;
+		}
+	}
+}

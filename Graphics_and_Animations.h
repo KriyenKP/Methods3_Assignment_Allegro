@@ -36,6 +36,7 @@ public: Animation(int, int);
 		int animationColumns;
 		int animationDirection;
 		ALLEGRO_BITMAP *image;
+		void draw();
 };
 
 class SimpleGraphic : public DynamicImg{

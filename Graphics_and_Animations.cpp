@@ -28,6 +28,18 @@
 *	^ a $ indicates Sulaiman-style explanation talk, to be modified prior to submission << lol. xD
 */
 
+//Animations
+void Animation::draw()
+{
+	if (checkActive)
+	{
+		int fx = (curFrame%animationColumns)*frameWidth;
+		int fy = (curFrame/animationColumns)*frameWidth;
+		al_draw_bitmap_region(image, fx, fy,frameWidth,
+			frameHeight, x - frameWidth / 2, y - frameHeight / 2, 0);
+	}
+}
+
 //DynamicImg
 DynamicImg::DynamicImg(int bX, int bY)
 : boundX(bX),

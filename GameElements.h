@@ -41,3 +41,11 @@ public: PowerUp();
 		bool start();
 		void approach(); //formerly update in prev versions
 };
+
+class Explosions: public Animation, public Gameplay
+{
+public: Explosions();
+		Explosions(ALLEGRO_BITMAP *);
+		void update();
+
+};
