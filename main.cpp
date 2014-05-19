@@ -15,9 +15,10 @@
 #include "lib/objects.h"						//Structures for Enemies/Characters/Projectiles
 #include "InputManager.h"						// Class that processes inputs (Keyboard only ATM) 
 #include "Character.h"							// Character class
+#include "Graphics_and_Animations.h"
 using namespace std;
 
-//REMEMBER TO EDIT Linker -> System -> SubSystem -> WINDOW to hide console!
+//REMEMBER TO EDIT Linker . System . SubSystem . WINDOW to hide console!
 
 //asset Init
 
@@ -26,7 +27,11 @@ Projectile comets[NUM_COMETS];
 Projectile powerUp[NUM_POWER];
 Boss bossy[NUM_BOSS];
 Explosion explosions[NUM_EXPLOSIONS];
+
+Character player; // the player! this doesnt need to be global if we just sort out init in change state func. 
 //End asset init
+
+
 
 // really this should move to the Input Manager class, and be managed in there.. but that requires alot of restructuring
 // ENUM to make life easier is included with IncludeManager.h
@@ -38,13 +43,13 @@ void DrawCharacter(ALLEGRO_BITMAP *select, int cur, int fW, int fH);
 
 // moved player to class
 
-void InitBullet(Bullet bullet[], int size);
-void DrawBullet(Bullet bullet[], int size, ALLEGRO_BITMAP *bit);
-void FireBullet(Bullet bullet[], int size);
-void UpdateBullet(Bullet bullet[], int size, int dir);
-void CollideBullet(Bullet bullet[], int bSize, Projectile thrown[], int cSize, Explosion explosions[], int eSize, ALLEGRO_SAMPLE *sample);
-void CollideBullet(Bullet bullet[], int bSize, Projectile thrown[], int cSize);
-void CollideBullet(Bullet bullet[], int bSize, Boss bossy[], int cSize, Explosion explosions[], int eSize, ALLEGRO_SAMPLE * sample);
+void InitBullet(int size);
+void DrawBullet(int size, ALLEGRO_BITMAP *bit);
+void FireBullet(int size);
+void UpdateBullet(int size, int dir);
+void CollideBullet(int bSize, Projectile thrown[], int cSize, Explosion explosions[], int eSize, ALLEGRO_SAMPLE *sample);
+void CollideBullet(int bSize, Projectile thrown[], int cSize);
+void CollideBullet(int bSize, Boss bossy[], int cSize, Explosion explosions[], int eSize, ALLEGRO_SAMPLE * sample);
 
 void InitProjectile(Projectile thrown[], int size, bool s);
 void DrawProjectile(Projectile thrown[], int size);
@@ -108,7 +113,7 @@ int frameH = 128;					//frame height for animated image
 const int maxFrame = 4;				//number of frames in animated image
 //End animated image var
 
-Character player;
+
 
 int main(void)
 {
@@ -663,7 +668,7 @@ int main(void)
 			{
 				// We're just chillin in here, waiting for eternity for you to press SPACE... 
 				if (keys[SPACE]){
-					ChangeState(state, MENU);					//Splash->Menu on Spacebar press
+					ChangeState(state, MENU);					//Splash.Menu on Spacebar press
 				}
 
 			} //end title 
@@ -672,7 +677,7 @@ int main(void)
 			else if (state == MENU)
 			{
 				if (keys[ENTER]){ // pressing enter starts the game
-					ChangeState(state, PLAYING);				//Menu-> Game if Enter press
+					ChangeState(state, PLAYING);				//Menu. Game if Enter press
 
 				}
 
@@ -718,9 +723,9 @@ int main(void)
 				}
 
 				UpdateExplosions(explosions, NUM_EXPLOSIONS);
-				UpdateBullet(bullets, NUM_BULLETS, direction);
-				CollideBullet(bullets, NUM_BULLETS, comets, NUM_COMETS, explosions, NUM_EXPLOSIONS, sample[3]);
-				CollideBullet(bullets, NUM_BULLETS, bossy, NUM_BOSS,  explosions, NUM_EXPLOSIONS, sample[2]);
+				UpdateBullet(NUM_BULLETS, direction);
+				CollideBullet(NUM_BULLETS, comets, NUM_COMETS, explosions, NUM_EXPLOSIONS, sample[3]);
+				CollideBullet(NUM_BULLETS, bossy, NUM_BOSS,  explosions, NUM_EXPLOSIONS, sample[2]);
 				CollideProjectile(comets, NUM_COMETS,  0);
 				CollideProjectile(powerUp, NUM_POWER,  1);
 				CollideBoss(bossy, NUM_BOSS );
@@ -753,7 +758,7 @@ int main(void)
 				if (loaded_gun == true){ // make sure the player has reloaded after the last shot. makes sure that they don't just hold the key down... 
 					if (keys[S_UP] || keys[S_DOWN] || keys[S_LEFT] || keys[S_RIGHT]){ // Shots fired.. 
 						loaded_gun = false;
-						FireBullet(bullets, NUM_BULLETS);		//Shoot him Someside!
+						FireBullet(NUM_BULLETS);		//Shoot him Someside!
 						//			//al_play_sample(sample[0], 1.0, 0.0, 1.0, ALLEGRO_PLAYMODE_ONCE, NULL); <--What did this do? 					
 					}
 				}
@@ -779,7 +784,7 @@ int main(void)
 			else if (state == HELP)
 			{
 				if (keys[SPACE]){
-					ChangeState(state, MENU);					//Help-> Menu if spacebar press
+					ChangeState(state, MENU);					//Help. Menu if spacebar press
 				}
 			}// end help
 
@@ -979,7 +984,7 @@ int main(void)
 
 				//playing
 				DrawCharacter(select, curFrame, frameW, frameH);
-				DrawBullet(bullets, NUM_BULLETS, atksel);
+				DrawBullet(NUM_BULLETS, atksel);
 				DrawProjectile(comets, NUM_COMETS, enemsel, curFrame, frameW, frameH);
 				DrawProjectile(powerUp, NUM_POWER, power[0], curFrame, frameW, frameH);
 				DrawBoss(bossy, NUM_BOSS, boss_sel, curFrame, frameW, frameH);
@@ -1160,168 +1165,175 @@ void DrawCharacter(ALLEGRO_BITMAP *select, int cur, int fW, int fH)
 }
 
 
-void InitBullet(Bullet bullet[], int size)
+// setup the bullet array! 
+void InitBullet(int size) 
 {
 	for (int i = 0; i < size; i++)
 	{
-		bullet[i].ID = BULLET;
-		bullet[i].speed = 10;
-		bullet[i].live = false;
-		bullet[i].dir = player.dir;
+		bullets[i].changeDir(player.dir);
 	}
 }
-void DrawBullet(Bullet bullet[], int size, ALLEGRO_BITMAP *bit)
+
+void DrawBullet(int size, ALLEGRO_BITMAP *bit)
 {
 	for (int i = 0; i < size; i++)
 	{
-		if (bullet[i].live)al_draw_bitmap(bit, bullet[i].x, bullet[i].y,0 );
+		bullets[i].draw(bit);
 	}
 }
-int FindDeadBulletIndex(Bullet bullet[], int size) 
+int FindDeadBulletIndex(int size) 
 {
 	for (int i = 0; i < size; ++i)
-	if (!bullet[i].live)
+	if (!bullets[i].checkActive())
 		return i;
 
 	// didn't find an index; maybe delete old bullet or similar?
 	return -1;
 }
 
-void FireBullet(Bullet bullet[], int size)
+// checks if there is amo then fires a bullet! 
+void FireBullet(int size)
 {
-	int index = FindDeadBulletIndex(bullet, size);
+	int index = FindDeadBulletIndex( size);
 
 	if (index < 0)
 		return; // no "open" bullet positions available, OUT OF AMO! SHIT! 
 
-	bullet[index].live = true;
+	bullets[index].setActive(true);
 
 	// set the direction of the bullet and offset the sprite
 	if (keys[S_UP]) 
 	{
-		bullet[index].dir = NORTH;
-		bullet[index].x = player.spritex +50;
-		bullet[index].y = player.spritey;
+		bullets[index].changeDir(NORTH);
+		bullets[index].setX(player.spritex + 50);
+		bullets[index].setY(player.spritey);
 	}
 	else if (keys[S_RIGHT])
 	{
-		bullet[index].dir = EAST;
-		bullet[index].x = player.spritex + 20 + player.boundx;
-		bullet[index].y = player.spritey + 50;
+		bullets[index].changeDir(EAST);
+		bullets[index].setX(player.spritex + 20 + player.boundx);
+		bullets[index].setY(player.spritey + 50);
 	}
 	else if (keys[S_DOWN])
 	{
-		bullet[index].dir = SOUTH;
-		bullet[index].x = player.spritex + 50;
-		bullet[index].y = player.spritey + 25;
+		bullets[index].changeDir(SOUTH);
+		bullets[index].setX(player.spritex + 50);
+		bullets[index].setY(player.spritey + 25);
 	}
 	else if (keys[S_LEFT])
 	{
-		bullet[index].dir = WEST;
-		bullet[index].x = player.spritex - 20 ;
-		bullet[index].y = player.spritey + 50;
+		bullets[index].changeDir(WEST);
+		bullets[index].setX(player.spritex - 20);
+		bullets[index].setY(player.spritey + 50);
 	}
 
 }
-void UpdateBullet(Bullet bullet[], int size, int dir)
+
+
+void UpdateBullet(int size, int dir)
 {
 	
-	for (int i = -1; i < size; i++)
-
-		switch (bullet[i].dir)
-	{
-		case 0: //up
-			//for (int i = 0; i < size; i++)
-			{
-				if (bullet[i].live)
-				{
-					bullet[i].y -= bullet[i].speed;
-					if (bullet[i].y < 0)
-						bullet[i].live = false;
-				}
-			}
-			break;
-		case 1: //right
-			//for (int i = 0; i < size; i++)
-			{
-				if (bullet[i].live)
-				{
-					bullet[i].x += bullet[i].speed;
-					if (bullet[i].x > scrn_W)
-						bullet[i].live = false;
-				}
-			}
-			break;
-		case 2: //down
-			//for (int i = 0; i < size; i++)
-			{
-				if (bullet[i].live)
-				{
-					bullet[i].y += bullet[i].speed;
-					if (bullet[i].y > scrn_H)
-						bullet[i].live = false;
-				}
-			}
-			break;
-		case 3: //left
-			//for (int i = 0; i < size; i++)
-			{
-				if (bullet[i].live)
-				{
-					bullet[i].x -= bullet[i].speed;
-					if (bullet[i].x < 0)
-						bullet[i].live = false;
-				}
-			}
-			break;
+	for (int i = -1; i < size; i++){
+		bullets[i].update();
 	}
+
+
+	// depricated
+
+	//	switch (bullet[i].dir)
+	//{
+	//	case 0: //up
+	//		//for (int i = 0; i < size; i++)
+	//		{
+	//			if (bullet[i].live)
+	//			{
+	//				bullet[i].y -= bullet[i].speed;
+	//				if (bullet[i].y < 0)
+	//					bullet[i].live = false;
+	//			}
+	//		}
+	//		break;
+	//	case 1: //right
+	//		//for (int i = 0; i < size; i++)
+	//		{
+	//			if (bullet[i].live)
+	//			{
+	//				bullet[i].x += bullet[i].speed;
+	//				if (bullet[i].x > scrn_W)
+	//					bullet[i].live = false;
+	//			}
+	//		}
+	//		break;
+	//	case 2: //down
+	//		//for (int i = 0; i < size; i++)
+	//		{
+	//			if (bullet[i].live)
+	//			{
+	//				bullet[i].y += bullet[i].speed;
+	//				if (bullet[i].y > scrn_H)
+	//					bullet[i].live = false;
+	//			}
+	//		}
+	//		break;
+	//	case 3: //left
+	//		//for (int i = 0; i < size; i++)
+	//		{
+	//			if (bullet[i].live)
+	//			{
+	//				bullet[i].x -= bullet[i].speed;
+	//				if (bullet[i].x < 0)
+	//					bullet[i].live = false;
+	//			}
+	//		}
+	//		break;
+	//}
 	
 }
 
-void CollideBullet(Bullet bullet[], int bSize, Projectile thrown[], int cSize, Explosion explosions[], int eSize, ALLEGRO_SAMPLE *sample)
+void CollideBullet( int bSize, Projectile thrown[], int cSize, Explosion explosions[], int eSize, ALLEGRO_SAMPLE *sample)
 {
 	for (int i = 0; i < bSize; i++)
 	{
-		if (bullet[i].live)
+		if (bullets[i].checkActive())
 		{
 			for (int j = 0; j < cSize; j++)
 			{
 				if (thrown[j].live)
 				{
-					if (bullet[i].x > (thrown[j].x - thrown[j].boundx) 
-					 && bullet[i].x < (thrown[j].x + thrown[j].boundx) 
-					 && bullet[i].y > (thrown[j].y - thrown[j].boundy) 
-					 && bullet[i].y < (thrown[j].y + thrown[j].boundy))
+					if (bullets[i].getX() >(thrown[j].x - thrown[j].boundx)
+						&& bullets[i].getX() < (thrown[j].x + thrown[j].boundx)
+						&& bullets[i].getY() > (thrown[j].y - thrown[j].boundy)
+						&& bullets[i].getY() < (thrown[j].y + thrown[j].boundy))
 					{
-						bullet[i].live = false;
+						bullets[i].setActive(false);
 						thrown[j].live = false;
 						al_play_sample(sample, 1.0, 0.0, 1.0, ALLEGRO_PLAYMODE_ONCE, NULL);
 						//player.score += thrown[j].speed/3;
 						for (int k = 0; k < thrown[j].speed / 3;++k)
 							player.score++;			
-						StartExplosions(explosions, eSize, bullet[i].x + 70, bullet[i].y+30);
+						StartExplosions(explosions, eSize, bullets[i].getX() + 70, bullets[i].getY() + 30);
 					}
 				}
 			}
 		}
 	}
 }
-void CollideBullet(Bullet bullet[], int bSize, Boss bossy[], int cSize, Explosion explosions[], int eSize, ALLEGRO_SAMPLE * sample)
+void CollideBullet( int bSize, Boss bossy[], int cSize, Explosion explosions[], int eSize, ALLEGRO_SAMPLE * sample)
 {
 	for (int i = 0; i < bSize; i++)
 	{
-		if (bullet[i].live)
+		if (bullets[i].checkActive())
 		{
 			for (int j = 0; j < cSize; j++)
 			{
 				if (bossy[j].live)
 				{
-					if (bullet[i].x >(bossy[j].x - bossy[j].boundx+100) 
-					 && bullet[i].x < (bossy[j].x + bossy[j].boundx+60) 
-					 && bullet[i].y >(bossy[j].y - bossy[j].boundy)
-				     && bullet[i].y < (bossy[j].y + bossy[j].boundy+250))
+					if (bullets[i].getX() >(bossy[j].x - bossy[j].boundx + 100)
+						&& bullets[i].getX() < (bossy[j].x + bossy[j].boundx + 60)
+						&& bullets[i].getY() >(bossy[j].y - bossy[j].boundy)
+						&& bullets[i].getY() < (bossy[j].y + bossy[j].boundy + 250))
 					{
-						bullet[i].live = false;
+						bullets[i].setActive(false);
 						bossy[j].lives--;
 						player.score++;
 						if (bossy[j].lives <= 0)
@@ -1332,7 +1344,7 @@ void CollideBullet(Bullet bullet[], int bSize, Boss bossy[], int cSize, Explosio
 						 bossy[j].lives = 30;
 						 al_play_sample(sample, 1.0, 0.0, 1.0, ALLEGRO_PLAYMODE_ONCE, NULL);
 						}
-						StartExplosions(explosions, eSize, bullet[i].x + 70, bullet[i].y + 30);
+						StartExplosions(explosions, eSize, bullets[i].getX() + 70, bullets[i].getY() + 30);
 					}
 				}
 			}
@@ -1643,7 +1655,7 @@ void ChangeState(int &state, int newState)
 	else if (state == PLAYING)
 	{
 		player.InitCharacter();
-		InitBullet(bullets, NUM_BULLETS);
+		InitBullet(NUM_BULLETS);
 		InitProjectile(comets, NUM_COMETS,1);
 		InitProjectile(powerUp, NUM_POWER, 0);
 		InitBoss(bossy, NUM_BOSS);

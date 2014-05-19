@@ -88,7 +88,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Character.cpp" />
-    <ClCompile Include="GameElements.cpp" />
     <ClCompile Include="Gameplay.cpp" />
     <ClCompile Include="Graphics_and_Animations.cpp" />
     <ClCompile Include="InputManager.cpp" />

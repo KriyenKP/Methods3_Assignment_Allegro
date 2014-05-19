@@ -4,7 +4,7 @@
 const float FPS = 60;											//Frames per second
 const int scrn_W = 1024;										//Screen Width 
 const int scrn_H = 686;											//Screen Height
-const int NUM_BULLETS = 5;										//Number of bullets  (not actual amount - more like a limit that can be on shot on the screen at any one time)
+const int NUM_BULLETS = 3;										//Number of bullets  (not actual amount - more like a limit that can be on shot on the screen at any one time)
 const int NUM_COMETS = 10;										//Number of enemies  (same as above)
 const int NUM_BOSS = 1;											//Number of enemies  (same as above)
 const int NUM_EXPLOSIONS = 5;									//Number of explosions (same as above)		

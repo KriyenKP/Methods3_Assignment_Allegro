@@ -47,3 +47,20 @@ public:
 private:
 	void toggleActive();
 };
+
+class Bullet : public SimpleGraphic
+{
+private: int speed = 10;
+		 int direction;
+public:	 Bullet();
+		 Bullet(int);
+		 void changeDir(int);
+		 void update();
+};
+
+class Enemy : public SimpleGraphic
+{
+private: int speed;
+public: Enemy(int, int);
+};
+

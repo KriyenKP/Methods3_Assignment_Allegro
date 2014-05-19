@@ -2,15 +2,15 @@
 
 
 
-struct Bullet {
-	int ID;
-	int x;
-	int y;
-	int dir;
-	bool live;
-	int speed;
-
-};
+//struct Bullet {
+//	int ID;
+//	int x;
+//	int y;
+//	int dir;
+//	bool live;
+//	int speed;
+//
+//};
 
 struct Projectile {
 	int ID;

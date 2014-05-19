@@ -1,4 +1,3 @@
-#include <allegro5\allegro.h>
 #include <Graphics_and_Animations.h>
 
 /*
@@ -118,4 +117,52 @@ void SimpleGraphic::draw(ALLEGRO_BITMAP *bitmap, int cur, int fW, int fH)
 {
 	if (active)
 		al_draw_bitmap_region(bitmap, cur * fW, 0, fW, fH, x, y, 0);
+}
+
+
+/*
+*	Game comprises of 5 general elements:
+*		1) Avatar (prev Character). User-controlled.
+*		2) Enemy (prev Projectile). Standard opponent.
+*		3) Boss. Opponent to be destroyed at end of level.
+*		4) Bullet. Thrown by Avatar when attacking Enemy/Boss
+*		5) Explosion. Occurs when Bullet and Enemy/Boss collide
+*		6) PowerUp
+*/
+
+
+Bullet::Bullet()
+{
+	setActive(false);
+}
+Bullet::Bullet(int newDir)
+{
+	setActive(false);
+	direction = newDir;
+}
+void Bullet::changeDir(int newDir)
+{
+	direction = newDir;
+}
+void Bullet::update()
+{
+	bool remainActive = move(speed, direction);
+	if (!remainActive)
+		setActive(false);
+}
+
+//NB for implementation
+//initBullet incorporated into constructor
+//DrawBullet() in old code should be largely the same, calling .draw()
+//findDeadBullet() would be unchanged
+//updateBullet() to be implemented with loop, changeDir() and update()
+//collideBullet() to be implemented with the collisionDetection stuff from Gameplay
+
+
+Enemy::Enemy(int bX = 110, int bY = 120)
+{
+	speed = 3 * (1 + rand() % 3);
+	setActive(false);
+	boundX = bX;
+	boundY = bY;
 }
