@@ -1,4 +1,4 @@
-#include <allegro5\allegro.h>
+#include <Graphics_and_Animations.h>
 
 /*
 *	Abstract Base Class DynamicImg used as a template for images in the game which move across the screen.
@@ -26,58 +26,16 @@
 *	^ a $ indicates Sulaiman-style explanation talk, to be modified prior to submission << lol. xD
 */
 
-class DynamicImg{
-protected: 
-	int x;					//x-coord relative to fixed top-left axis
-	int y;					//y-coord relative to fixed top-left axis
-	bool active;			//indicates whether image is destroyed or not, to prevent memory leaks
-							//previously variable 'live'
-							//$ may be able to make this a protected variable
-	const int boundX;		//used for determining width
-	const int boundY;		//used for determining height
-public:
-	DynamicImg();
-	DynamicImg(int, int);
-	~DynamicImg();
-	virtual void draw();
-	void setX(int);
-	void setY(int);
-	int getX();
-	int getY();
-	int getBoundX() const;
-	int getBoundY() const;
-};
-
-class Animation : public DynamicImg{
-public: Animation(int, int){};			
-		int maxFrame;
-		int curFrame;
-		int frameCount;
-		int frameDelay;
-		int frameWidth;
-		int frameHeight;
-		int animationColumns;
-		int animationDirection;
-		ALLEGRO_BITMAP *image;
-};
-
-class SimpleGraphic : public DynamicImg{
-public: 
-	SimpleGraphic();
-	SimpleGraphic(bool);
-	virtual void draw(ALLEGRO_BITMAP *);
-	virtual void draw(ALLEGRO_BITMAP *, int, int, int);
-private:
-	void setActive(bool);
-};
-
 //DynamicImg
-DynamicImg::DynamicImg(int bX = 0, int bY = 0)
+DynamicImg::DynamicImg(int bX, int bY)
 : boundX(bX),
   boundY(bY)
 {
 
 }
+DynamicImg::DynamicImg():boundX(0), boundY(0){}
+DynamicImg::~DynamicImg(){}
+void DynamicImg::draw(){}
 void DynamicImg::setX(int xVal)
 {
 	x = xVal;
@@ -86,16 +44,69 @@ void DynamicImg::setY(int yVal)
 {
 	y = yVal;
 }
+void DynamicImg::setActive(bool isActive)
+{
+	active = isActive;
+}
+bool DynamicImg::checkActive() const
+{
+	return active;
+}
+int DynamicImg::getX() const
+{
+	return x;
+}
+int DynamicImg::getY() const
+{
+	return y;
+}
+int DynamicImg::getBoundX() const
+{
+	return boundX;
+}
+int DynamicImg::getBoundY() const
+{
+	return boundY;
+}
+bool DynamicImg::move(int speed, int direction)
+{
+	bool onScreen = true;
+	switch (direction)
+	{
+	case 0:
+		y -= speed;			  //move upwards
+		onScreen = y > 0;	  //check if bullet moved off the screen
+		break;
+	case 1:
+		x += speed;			  //move right
+		onScreen = x < 1024;//check if bullet moved off the screen
+		break;
+	case 3:
+		x -= speed;			  //move left
+		onScreen = x > 0;	  //check if bullet moved off the screen
+		break;
+	case 2:
+		y += speed;			  //move down
+		onScreen = y < 686;//check if bullet moved off the screen
+		break;
+	default:				  //invalid direction entered
+		onScreen = false;	  //deactivate bullet
+		break;
+	}
+	return onScreen;
+}
 
 //SimpleGraphic Methods
 
-SimpleGraphic::SimpleGraphic(bool isActive)
+SimpleGraphic::SimpleGraphic(){}
+SimpleGraphic::SimpleGraphic(int bX, int bY)
 {
-	setActive(isActive);
+	boundX = bX;
+	boundY = bY;
 }
-void SimpleGraphic::setActive(bool isActive)
+void SimpleGraphic::toggleActive()
 {
-	active = isActive;
+	active = !active;
 }
 void SimpleGraphic::draw(ALLEGRO_BITMAP *bitmap)
 {
@@ -106,4 +117,52 @@ void SimpleGraphic::draw(ALLEGRO_BITMAP *bitmap, int cur, int fW, int fH)
 {
 	if (active)
 		al_draw_bitmap_region(bitmap, cur * fW, 0, fW, fH, x, y, 0);
+}
+
+
+/*
+*	Game comprises of 5 general elements:
+*		1) Avatar (prev Character). User-controlled.
+*		2) Enemy (prev Projectile). Standard opponent.
+*		3) Boss. Opponent to be destroyed at end of level.
+*		4) Bullet. Thrown by Avatar when attacking Enemy/Boss
+*		5) Explosion. Occurs when Bullet and Enemy/Boss collide
+*		6) PowerUp
+*/
+
+
+Bullet::Bullet()
+{
+	setActive(false);
+}
+Bullet::Bullet(int newDir)
+{
+	setActive(false);
+	direction = newDir;
+}
+void Bullet::changeDir(int newDir)
+{
+	direction = newDir;
+}
+void Bullet::update()
+{
+	bool remainActive = move(speed, direction);
+	if (!remainActive)
+		setActive(false);
+}
+
+//NB for implementation
+//initBullet incorporated into constructor
+//DrawBullet() in old code should be largely the same, calling .draw()
+//findDeadBullet() would be unchanged
+//updateBullet() to be implemented with loop, changeDir() and update()
+//collideBullet() to be implemented with the collisionDetection stuff from Gameplay
+
+
+Enemy::Enemy(int bX = 110, int bY = 120)
+{
+	speed = 3 * (1 + rand() % 3);
+	setActive(false);
+	boundX = bX;
+	boundY = bY;
 }
