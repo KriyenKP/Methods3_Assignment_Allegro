@@ -87,6 +87,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Character.cpp" />
+    <ClCompile Include="Gameplay.cpp" />
+    <ClCompile Include="Graphics_and_Animations.cpp" />
     <ClCompile Include="InputManager.cpp" />
     <ClCompile Include="main.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
@@ -94,9 +97,16 @@
     <ClCompile Include="Unlockables.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Character.h" />
     <ClInclude Include="constants.h" />
+    <ClInclude Include="Gameplay.h" />
+    <ClInclude Include="Graphics_and_Animations.h" />
     <ClInclude Include="InputManager.h" />
     <ClInclude Include="lib\objects.h" />
+    <ClInclude Include="resource.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Methods3_Assignment_Allegro.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
