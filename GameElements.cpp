@@ -1,6 +1,6 @@
 #include <Graphics_and_Animations.h>
 #include <allegro5\allegro.h>
-#include <Gameplay.h>
+#include <GameElements.h>
 
 /*
 *	Game comprises of 5 general elements:
@@ -11,15 +11,6 @@
 *		5) Explosion. Occurs when Bullet and Enemy/Boss collide
 *		6) PowerUp
 */
-
-class Bullet : public SimpleGraphic, public Gameplay
-{
-private: const int speed = 10;
-		 int direction;
-public:	 Bullet();
-		 void changeDir(int);
-		 void update();
-};
 
 Bullet::Bullet()
 {
@@ -42,16 +33,6 @@ void Bullet::update()
 //findDeadBullet() would be unchanged
 //updateBullet() to be implemented with loop, changeDir() and update()
 //collideBullet() to be implemented with the collisionDetection stuff from Gameplay
-
-class Enemy : public SimpleGraphic, public Gameplay
-{
-private: int speed;
-		 int startX;
-		 int startY;
-public: Enemy();
-		bool start();
-		void attackPlayer(); //formerly update in prev versions
-};
 
 Enemy::Enemy()
 {
@@ -81,23 +62,15 @@ bool Enemy::start() //to be called in a loop, where a true return breaks out of 
 			flag = true;
 		}
 	}
+	return flag;
 }
 void Enemy::attackPlayer()
 {
 	if (checkActive())
-		move(speed, 3); //left = 3
+		if (!move(speed, 3)) //left = 3
+			setActive(false);
 }
 
-
-class PowerUp : public SimpleGraphic, public Gameplay
-{
-private: int speed;
-		 int startX;
-		 int startY;
-public: PowerUp();
-		bool start();
-		void approach(); //formerly update in prev versions
-};
 
 PowerUp::PowerUp()
 {
@@ -127,6 +100,7 @@ bool PowerUp::start() //to be called in a loop, where a true return breaks out o
 			flag = true;
 		}
 	}
+	return flag;
 }
 void PowerUp::approach()
 {
@@ -134,20 +108,9 @@ void PowerUp::approach()
 	if (y >= (startY + 100)) sign = 1;
 	if (y < 0) y = 656;
 	if (y <= (startY - 100) || y > 686) sign = -1;
-	move(speed*sign, 3);
+	if (!move(speed*sign, 3))
+		setActive(false);
 }
-
-class Boss : public SimpleGraphic, public Gameplay
-{
-private: int speed;
-		 int health;
-		 int startX;
-		 int startY;
-public: Boss();
-		void start();
-		void attackPlayer(); //formerly update in prev versions
-		void drawBoss(ALLEGRO_BITMAP *, int, int, int);
-};
 
 Boss::Boss()
 {

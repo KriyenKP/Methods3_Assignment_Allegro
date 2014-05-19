@@ -95,6 +95,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="GameElements.h" />
     <ClInclude Include="Gameplay.h">
       <FileType>CppHeader</FileType>
     </ClInclude>
