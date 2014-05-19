@@ -1,3 +1,16 @@
+/*	main.cpp - Lecturer Defence Game - Computer Methods 3 - ENEL3CC - UKZN 2014
+	Authors: K. Padayachee - 212511648
+			 S. Patel - 212513168
+			 R. Mawbey - 213560382
+			 M. De Neef - 212503024
+			 T. Eldridge - 211515873
+			 R. Holder -212504400
+	Date: 19/5/2014
+	Description: 
+	Contains Allegro graphics setup, main method, game logic and redraw logic
+
+*/
+
 #include <math.h>								//Nothing yet - put in for mouse cursor check if we use it
 #include <allegro5/allegro.h>					//Allegro library
 #include <allegro5/allegro_image.h>				//Allegro bitmaps

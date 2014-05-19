@@ -1,3 +1,8 @@
+/*	Graphics_and_Animations.cpp - Lecturer Defence Game - Computer Methods 3 - ENEL3CC - UKZN 2014
+Author: S. Patel - 212513168
+Date: 19/5/2014
+
+*/
 #include <Graphics_and_Animations.h>
 
 /*

@@ -13,11 +13,6 @@ public:
 	InputManager(void);
 	~InputManager(void);
 
-
-	bool IsKeyPressed(ALLEGRO_EVENT ev, int key);
-
-	bool IsKeyReleased(ALLEGRO_EVENT ev, int key);
-
 	void UpdateKeys(ALLEGRO_EVENT ev, bool keys[]);
 };
 

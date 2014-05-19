@@ -1,3 +1,12 @@
+/*	InputManager.cpp - Lecturer Defence Game - Computer Methods 3 - ENEL3CC - UKZN 2014
+Author: R. Mawbey - 213560382
+Date: 19/5/2014
+Description:
+Abstracts the keyboard key processing, takes an array of booleans corosponding to selected keys and updates if they are pressed or not. 
+See header for keys. 
+
+*/
+
 #include "InputManager.h"
 
 
@@ -10,26 +19,6 @@ InputManager::~InputManager()
 {
 }
 
-// Check if a single key is pressed
-bool InputManager::IsKeyPressed(ALLEGRO_EVENT ev, int key){
-	if (ev.type == ALLEGRO_EVENT_KEY_DOWN){
-		if (ev.keyboard.keycode == key){
-			return true;
-		}
-	}
-	return false;
-}
-
-
-// Check if a single key is released
-bool InputManager::IsKeyReleased(ALLEGRO_EVENT ev, int key){
-	if (ev.type == ALLEGRO_EVENT_KEY_UP){
-		if (ev.keyboard.keycode == key){
-			return true;
-		}
-	}
-	return false;
-}
 
 // Update the state of keys in a boolean array
 void InputManager::UpdateKeys(ALLEGRO_EVENT ev, bool keys[]){
@@ -134,176 +123,4 @@ void InputManager::UpdateKeys(ALLEGRO_EVENT ev, bool keys[]){
 
 		} // keyup detect switch
 	}// end if
-
-		// old code... 
-
-		//	fired = false;										//Bullet Fired False. 
-		//	switch (ev.keyboard.keycode)						//Switch keyboard code returned. 
-		//	{
-		//	case ALLEGRO_KEY_UP:				
-		//		keys[UP] = true;
-		//		if (direction == 1) select = player_img[2];			//set character sprite to ____
-		//		else select = player_img[3];
-		//		break;
-		//	case ALLEGRO_KEY_W:										//button press actions for sprite dir
-		//		keys[UP] = true;
-		//		if (direction == 1) select = player_img[2];
-		//		else select = player_img[3];
-		//		break;
-		//	case ALLEGRO_KEY_DOWN:
-		//		keys[DOWN] = true;
-		//		if (direction == 1) select = player_img[2];
-		//		else select = player_img[3];
-		//		break;
-		//	case ALLEGRO_KEY_S:
-		//		keys[DOWN] = true;
-		//		if (direction == 1) select = player_img[2];
-		//		else select = player_img[3];
-		//		break;
-		//	case ALLEGRO_KEY_RIGHT:
-		//		keys[RIGHT] = true;
-		//		select = player_img[2];
-		//		direction = 1;
-		//		break;
-		//	case ALLEGRO_KEY_N:
-		//		if (egg < 1 && state == SETTINGS)
-		//		{
-		//			egg++;
-		//		}
-		//		break;
-		//	case ALLEGRO_KEY_M:
-		//		if (egg < 2 && state == SETTINGS)
-		//		{
-		//			egg++;
-		//		}
-		//		break;
-		//	case ALLEGRO_KEY_K:
-		//		egg = 0;
-		//		break;
-		//	case ALLEGRO_KEY_D:
-		//		keys[RIGHT] = true;
-		//		select = player_img[2];
-		//		direction = 1;
-		//		break;
-		//	case ALLEGRO_KEY_LEFT:
-		//		keys[LEFT] = true;
-		//		select = player_img[3];
-		//		direction = 0;
-		//		break;
-		//	case ALLEGRO_KEY_A:
-		//		keys[LEFT] = true;
-		//		select = player_img[3];
-		//		direction = 0;
-		//		break;
-		//	case ALLEGRO_KEY_ENTER:
-		//		break;
-		//	case ALLEGRO_KEY_SPACE:
-		//		keys[SPACE] = true;
-		//		if (state == TITLE)
-		//			ChangeState(state, MENU);					//Splash->Menu on Spacebar press
-		//		else if (state == MENU)
-		//			ChangeState(state, PLAYING);				//Menu-> Game if Spacebar press
-		//		else if (state == HELP)
-		//			ChangeState(state, MENU);					//Help-> Menu if spacebar press
-		//		else if (state == PLAYING)						//Spacebar fires bullets in-game
-		//		{	
-		//			FireBullet(bullets, NUM_BULLETS, player);
-		//			//al_play_sample(sample[0], 1.0, 0.0, 1.0, ALLEGRO_PLAYMODE_ONCE, NULL); <--What did this do? 
-		//		}
-		//		else if (state == LOST)
-		//			ChangeState(state, PLAYING);				
-		//		break;
-		//	}
-		//}
-
-		//else if (ev.type == ALLEGRO_EVENT_KEY_UP)					//If Key up event
-		//{
-		//	switch (ev.keyboard.keycode)
-		//	{
-		//	case ALLEGRO_KEY_UP:									//Keypress sprite and dir updates
-		//		keys[UP] = false;
-		//		if (direction == 1) select = player_img[0];
-		//		else select = player_img[1];
-		//		break;
-		//	case ALLEGRO_KEY_W:
-		//		keys[UP] = false;
-		//		if (direction == 1) select = player_img[0];
-		//		else select = player_img[1];
-		//		break;
-		//	case ALLEGRO_KEY_DOWN:
-		//		keys[DOWN] = false;
-		//		if (direction == 1) select = player_img[0];
-		//		else select = player_img[1];
-		//		break;
-		//	case ALLEGRO_KEY_S:
-		//		keys[DOWN] = false;
-		//		if (direction == 1) select = player_img[0];
-		//		else select = player_img[1];
-		//		break;
-		//	case ALLEGRO_KEY_RIGHT:
-		//		keys[RIGHT] = false;
-		//		select = player_img[0];
-		//		break;
-		//	case ALLEGRO_KEY_D:
-		//		keys[RIGHT] = false;
-		//		select = player_img[0];
-		//		break;
-		//	case ALLEGRO_KEY_LEFT:
-		//		keys[LEFT] = false;
-		//		select = player_img[1];
-		//		break;
-		//	case ALLEGRO_KEY_A:
-		//		select = player_img[1];
-		//		break;
-		//	case ALLEGRO_KEY_P:
-		//		if (state == PLAYING)					//Check state		-- THIS FUNCTION NEEDS REPAIRS	
-		//		{
-		//			if (timeM == true)
-		//			{
-		//				al_stop_timer(timer);									//Stop timer for pause menu
-		//				timeM = false;
-		//				al_draw_bitmap(scrns[1], scrn_W / 2 - 250, 100, 0);		//Show Pause menu
-		//				al_flip_display();										//Bring backbuffer forward (bring all set contents to the current frame)
-		//			}
-		//			else
-		//			{
-		//				al_start_timer(timer);									//Continue timer
-		//				timeM = true;
-		//			}
-		//		}
-		//		break;
-		//	case ALLEGRO_KEY_BACKSPACE:
-		//		if (timeM == false)										//if game on pause, BKSP to menu
-		//		{
-		//			timeM = true;
-		//			al_start_timer(timer);
-		//		}
-		//			ChangeState(state, MENU);
-		//		break;
-		//	case ALLEGRO_KEY_ENTER:
-		//		if (state == WIN)
-		//			boss_sel = lecturers[rand() % 6];				//Random Boss character selected
-		//			ChangeState(state, PLAYING);
-		//		break;
-		//	case ALLEGRO_KEY_ESCAPE:								
-		//		if (state==TITLE || state == MENU || state == HELP)
-		//			done = true;
-		//		else 
-		//			ChangeState(state, MENU);
-		//		break;
-		//	case ALLEGRO_KEY_SPACE:
-		//		keys[SPACE] = false;
-		//		break;
-		//	case ALLEGRO_KEY_K:
-		//			egg = 0;
-		//		break;
-		//	case ALLEGRO_KEY_M:
-		//		//	egg = 0;
-		//		break;
-		//	case ALLEGRO_KEY_N:
-		//		//	egg = 0;
-		//		break;
-		//	}
-
-
-} // end update keys
+}

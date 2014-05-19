@@ -1,3 +1,12 @@
+/*	Character.cpp - Lecturer Defence Game - Computer Methods 3 - ENEL3CC - UKZN 2014
+Author: R. Mawbey - 213560382
+Date: 19/5/2014
+Description:
+Abstraction of the player into a class, used by the main game to create an instance of a player
+
+*/
+
+
 #include "Character.h"
 
 

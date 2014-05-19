@@ -1,3 +1,11 @@
+/*	Unlockables.cpp - Lecturer Defence Game - Computer Methods 3 - ENEL3CC - UKZN 2014
+Author: M. De Neef - 212503024
+Date: 19/5/2014
+Description:
+Deals with the file system I/O for the file containing what additional features of the game have been unlocked
+abstracts the processing from main. 
+
+*/
 #include <allegro5/allegro.h>					//Allegro libraries
 #include <allegro5/allegro_native_dialog.h>		//Error message dialog library
 #include <string>								//String manipulation 

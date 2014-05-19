@@ -1,3 +1,6 @@
+/*
+This file contains game running constants 
+*/
 #if !defined(CONSTANTS_H)
 #define CONSTANTS_H 1
 

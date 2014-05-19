@@ -1,16 +1,6 @@
-//objects
-
-
-
-//struct Bullet {
-//	int ID;
-//	int x;
-//	int y;
-//	int dir;
-//	bool live;
-//	int speed;
-//
-//};
+/*
+This file contains structs for onscreen objects
+*/
 
 struct Projectile {
 	int ID;
