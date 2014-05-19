@@ -27,9 +27,6 @@
     <ClInclude Include="Graphics_and_Animations.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Gameplay.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="resource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -45,9 +42,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Unlockables.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Gameplay.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Graphics_and_Animations.cpp">

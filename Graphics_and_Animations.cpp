@@ -36,6 +36,7 @@ protected:
 	const int boundX;		//used for determining width
 	const int boundY;		//used for determining height
 public:
+	DynamicImg();
 	DynamicImg(int, int);
 	~DynamicImg();
 	virtual void draw();
@@ -48,7 +49,7 @@ public:
 };
 
 class Animation : public DynamicImg{
-public: Animation(){};			
+public: Animation(int, int){};			
 		int maxFrame;
 		int curFrame;
 		int frameCount;

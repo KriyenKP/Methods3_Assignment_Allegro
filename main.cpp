@@ -14,13 +14,9 @@
 #include "constants.h"
 #include "lib/objects.h"						//Structures for Enemies/Characters/Projectiles
 #include "InputManager.h"						// Class that processes inputs (Keyboard only ATM) 
-<<<<<<< HEAD
 #include "Unlockables.cpp"						//Class for dealing with game unlocks
-
-=======
 #include "Character.h"							// Character class
 #include "Graphics_and_Animations.h"
->>>>>>> 7b77e20d5fdae4add37223ec9b0065dc3967fe7a
 using namespace std;
 
 //REMEMBER TO EDIT Linker . System . SubSystem . WINDOW to hide console!
@@ -360,11 +356,11 @@ int main(void)
 	//end event queue
 
 	//Colours
-	black = al_map_rgb(0, 0, 0);
-	white = al_map_rgb(255, 255, 255);
-	red = al_map_rgb(255, 0, 0);
-	green = al_map_rgb(0, 255, 0);
-	blue = al_map_rgb(0, 0, 255);
+	ALLEGRO_COLOR black = al_map_rgb(0, 0, 0);
+	ALLEGRO_COLOR white = al_map_rgb(255, 255, 255);
+	ALLEGRO_COLOR red = al_map_rgb(255, 0, 0);
+	ALLEGRO_COLOR green = al_map_rgb(0, 255, 0);
+	ALLEGRO_COLOR blue = al_map_rgb(0, 0, 255);
 	//End Colours
 
 	//Asset variables
