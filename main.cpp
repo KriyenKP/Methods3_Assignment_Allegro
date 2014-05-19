@@ -555,7 +555,7 @@ int main(void)
 
 				if (crs_x >= 500 && crs_x <= 615 && crs_y >= 470 && crs_y <= 560)
 				{
-					if (strcmp(al_get_config_value(savegame, "weaponunlocks", "unlocked2"), "0") == 0)
+					if (strcmp(Unlockables.getUnlocksWeapons(2), "0") == 0)
 					{
 						curAtk = 3; //Pencil locked, revert to calc
 					}
@@ -564,7 +564,7 @@ int main(void)
 
 				if (crs_x >= 670 && crs_x <= 800 && crs_y >= 470 && crs_y <= 560)
 				{
-					if (strcmp(al_get_config_value(savegame, "weaponunlocks", "unlocked3"), "0") == 0)
+					if (strcmp(Unlockables.getUnlocksWeapons(3), "0") == 0)
 					{
 						curAtk = 3; //C++ locked, revert to calc
 					}
@@ -880,7 +880,7 @@ int main(void)
 
 				switch (curMap)
 				{
-					//need savegame unlockables
+
 				case 0:
 					al_draw_textf(fonts[1], white, scrn_W / 2 - 150,380, 0, "CURRENT VENUE : Howard Building");
 					break;
@@ -1016,56 +1016,54 @@ int main(void)
 			{//lost
 				al_draw_bitmap(scrns[2], scrn_W / 2 - 250, 100, 0);                      // Game over Screen
 				al_draw_textf(fonts[2], black, scrn_W/2+70, 340, 0, "%i", player.score);
-				int ps = player.score;
-				char score[10];
-				sprintf_s(score, "%i", ps);
-				al_set_config_value(savegame,"highscore", "playsc",score);	//saves player score
-				al_save_config_file("config.ini", savegame);
+				
+				int score = Unlockables.setHiscore(player.score);	//saves player score
+				Unlockables.saveconfig(savegame);									//saves config
 
 				//check for unlocks
-				if (ps > 10)
+				if (player.score > 50)
 				{
-					al_set_config_value(savegame, "venueunlock 2", "unlocked", "1"); //unlock TB Davis
-					if (al_get_config_value(savegame, "highscore", "playsc")<score) //only shows if not unlocked before
+					Unlockables.setUnlocksVenue("unlocked2",1); //unlock TB Davis
+					if (Unlockables.getHiscore() < score) //only shows if not unlocked before
 					{
 						al_draw_textf(fonts[0], green, scrn_W / 2 - 100, 380, 0, "NEW UNLOCKS: TB Davis!!");
 					}
 					
 				}
-				if (ps > 20)
+				if (player.score > 100)
 				{
-					al_set_config_value(savegame, "venueunlock 3", "unlocked", "1");//unlock Park
-					if (al_get_config_value(savegame, "highscore", "playsc")<score) //only shows if not unlocked before
+					Unlockables.setUnlocksVenue("unlocked3", 1);//unlock Park
+					if (Unlockables.getHiscore() < score) //only shows if not unlocked before
 					{
 						al_draw_textf(fonts[0], green, scrn_W / 2 - 100, 400, 0, "NEW UNLOCKS: Park!"); }
 				}
-				if (ps > 30)
+				if (player.score > 200)
 				{
-					al_set_config_value(savegame, "venueunlock 4", "unlocked", "1");//unlock Science
-					al_set_config_value(savegame, "weaponunlocks", "unlocked2", "1");//unlock Pencil
-					if (al_get_config_value(savegame, "highscore", "playsc")<score) //only shows if not unlocked before
+					Unlockables.setUnlocksVenue("unlocked4", 1);//unlock Science
+					Unlockables.setUnlocksWeapon("unlocked2",1);//unlock Pencil
+					if (Unlockables.getHiscore() < score) //only shows if not unlocked before
 					{
 						al_draw_textf(fonts[0], green, scrn_W / 2 - 100, 420, 0, "NEW UNLOCKS: Science & Pencil!"); }
 				}
-				if (ps > 40)
+				if (player.score > 300)
 				{
-					al_set_config_value(savegame, "venueunlock 5", "unlocked", "1");//Unlock Cafe
+					Unlockables.setUnlocksVenue("unlocked5", 1);//Unlock Cafe
 					
-					if (al_get_config_value(savegame, "highscore", "playsc")<score) //only shows if not unlocked before
+					if (Unlockables.getHiscore() < score) //only shows if not unlocked before
 					{
 						al_draw_textf(fonts[0], green, scrn_W / 2 - 100, 440, 0, "NEW UNLOCKS: Cafe!"); }
 				}
 
-				if (ps > 50)
+				if (player.score > 400)
 				{
-					al_set_config_value(savegame, "venueunlock 6", "unlocked", "1");//unlock Amphitheatre
-					al_set_config_value(savegame, "weaponunlocks", "unlocked3", "1");//unlock C++
+					Unlockables.setUnlocksVenue("unlocked6", 1);;//unlock Amphitheatre
+					Unlockables.setUnlocksWeapon("unlocked3", 1);//unlock C++
 					
-					if (al_get_config_value(savegame, "highscore", "playsc") < score) //only shows if not unlocked before
+					if (Unlockables.getHiscore() < score) //only shows if not unlocked before
 					{
 						al_draw_textf(fonts[0], green, scrn_W / 2 - 100, 460, 0, "NEW UNLOCKS: Amphitheatre & C++"); }
 				}
-				al_save_config_file("config.ini", savegame);
+				Unlockables.saveconfig(savegame); //save unlocks!
 
 				egg = 0;
 
